@@ -1,0 +1,27 @@
+const fs = require('fs');
+const path = 'd:/GitHub/ReactNative-expo-LoanWaterMelon/src/services/__tests__/SyncService.test.ts';
+let content = fs.readFileSync(path, 'utf8');
+
+const idMap = {
+    "'1'": "'00000000-0000-0000-0000-000000000001'",
+    "'2'": "'00000000-0000-0000-0000-000000000002'",
+    "'3'": "'00000000-0000-0000-0000-000000000003'",
+    "'remote-1'": "'00000000-0000-0000-0000-000000000010'",
+    "'remote-2'": "'00000000-0000-0000-0000-000000000011'",
+    "'remote-3'": "'00000000-0000-0000-0000-000000000012'",
+    "'remote-id'": "'00000000-0000-0000-0000-000000000013'",
+    "'del-1'": "'00000000-0000-0000-0000-000000000014'",
+    "'local-id-123'": "'00000000-0000-0000-0000-000000000015'",
+};
+
+Object.entries(idMap).forEach(([oldId, newId]) => {
+    // Replace id: '1' or deleted: ['1']
+    const regex = new RegExp(`id:\\s*${oldId}`, 'g');
+    content = content.replace(regex, `id: ${newId}`);
+    
+    const arrayRegex = new RegExp(`\\[\\s*${oldId}\\s*\\]`, 'g');
+    content = content.replace(arrayRegex, `[${newId}]`);
+});
+
+fs.writeFileSync(path, content);
+console.log('Fixed IDs in SyncService.test.ts');

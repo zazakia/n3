@@ -1,0 +1,612 @@
+[
+  {
+    "id": "9959c56a-f474-461c-bc71-e605088f9b35",
+    "loan_id": "a8a0622f-2bed-4c88-9184-1fed0eeecf8c",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 200,
+    "payment_date": "2025-12-09T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BH)",
+    "created_at": "2026-04-09T04:48:09.085Z",
+    "updated_at": "2026-04-09T04:48:09.085Z"
+  },
+  {
+    "id": "03f3bef4-22e4-4f65-9ab0-25d684adb8f6",
+    "loan_id": "a8a0622f-2bed-4c88-9184-1fed0eeecf8c",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-10T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BI)",
+    "created_at": "2026-04-09T04:48:09.085Z",
+    "updated_at": "2026-04-09T04:48:09.085Z"
+  },
+  {
+    "id": "1546889c-4e98-4579-83a8-88e1eda8dd88",
+    "loan_id": "a8a0622f-2bed-4c88-9184-1fed0eeecf8c",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-11T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BJ)",
+    "created_at": "2026-04-09T04:48:09.085Z",
+    "updated_at": "2026-04-09T04:48:09.085Z"
+  },
+  {
+    "id": "ff0ad91c-6a2f-44d3-9a63-bdc4fa6053ce",
+    "loan_id": "a8a0622f-2bed-4c88-9184-1fed0eeecf8c",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-12T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BK)",
+    "created_at": "2026-04-09T04:48:09.085Z",
+    "updated_at": "2026-04-09T04:48:09.085Z"
+  },
+  {
+    "id": "7ef0c416-6a13-4239-bfda-cc88324f3fd1",
+    "loan_id": "a8a0622f-2bed-4c88-9184-1fed0eeecf8c",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-14T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BL)",
+    "created_at": "2026-04-09T04:48:09.085Z",
+    "updated_at": "2026-04-09T04:48:09.085Z"
+  },
+  {
+    "id": "b27bd601-c3b6-4f28-8b23-81fc30e05f13",
+    "loan_id": "a8a0622f-2bed-4c88-9184-1fed0eeecf8c",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-15T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BM)",
+    "created_at": "2026-04-09T04:48:09.085Z",
+    "updated_at": "2026-04-09T04:48:09.085Z"
+  },
+  {
+    "id": "e8cde8df-1cd5-4801-8f2f-071303c205be",
+    "loan_id": "a8a0622f-2bed-4c88-9184-1fed0eeecf8c",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-16T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BN)",
+    "created_at": "2026-04-09T04:48:09.085Z",
+    "updated_at": "2026-04-09T04:48:09.085Z"
+  },
+  {
+    "id": "bea593b4-32af-4e5c-ab4c-de32242ccd11",
+    "loan_id": "a8a0622f-2bed-4c88-9184-1fed0eeecf8c",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-17T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BO)",
+    "created_at": "2026-04-09T04:48:09.085Z",
+    "updated_at": "2026-04-09T04:48:09.085Z"
+  },
+  {
+    "id": "2a5f0696-4052-4eb5-92b5-690a15338060",
+    "loan_id": "a8a0622f-2bed-4c88-9184-1fed0eeecf8c",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-18T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BP)",
+    "created_at": "2026-04-09T04:48:09.085Z",
+    "updated_at": "2026-04-09T04:48:09.085Z"
+  },
+  {
+    "id": "5d8bc8f6-5258-4743-a083-9a73be3ebdac",
+    "loan_id": "ce047045-8f85-4bfa-907f-a8a8a3152e75",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-09T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BH)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "50d15537-11b6-4f80-acbe-d2412848bfae",
+    "loan_id": "ce047045-8f85-4bfa-907f-a8a8a3152e75",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-10T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BI)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "b1d2a210-29a3-47a7-a79c-74cf8f0af6ca",
+    "loan_id": "ce047045-8f85-4bfa-907f-a8a8a3152e75",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-11T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BJ)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "3292dad9-be87-4f4a-a9f0-18c8e49b2906",
+    "loan_id": "ce047045-8f85-4bfa-907f-a8a8a3152e75",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-12T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BK)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "50ec9b57-81b5-4aac-a104-dccf62db87ce",
+    "loan_id": "ce047045-8f85-4bfa-907f-a8a8a3152e75",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 50,
+    "payment_date": "2025-12-14T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BL)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "224ad260-8dc6-44a3-a33d-9feeae23b5e1",
+    "loan_id": "ce047045-8f85-4bfa-907f-a8a8a3152e75",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-15T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BM)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "223919c0-539b-4e47-8e97-9fc641ea7044",
+    "loan_id": "ce047045-8f85-4bfa-907f-a8a8a3152e75",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-16T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BN)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "9c527621-19bc-4979-8189-6477e3b944b0",
+    "loan_id": "ce047045-8f85-4bfa-907f-a8a8a3152e75",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-17T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BO)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "0f90aba9-5b59-4948-a8ed-7e3b26aed7ce",
+    "loan_id": "ce047045-8f85-4bfa-907f-a8a8a3152e75",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 50,
+    "payment_date": "2025-12-18T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BP)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "e5bc0c9a-3a87-43b4-a812-e439be25d216",
+    "loan_id": "ce047045-8f85-4bfa-907f-a8a8a3152e75",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-19T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BQ)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "39d56854-242d-41fc-b5b6-54c10dacc812",
+    "loan_id": "ce047045-8f85-4bfa-907f-a8a8a3152e75",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-21T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BR)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "d26da862-dbad-4ba6-852b-5b7f655ca45a",
+    "loan_id": "23c90f2a-e265-4b24-b357-988b4e5325c1",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-09T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BH)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "7bec3d1c-8ff7-44c6-b176-8f1745b9e08d",
+    "loan_id": "23c90f2a-e265-4b24-b357-988b4e5325c1",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-10T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BI)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "27f6c115-6787-4dbf-99c1-b794d4d986e4",
+    "loan_id": "23c90f2a-e265-4b24-b357-988b4e5325c1",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 50,
+    "payment_date": "2025-12-11T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BJ)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "5a09aac6-4766-4ae4-ac83-01c4cc03ac08",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-09T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BH)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "560a406b-c7c2-4b10-8374-e4a124800974",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-10T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BI)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "51eda173-a0cb-48b1-84f0-1b3a3ddc0994",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-11T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BJ)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "68291f87-1fd9-4446-9469-a440ab823182",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-12T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BK)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "9f64e8e3-beef-48a7-b58b-ace45810f702",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-14T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BL)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "8b6c5c28-c5ae-4a96-b260-da8f5b00bd7a",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-15T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BM)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "6e7c05c5-cb89-4021-9326-629ca577507e",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-16T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BN)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "5d491130-e73d-42ac-b7f3-b35b3604e070",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-17T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BO)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "7f9d4966-c6b4-4708-8dc2-9c8452723b57",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-18T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BP)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "8a06399c-ad86-4d18-ac93-d75bdebc7a1f",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-19T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BQ)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "ef0052b9-4c81-47c8-8694-9a64645b1eaa",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-21T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BR)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "dd09cd97-15d7-494b-9d29-b6d95ca3c748",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-22T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BS)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "39244fa3-ea50-4d5e-8a45-30d706f21499",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-23T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BT)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "b66eac90-6558-4b51-a87e-e5bac345a121",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-24T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BU)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "69720700-129c-4620-a482-e7c6f4e31c5a",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-25T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BV)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "5397ab71-4eff-4d77-bb3e-19a08e65187d",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-26T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BW)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "ec2b06bf-e08a-4595-b35f-e6e6b0b2b879",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-28T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BX)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "12158bc2-5073-4a04-9709-195fe6efa0b8",
+    "loan_id": "8b97f98c-b473-4c24-9947-2aaec3b34e97",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 120,
+    "payment_date": "2025-12-29T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BY)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "671b33f4-a2cd-4559-a3aa-9532df5b057a",
+    "loan_id": "9875ac99-8bb4-4e58-a07e-26e29e187a44",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 50,
+    "payment_date": "2025-12-26T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BH)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "e74699be-b20e-4042-9096-bfc76c7b1d6b",
+    "loan_id": "9875ac99-8bb4-4e58-a07e-26e29e187a44",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-28T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BI)",
+    "created_at": "2026-04-09T04:48:09.086Z",
+    "updated_at": "2026-04-09T04:48:09.086Z"
+  },
+  {
+    "id": "9a940ae7-a24d-47b4-b088-19717ac513ea",
+    "loan_id": "9875ac99-8bb4-4e58-a07e-26e29e187a44",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 100,
+    "payment_date": "2025-12-29T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BJ)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "df09da69-9a92-457f-aa96-889ba0ac2144",
+    "loan_id": "9875ac99-8bb4-4e58-a07e-26e29e187a44",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 50,
+    "payment_date": "2025-12-30T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BK)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "e443117f-ad88-4801-af04-7ec4a81360f3",
+    "loan_id": "9875ac99-8bb4-4e58-a07e-26e29e187a44",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 50,
+    "payment_date": "2025-12-31T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BL)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "98dcb005-5750-4c1a-8b9c-fa713da945e5",
+    "loan_id": "9875ac99-8bb4-4e58-a07e-26e29e187a44",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 50,
+    "payment_date": "2026-01-01T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BM)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "d58495f4-61de-4de0-a245-0dbe273f35c8",
+    "loan_id": "9875ac99-8bb4-4e58-a07e-26e29e187a44",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 50,
+    "payment_date": "2026-01-02T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BN)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "66593872-0d82-4681-a05e-8f39c7ed5b2a",
+    "loan_id": "9875ac99-8bb4-4e58-a07e-26e29e187a44",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 50,
+    "payment_date": "2026-01-04T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BO)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "c1534102-4dd9-45d8-aae8-48ad99f945b2",
+    "loan_id": "9875ac99-8bb4-4e58-a07e-26e29e187a44",
+    "collector_id": "5f0fa53a-f10f-4376-b26a-da9209eee0e8",
+    "amount": 50,
+    "payment_date": "2026-01-05T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BP)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "30606f54-99cd-4636-9056-b70705c1a40b",
+    "loan_id": "6a0349f2-0edc-495d-a415-c5f549b42730",
+    "collector_id": "d5b9ac45-4882-45eb-b982-f6b4edae811d",
+    "amount": 100,
+    "payment_date": "2026-01-07T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BH)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "5f772ec3-c415-40c2-898f-f6e8f6423670",
+    "loan_id": "6a0349f2-0edc-495d-a415-c5f549b42730",
+    "collector_id": "d5b9ac45-4882-45eb-b982-f6b4edae811d",
+    "amount": 100,
+    "payment_date": "2026-01-08T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BI)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "6151af57-9ffe-46a9-b977-6653853c997d",
+    "loan_id": "6a0349f2-0edc-495d-a415-c5f549b42730",
+    "collector_id": "d5b9ac45-4882-45eb-b982-f6b4edae811d",
+    "amount": 100,
+    "payment_date": "2026-01-09T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BJ)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "2a7bed36-4e7e-47ec-8357-3f4c6306232f",
+    "loan_id": "cbd42603-8ecc-4631-b181-b2a00af9b218",
+    "collector_id": "13b8cb7f-c0b6-46bc-9b71-0a8dbaddbf06",
+    "amount": 100,
+    "payment_date": "2026-01-07T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BH)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "cee585cc-32b6-482a-91da-ad2f30c1ffdd",
+    "loan_id": "cbd42603-8ecc-4631-b181-b2a00af9b218",
+    "collector_id": "13b8cb7f-c0b6-46bc-9b71-0a8dbaddbf06",
+    "amount": 100,
+    "payment_date": "2026-01-08T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BI)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "77826fab-baba-4b60-b1b6-b110fa1543c7",
+    "loan_id": "cbd42603-8ecc-4631-b181-b2a00af9b218",
+    "collector_id": "13b8cb7f-c0b6-46bc-9b71-0a8dbaddbf06",
+    "amount": 50,
+    "payment_date": "2026-01-09T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BJ)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "2b0ca964-22db-450f-b4ec-c08cd3bdf41c",
+    "loan_id": "cbd42603-8ecc-4631-b181-b2a00af9b218",
+    "collector_id": "13b8cb7f-c0b6-46bc-9b71-0a8dbaddbf06",
+    "amount": 100,
+    "payment_date": "2026-01-11T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BK)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "ac9de10f-6e2c-4b99-b299-d70ca5b6f0b6",
+    "loan_id": "cbd42603-8ecc-4631-b181-b2a00af9b218",
+    "collector_id": "13b8cb7f-c0b6-46bc-9b71-0a8dbaddbf06",
+    "amount": 72,
+    "payment_date": "2026-01-12T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BL)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "bb091702-420b-405b-9d26-7a701faa2f2c",
+    "loan_id": "cbd42603-8ecc-4631-b181-b2a00af9b218",
+    "collector_id": "13b8cb7f-c0b6-46bc-9b71-0a8dbaddbf06",
+    "amount": 50,
+    "payment_date": "2026-01-13T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BM)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "98a04d42-f00e-45e3-a38e-9e5aa6d63f1e",
+    "loan_id": "cb6a1d94-43a1-4b86-878a-b5893b32f4c9",
+    "collector_id": "13b8cb7f-c0b6-46bc-9b71-0a8dbaddbf06",
+    "amount": 100,
+    "payment_date": "2026-02-25T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BH)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  },
+  {
+    "id": "d418d20d-980c-4327-bd9e-2acdb78d961b",
+    "loan_id": "cb6a1d94-43a1-4b86-878a-b5893b32f4c9",
+    "collector_id": "13b8cb7f-c0b6-46bc-9b71-0a8dbaddbf06",
+    "amount": 100,
+    "payment_date": "2026-02-26T08:00:00+08:00",
+    "notes": "Excel import BH-CA (col BI)",
+    "created_at": "2026-04-09T04:48:09.087Z",
+    "updated_at": "2026-04-09T04:48:09.087Z"
+  }
+]
