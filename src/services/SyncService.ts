@@ -289,115 +289,10 @@ export class SyncService {
                 // pattern per WatermelonDB docs for server-centric sync.
                 sendCreatedAsUpdated: true,
                 pullChanges: async ({ lastPulledAt }) => {
-                    return await perf.measure('Sync.Pull', async () => {
-                        // Use a 2-second look-back safety window to ensure no records are missed
-                        // due to network latency or database commit timing differences.
-                        const lastSyncDate = lastPulledAt 
-                            ? new Date(lastPulledAt - 2000).toISOString() 
-                            : null;
-                        
-                        // Try to get server time for WatermelonDB's next lastPulledAt.
-                        let serverTime = Date.now() + this.clockOffset;
-                        try {
-                            const { data } = await withSyncTimeout(
-                                this.supabase.rpc('get_server_time'),
-                                SERVER_TIME_TIMEOUT_MS,
-                                'Pull server time lookup'
-                            );
-                            if (data) serverTime = new Date(data).getTime();
-                        } catch (e) {
-                            console.log('[SyncService] Could not refresh server time, using offset-adjusted clock', e);
-                        }
-
-                        const tablesToPull = SYNC_TABLES;
-                        const total = tablesToPull.length;
-
-                        store.setSyncProgress({ currentModel: 'Pulling changes...', progress: 0.1 });
-                        const pullStartTime = Date.now();
-
-                        const results = await Promise.allSettled(
-                            tablesToPull.map(tableName => this.fetchTableChanges(tableName, lastSyncDate))
-                        );
-                        const changes: Record<string, any> = {};
-                        
-                        // Surface table-level failures to sync logs (not just console)
-                        const failures = results
-                            .map((r, i) => ({ result: r, table: tablesToPull[i] }))
-                            .filter(f => f.result.status === 'rejected');
-                        if (failures.length > 0) {
-                            console.error('[SyncService] Some table fetches failed:', failures);
-                            const details = failures.map(f => {
-                                const reason = (f.result as PromiseRejectedResult).reason;
-                                return `${f.table}: ${reason?.message || String(reason)}`;
-                            });
-                            for (const f of failures) {
-                                const reason = (f.result as PromiseRejectedResult).reason;
-                                store.addLog({
-                                    timestamp: new Date(),
-                                    type: 'error',
-                                    message: `Pull failed: ${f.table}`,
-                                    detail: reason?.message || String(reason),
-                                });
-                            }
-                            throw new Error(`Pull failed for ${failures.length} table(s): ${details.join('; ')}`);
-                        }
-
-                        results.forEach((result, i) => {
-                            const localTableName = tablesToPull[i];
-                            const tableData = result.status === 'fulfilled'
-                                ? result.value
-                                : { created: [], updated: [], deleted: [] };
-                            
-                            changes[localTableName] = tableData;
-
-                            const rowCount =
-                                (tableData.created?.length ?? 0) +
-                                (tableData.updated?.length ?? 0) +
-                                (tableData.deleted?.length ?? 0);
-
-                            totalPulled += rowCount;
-
-                            if (rowCount > 0) {
-                                store.addLog({
-                                    timestamp: new Date(),
-                                    type: 'table',
-                                    message: `Pulled ${localTableName}`,
-                                    detail: `${tableData.created?.length ?? 0} new · ${tableData.updated?.length ?? 0} updated · ${tableData.deleted?.length ?? 0} deleted`,
-                                    rowCount,
-                                });
-                            }
-                        });
-
-                        store.setSyncProgress({ currentModel: 'Pull complete', progress: 0.8 });
-                        console.log(`[SyncService] Pulled all ${total} tables in ${Date.now() - pullStartTime}ms (${totalPulled} rows total)`);
-
-                        return { changes, timestamp: serverTime };
-                    });
+                    return await this.performPull(lastPulledAt);
                 },
                 pushChanges: async ({ changes, lastPulledAt }) => {
-                    return await perf.measure('Sync.Push', async () => {
-                        const pushStartTime = Date.now();
-                        store.setSyncProgress({ currentModel: 'Pushing changes...', progress: 0.8 });
-                        const experimentalRejectedIds = await this.pushChangesToSupabase(changes, lastPulledAt);
-
-                        const duration = Date.now() - pushStartTime;
-                        const totalPushed = Object.values(changes as any).reduce((sum: number, t: any) => {
-                            return sum + (t.created?.length ?? 0) + (t.updated?.length ?? 0) + (t.deleted?.length ?? 0);
-                        }, 0) as number;
-
-                        if (totalPushed > 0) {
-                            store.addLog({
-                                timestamp: new Date(),
-                                type: 'info',
-                                message: `Pushed ${totalPushed} local changes`,
-                                duration,
-                                rowCount: totalPushed,
-                            });
-                        }
-
-                        console.log(`[SyncService] Pushed changes in ${duration}ms`);
-                        return { experimentalRejectedIds };
-                    });
+                    return await this.performPush(changes, lastPulledAt);
                 },
             });
 
@@ -438,6 +333,128 @@ export class SyncService {
         } finally {
             this.isSyncing = false;
         }
+    }
+
+    /**
+     * @internal Pull implementation extracted for testability
+     */
+    public async performPull(lastPulledAt?: number): Promise<{ changes: Record<string, any>; timestamp: number }> {
+        return await perf.measure('Sync.Pull', async () => {
+            const store = useSyncStore.getState();
+            // Use a 2-second look-back safety window to ensure no records are missed
+            // due to network latency or database commit timing differences.
+            const lastSyncDate = lastPulledAt 
+                ? new Date(lastPulledAt - 2000).toISOString() 
+                : null;
+            
+            // Try to get server time for WatermelonDB's next lastPulledAt.
+            let serverTime = Date.now() + this.clockOffset;
+            try {
+                const { data } = await withSyncTimeout(
+                    this.supabase.rpc('get_server_time'),
+                    SERVER_TIME_TIMEOUT_MS,
+                    'Pull server time lookup'
+                );
+                if (data) serverTime = new Date(data).getTime();
+            } catch (e) {
+                console.log('[SyncService] Could not refresh server time, using offset-adjusted clock', e);
+            }
+
+            const tablesToPull = SYNC_TABLES;
+            const total = tablesToPull.length;
+
+            store.setSyncProgress({ currentModel: 'Pulling changes...', progress: 0.1 });
+            const pullStartTime = Date.now();
+
+            const results = await Promise.allSettled(
+                tablesToPull.map(tableName => this.fetchTableChanges(tableName, lastSyncDate))
+            );
+            const changes: Record<string, any> = {};
+            let totalPulledCount = 0;
+            
+            // Surface table-level failures to sync logs (not just console)
+            const failures = results
+                .map((r, i) => ({ result: r, table: tablesToPull[i] }))
+                .filter(f => f.result.status === 'rejected');
+            if (failures.length > 0) {
+                console.error('[SyncService] Some table fetches failed:', failures);
+                const details = failures.map(f => {
+                    const reason = (f.result as PromiseRejectedResult).reason;
+                    return `${f.table}: ${reason?.message || String(reason)}`;
+                });
+                for (const f of failures) {
+                    const reason = (f.result as PromiseRejectedResult).reason;
+                    store.addLog({
+                        timestamp: new Date(),
+                        type: 'error',
+                        message: `Pull failed: ${f.table}`,
+                        detail: reason?.message || String(reason),
+                    });
+                }
+                throw new Error(`Pull failed for ${failures.length} table(s): ${details.join('; ')}`);
+            }
+
+            results.forEach((result, i) => {
+                const localTableName = tablesToPull[i];
+                const tableData = result.status === 'fulfilled'
+                    ? result.value
+                    : { created: [], updated: [], deleted: [] };
+                
+                changes[localTableName] = tableData;
+
+                const rowCount =
+                    (tableData.created?.length ?? 0) +
+                    (tableData.updated?.length ?? 0) +
+                    (tableData.deleted?.length ?? 0);
+
+                totalPulledCount += rowCount;
+
+                if (rowCount > 0) {
+                    store.addLog({
+                        timestamp: new Date(),
+                        type: 'table',
+                        message: `Pulled ${localTableName}`,
+                        detail: `${tableData.created?.length ?? 0} new · ${tableData.updated?.length ?? 0} updated · ${tableData.deleted?.length ?? 0} deleted`,
+                        rowCount,
+                    });
+                }
+            });
+
+            store.setSyncProgress({ currentModel: 'Pull complete', progress: 0.8 });
+            console.log(`[SyncService] Pulled all ${total} tables in ${Date.now() - pullStartTime}ms (${totalPulledCount} rows total)`);
+
+            return { changes, timestamp: serverTime };
+        });
+    }
+
+    /**
+     * @internal Push implementation extracted for testability
+     */
+    public async performPush(changes: any, lastPulledAt?: number): Promise<{ experimentalRejectedIds?: Record<string, string[]> }> {
+        return await perf.measure('Sync.Push', async () => {
+            const store = useSyncStore.getState();
+            const pushStartTime = Date.now();
+            store.setSyncProgress({ currentModel: 'Pushing changes...', progress: 0.8 });
+            const experimentalRejectedIds = await this.pushChangesToSupabase(changes, lastPulledAt);
+
+            const duration = Date.now() - pushStartTime;
+            const totalPushed = Object.values(changes as any).reduce((sum: number, t: any) => {
+                return sum + (t.created?.length ?? 0) + (t.updated?.length ?? 0) + (t.deleted?.length ?? 0);
+            }, 0) as number;
+
+            if (totalPushed > 0) {
+                store.addLog({
+                    timestamp: new Date(),
+                    type: 'info',
+                    message: `Pushed ${totalPushed} local changes`,
+                    duration,
+                    rowCount: totalPushed,
+                });
+            }
+
+            console.log(`[SyncService] Pushed changes in ${duration}ms`);
+            return { experimentalRejectedIds };
+        });
     }
 
     private async fetchTableChanges(localTableName: string, lastSyncDate: string | null) {

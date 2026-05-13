@@ -1,0 +1,230 @@
+﻿client_stage_id,client_name,cell_number_norm,cell_number_raw,address,business,co_maker_name,first_collector,loan_count,total_loan_amount,total_balance
+C000001,Teresita P. Samson,09195078249,9195078249,"Prk. Jasmin Cogon, Ormoc City",Carenderia,Annalyn B. Alfar,Cresencio Junco,3,27000.0,15153.0
+C000002,Maria Camila Lahoylahoy,09383139031,9383139031,"Prk 1. Can adieng Ormoc, City",Sari Sari store,Adrian Villarin,Cresencio Junco,2,13000.0,2015.0
+C000003,Maribel R. Barabad,09564980146,9564980146,Block 7 Tambulilid Ormoc City,fruit Vending,Geralien Benitez,Cresencio Junco,4,45000.0,9885.0
+C000004,Geralien Benitez,09704507119,9704507119,Block 7 Tambulilid Ormoc City,fruit Vending,Maribel R. Barabad,Cresencio Junco,4,24000.0,7147.0
+C000005,Leonora P. Trigosa,09301132359,9301132359,Prk. Dahlia Cogon ormoc city,Sari Sari store,Genaro Manucot,Cresencio Junco,4,35000.0,13164.0
+C000006,Ma. Liza Librea,09158306641,9158306641,Prk. Dahlia Cogon ormoc city,Food Vending,Raven Trigosa,Cresencio Junco,4,33000.0,17308.0
+C000007,Ronald Trigosa,09688774362,9688774362,Prk. Dahlia Cogon ormoc city,Food Vending,Ronito P. Trigosa,Cresencio Junco,4,33000.0,13776.0
+C000008,Celerina R. Decio,,N/A,"Chrysanthemum cogon, Ormoc city",Sari Sari store,Jessica Mague,Cresencio Junco,2,12000.0,1805.0
+C000009,Jessica P. Mague,,N/A,"Chrysanthemum cogon, Ormoc city",Sari Sari store,Christine Manozza,Cresencio Junco,2,12000.0,2200.0
+C000010,Mario R. lisondra,09056863045,9056863045,"Chrysanthemum cogon, Ormoc city",Sari Sari store,Jessica Mague,Cresencio Junco,4,32000.0,7693.0
+C000011,Rachel W. Dalanon,09532451782,9532451782,"Balugo Centro ,Albuera ,Leyte",Water Refilling,Tiffany L. Pugata,Cresencio Junco,6,47000.0,17704.0
+C000012,Socorro H. Cuan,09776427601,9776427601,Brgy.Can untog urban poor Phase 2,fruit Vending,Rossana Germano,Cresencio Junco,6,55000.0,18805.0
+C000013,Stephanie G. Cuan,09620646218,9620646218,Brgy.Can untog urban poor Phase 2,fruit Vending,Florenda Cemine,Cresencio Junco,6,73000.0,21381.0
+C000014,Florenda N. Cimene,09534764979,9534764979,"Brgy. Alegria Ormoc, city",fruit Vending,Stephanie G. Cuan,Cresencio Junco,7,73000.0,26772.0
+C000015,Rosanna T. Germano,09484827652,9484827652,Brgy.Can untog urban poor Phase 2,fruit Vending,Soccoro Cuan,Cresencio Junco,7,93000.0,34441.0
+C000016,Glen B. Gadil,09664620583,9664620583,Brgy. Tinag an Albuera Leyte,Driver/ EDC,Ivy A. Gadil,Cresencio Junco,1,5000.0,2000.0
+C000017,Emma J. Dela Pena,09655930669,9655930669,"Prk Chrysanthemum , Cogon , Ormoc , City",BBQ Vending,Erasmo B. Dela Pena,Cresencio Junco,4,32000.0,13221.0
+C000018,Warlito R. Decio,,N/A,"Prk Chrysanthemum , Cogon , Ormoc , City",Sari Sari store,Bernadeth Mijares,Cresencio Junco,2,12000.0,2555.0
+C000019,Benjamin C. Beltran,09120206836,9120206836,"Bilwang Pob. Albuera , Leyte",Fruit vending,Girlie mae Beltran,Cresencio Junco,5,39000.0,8425.0
+C000020,Arcelene B. Castro,09077357729,9077357729,Ipil Sangi Ormoc City,fruit Vending,Oliver S. Gablino,Cresencio Junco,2,15000.0,4085.0
+C000021,Marilu B. Bande,09557419401,9557419401,"Banana Island Balugo, Albuera , Leyte",Food Vending,Nilo B. Bande,Cresencio Junco,4,40000.0,5565.0
+C000022,Susan B. Guevarra,09754311123,9754311123,CCF Prk.Mars Brgy. San Isidro Ormoc City,Sari Sari Store,Rodulfo S. Quin,Cresencio Junco,5,40000.0,13960.0
+C000023,Helen Omega,09929390669,9929390669,"Chrysanthemum cogon, Ormoc city",Sari Sari store,Rosalinda Hinuguin,Cresencio Junco,4,30000.0,10590.0
+C000024,Rosalinda P. Hinuguin,09541064200,9541064200,"Chrysanthemum cogon, Ormoc city",Food Vending,Helen Omega,Cresencio Junco,4,30000.0,9023.0
+C000025,Anita D. Pepito,09359317248,9359317248,"Chrysanthemum cogon, Ormoc city",Sari Sari store,Mario R. lisondra,Cresencio Junco,2,12000.0,1550.0
+C000026,Glenn Erick B. Dejano,09754764298,9754764298,"Chrysanthemum cogon, Ormoc city",Sari Sari store,Gretchen Marie C. Tabucanon,Cresencio Junco,3,21000.0,4927.0
+C000027,Veneranda L.Gutierrez,09854642528,9854642528,"Prk. Jasmin Cogon, Ormoc City",Sari Sari store,Luzviminda C. Lumanta,Cresencio Junco,3,18000.0,8933.0
+C000028,Maria Lourdes D. Patricio,09659445141,9659445141,"Balugo ,Albuera ,Leyte",Teacher/Day care,Dom Juyl D. Patricio,Cresencio Junco,6,99000.0,36123.0
+C000029,Rudelyn C. Olita,09934940675,9934940675,"Chrysanthemum cogon, Ormoc city",Sari Sari store,Anita D. Pepito,Cresencio Junco,2,12000.0,1550.0
+C000030,Corsini V. Lumapas,09355942262,9355942262,Balugo Albuera Leyte,Tubig Dealer,Elvira Lumapas,Cresencio Junco,3,15000.0,4230.0
+C000031,Alfredo P. Cayanong,09853326960,9853326960,"Bilwang , Albuera , Leyte",Sari Sari store,Manuel Cayanong,Cresencio Junco,5,40000.0,12440.0
+C000032,Grace G. Abandonado,09074539553,9074539553,"Coob, Libertad Ormoc City",Food Vending,Leticia B. Tianes,Cresencio Junco,5,31000.0,6297.0
+C000033,Mechelle A. Soria,09208879109,9208879109,"Osco Compound Ipil, Ormoc city",Food Vending,Myla Soria,Cresencio Junco,1,5000.0,0.0
+C000034,Jenefer Y. Lambojon,09384327178,9384327178,St. Benedict Village ormoc City,Food Vending,Helen Bacalso,Cresencio Junco,1,5000.0,0.0
+C000035,Amelita Caamic,09156502786,9156502786,Linao Ormoc City,Sari Sari store,Armida B. Cana,Cresencio Junco,5,42000.0,10380.0
+C000036,Myla P. Soria,09208878921,9208878921,"Osco Compound Ipil, Ormoc city",Food Vending,Michelle Soria,Cresencio Junco,1,5000.0,950.0
+C000037,Emelita D. Tuico,09208864469,9208864469,Prk 1 Brgy San Antonio ormoc city,fruit Vending,Fernando A. Tuico,Cresencio Junco,2,12000.0,1775.0
+C000038,Christine M. Rumol,09263683865,9263683865,Brgy. 29 Pob. 3 Ormoc City,Sari Sari store,Jessica Mague,Cresencio Junco,2,12000.0,1550.0
+C000039,Irma C. Marquez,09639115746,9639115746,Prk .Dahlia Brgy Cogon Ormoc City,Sari Sari store,Daren C. Marquez,Cresencio Junco,5,39000.0,13823.0
+C000040,Mary Grace S. Matres,09700877939,9700877939,"Prk. Jasmin Cogon, Ormoc City",Sari Sari store,Teresa P. Samson,Cresencio Junco,5,32000.0,10048.0
+C000041,Queennei B. Bebanco,09853326960,9853326960,"Pob. Albuera, Leyte",Sari Sari store,Manuel Cayanong,Cresencio Junco,2,12000.0,1550.0
+C000042,Marielle R. Decio,09109270993,9109270993,"Prk. Chrysanthemum Cogon, ormoc city",Sari Sari store,Celerina Decio,Cresencio Junco,1,5000.0,0.0
+C000043,Antonio R. Ypil,09856217704,9856217704,"Brgy. Alta vista ,ormoc city",BBQ Vending,Arceline Sestoso,Cresencio Junco,5,39000.0,11470.0
+C000044,Arceline Sestoso,09856217704,9856217704,"Brgy. Alta vista ,ormoc city",Food Vending,Angelina G. Padayao,Cresencio Junco,4,35000.0,15670.0
+C000045,Luzviminda G. Ybanez,09071868553,9071868553,Brgy. Can untog Ormoc city,fruit Vending,Rossana Germano,Cresencio Junco,5,43000.0,11079.0
+C000046,Vennis M. Cagabhion,09558440300,9558440300,"Balugo, Albuera, Leyte",Sari Sari store,Eva C. Alao,Cresencio Junco,4,34000.0,10240.0
+C000047,Miraluna P. Manoza,09103935299,9103935299,Brgy.Cogon ormoc City,BHW/ Sari sari store,Anita D. Pepito,Cresencio Junco,2,10000.0,0.0
+C000048,Danilo P. Dejano,09934940675,9934940675,"Prk. Chrysanthemum Cogon, ormoc city",Tricycle Driver,Rudelyn C. Olita,Cresencio Junco,2,10000.0,0.0
+C000049,Reymunda J. Hermias,09304069725,9304069725,"Brgy. Ipil, Ormoc ,Cxity",Fish Vendor,Maria Luz Garciano,Cresencio Junco,1,5000.0,0.0
+C000050,Gina O. Navarro,09163535523,9163535523,"Prk.3 brgy. Bantigue, Ormoc City",Food Vending,Elena Bendanillo,Cresencio Junco,5,32000.0,11726.0
+C000051,Rodulfo D. Pepito Jr.,09950869378,9950869378,"Brgy. Cogon Chrysanthemum ormoc, City",Sari Sari store,Celerina Decio,Cresencio Junco,1,5000.0,0.0
+C000052,Jerome W. Dominguito,09537745007,9537745007,"Wangag , Damulaan Albuera, Leyte",Driver/ EDC,Vilma Tubo,Cresencio Junco,2,10000.0,1100.0
+C000053,Ma. Jocelyn S. Rodriguez,09454613419,9454613419,"Sangi, Ipil Ormoc City",Sari Sari store,Verginia S. Pesanon,Cresencio Junco,2,12000.0,675.0
+C000054,Verginia S. Pesanon,09603254664,9603254664,"Sangi, Ipil Ormoc City",Sari Sari store,Ma. Jocelyn S. Rodriguez,Cresencio Junco,1,5000.0,0.0
+C000055,Joey E. Peroso,09951371826,9951371826,Prk. Dahlia Cogon ormoc city,Tricycle Driver,Ma. Helina L. Toring,Cresencio Junco,6,50000.0,16240.0
+C000056,Rodel C. Concon,09706814072,9706814072,Prk. Dahlia Cogon ormoc city,Tricycle Driver,Maria milagros Concon,Cresencio Junco,5,47000.0,13720.0
+C000057,Rachel Cabullo,09533506060,9533506060,"Zone 5 Balugo, Albuera, leyte",Feeds Dealer,Rachell Dalanon,Cresencio Junco,3,21000.0,5830.0
+C000058,Cecelia N. Alao,09263682467,9263682467,"Balugo, Albuera ,Leyte",Spareparts/ mechanic,Jocel Bohol,Cresencio Junco,4,31000.0,10891.0
+C000059,Cirila P. Borinaga,09051038763,9051038763,"Balugo, Albuera, Leyte",Sari Sari store,Mary grace P. Borinaga,Cresencio Junco,3,21000.0,5117.0
+C000060,Bernardo T. Romano,09484467490,9484467490,"Relocation Balugo, Albuera Leyte,",Fish Vending,Flordeliza Manatad,Cresencio Junco,4,24000.0,1550.0
+C000061,Maricris D. Toyong,09947830511,9947830511,"Balugo 2 albuera, Leyte",Food Vending,Ruel L. Toyong,Cresencio Junco,3,22000.0,2530.0
+C000062,Gleen C.Concon,09709951467,9709951467,"Aquino Village Brgy.Cogon Ormoc, City",Tricycle Driver,Dindo Ritche C. Concon,Cresencio Junco,5,42000.0,13461.0
+C000063,Noime D. Matuguina,09630945234,9630945234,"Sitio Sangi, Brgy. Ipil Ormoc, City",Sari Sari store,Joel G. Jaca,Cresencio Junco,5,67000.0,19501.0
+C000064,Rubilyn B. Nazario,09051206506,9051206506,"Brgy Campdownes Ormoc, City",Online selling,Gap C. Labahanan,Jason Cayanong,5,44000.0,13114.0
+C000065,Milowa M. Torralba,09380375226,9380375226,"P-1 Brgy.Altavista, Ormoc ,City",Vegetable Vending,Rizande P. Torralba,Jason Cayanong,5,41000.0,13097.0
+C000066,Emma B. Lajara,09169492062,9169492062,"Balugo ,Albuera ,Leyte",Sari Sari store,Marilu B. Bande,Jason Cayanong,4,32000.0,10350.0
+C000067,Jose A. Pogonia,09056217704,9056217704,"P-1 Brgy.Altavista, Ormoc ,City",Driiver,Antonio Ypil,Jason Cayanong,4,31000.0,13590.0
+C000068,Carlita C Seno,09855731407,9855731407,"Pob. Albuera, Leyte",Sari Sari store,Rhian mae seno,Jason Cayanong,1,5000.0,0.0
+C000069,Ecel C. Lagrimas,09923238916,9923238916,"Pob. Bilwang ,Albuera,Leyte",Food Vending,Myrna P. Surima,Jason Cayanong,2,13000.0,0.0
+C000070,Marcelina A. Pantas,09563144747,9563144747,Brgy. North Ormoc City,Sari Sari store,Vivian P. Vinas,Jason Cayanong,6,52000.0,14190.0
+C000071,Nelia L. Miole,09700898137,9700898137,Brgy. North Ormoc City,Sari Sari store,Rene G. Miole,Jason Cayanong,5,44000.0,12066.0
+C000072,Annalyn B. Alfar,09122493321,9122493321,"Brgy.North Ormoc, City",Food Vending,Lea P. Pagay,Jason Cayanong,2,12000.0,1240.0
+C000073,Marivic R. Penalosa,09656931118,9656931118,"Balugo 2 albuera, Leyte",Sari Sari store,Rachel Cabullo,Jason Cayanong,2,12000.0,3354.0
+C000074,Ma. Liza O. Silao,09995205392,9995205392,Brgy. Lilo an Ormoc City,BBQ Vending,Ronaldo R. Garcia,Jason Cayanong,1,5000.0,0.0
+C000075,Nelyn Jane C. Gallardo,09070660762,9070660762,Prk. Dahlia Cogon ormoc city,Online selling,Ronito P. Trigosa Jr.,Jason Cayanong,3,21000.0,5888.0
+C000076,Gleceria J. Teves,09483650990,9483650990,Prk. Sangi Ipil Ormoc city,Sari Sari store,Jerome J. Teves,Jason Cayanong,1,5000.0,0.0
+C000077,Margie N. Palmitos,09853537946,9853537946,Block 1 Lot 12 RAFI Brgy.Tambulilid O.C,fruit Vending,Jesus E. Palmitos,Jason Cayanong,2,12000.0,5546.0
+C000078,Arah C. Gastardo,09667989959,9667989959,Balugo Albuera Leyte,BBQ Vending,Marialyn E. Cagabhion,Jason Cayanong,4,31000.0,4692.0
+C000079,Nenita L.Orellano,09125788364,9125788364,"Calingatnan San Pedro Albuera, Leyte",Food Vending,Alfred P. Cayanong,Jason Cayanong,3,15000.0,3635.0
+C000080,Jean M. Sanchez,09385550326,9385550326,"Mangga Seguinon Albuera, Leyte",Sari Sari store,Julious T. Languido,Jason Cayanong,1,5000.0,0.0
+C000081,Margarita B. Cayanong,09508690391,9508690391,"San Andres Poblacion Albuera, Leyte",BBQ Vending,Elizabeth Velarde,Jason Cayanong,6,69000.0,18561.0
+C000082,Mario P. Pawa-an Jr.,09359320358,9359320358,"Distriict 24 Brgy. West Ormoc, City",Food Vending,Ireis Ritshil A. Pawa-an,Jason Cayanong,2,12000.0,2600.0
+C000083,Isabel J. Roncal,09310345361,9310345361,"Poblacion Albuera, Leyte",Food Vending,Margarita B. Cayanong,Jason Cayanong,5,54000.0,19627.0
+C000084,Cindy A. Pastoril,09759008271,9759008271,Apolonia Village Poblacion,Food Vending,Ma. Laisa Ando,Jason Cayanong,6,59000.0,20727.0
+C000085,Cristal S. Fernandez,09512125108,9512125108,"Poblacion Albuera, Leyte",Food Vending,Myra P. Surina,Jason Cayanong,1,5000.0,0.0
+C000086,Judith Languido,09486125867,9486125867,"Mangga Seguinon Albuera, Leyte",Food Vending,Nestor Languido,Jason Cayanong,1,5000.0,0.0
+C000087,Myrna P. Surima,09841337447,9841337447,"Poblacion Albuera, Leyte",Food Vending,Ecel C. Lagrimas,Jason Cayanong,2,12000.0,4910.0
+C000088,Elizabeth O. Lubon,09491513217,9491513217,"District 28 Brgy. East Ormoc, City",Food Vending,Joel Lubon,Jason Cayanong,3,21000.0,8090.0
+C000089,Jay T. Canoy,09552741409,9552741409,"Brgy. Talisayan Albuera, Leyte",Food Vending,Imee G. Masinaoy,Jason Cayanong,3,30000.0,8270.0
+C000090,Ameryl C. Felicita,09514181285,9514181285,Brgy. Linao Ormoc City,Food Vending,Amelita A. Caamic,Jason Cayanong,4,31000.0,7111.0
+C000091,Edna G.Tudtud,09069629216,9069629216,"Balugo 2, Albuera, Leyte",Fish vendor,Danilo Tudtud,Jason Cayanong,3,17000.0,2610.0
+C000092,Cristina F. Rodriguez,09069629216,9069629216,"Balugo 2, Albuera, Leyte",Food Vending,Myrna P. Casane,Jason Cayanong,2,12000.0,5486.0
+C000093,Teofila V.Tamosa,09947103169,9947103169,Balugo Albuera Leyte,Food Vending,Vanessa Cadiz,Jason Cayanong,2,5000.0,0.0
+C000094,Jane M. Abrahan,09949478530,9949478530,"Cantawagon Brgy. Tabgas, Albuera",Laborer/ Habal2 Driver,Romillo Abrahan,Jason Cayanong,3,27000.0,5960.0
+C000095,Mary Jane D. Pernites,09976498417,9976498417,"Balugo 2 albuera, Leyte",Food Vending,Marivic R. Penaloisa,Jason Cayanong,2,12000.0,1490.0
+C000096,Teresita C. Competente,09753330221,9753330221,"Canlalin 2 Poblacion Albuera, Leyte",School Canteen,Cindy Pastoril,Jason Cayanong,5,60000.0,13830.0
+C000097,Josephina D. Manatad,09977216599,9977216599,Balugo Albuera Leyte,Sari Sari store,Vennis M. Cagabhion,Jason Cayanong,5,27000.0,6480.0
+C000098,Jemaima L. Gonzales,09610179022,9610179022,Real Street Poblacion Albuera,Food Vending,Vangie Domanillo,Jason Cayanong,4,32000.0,4952.0
+C000099,Asuncion M. Nabre,09985469601,9985469601,"Urban Albuera, Leyte",Food Vending,Fe Redolosa,Jason Cayanong,5,59000.0,17900.0
+C000100,Lorena Baloro,09367391043,9367391043,"Apolohia Village,Albuera, Leyte",Food Vending,Cindy Pastoril,Jason Cayanong,5,44000.0,15103.0
+C000101,Fe Redolosa,09067722754,9067722754,"Apolohia Village,Albuera, Leyte",Food Vending,Lorena Baloro,Jason Cayanong,5,40000.0,12469.0
+C000102,Helen B. Bacalso,09461547012,9461547012,Saint benidict Ipil Ormoc City,Sari Sari store,Jenefer Lambojon,Cresencio Junco,5,65000.0,16940.0
+C000103,Amy S. Abrahan,09066878267,9066878267,"Sitio Cantawagon Brgy. Tabgas, Albuera",Laborer/Helper,Regie M. Abrahan,Jason Cayanong,3,22000.0,4601.0
+C000104,Carolina L. Misperos,09914907815,9914907815,"Sitio Cantawagon Brgy. Tabgas, Albuera",,Michelle L. Calaging,Jason Cayanong,5,49000.0,13795.0
+C000105,James N. Ando,09162546705,9162546705,"Poblacion Albuera, Leyte",,Ma. Laisa F. Ando,Jason Cayanong,5,36000.0,11968.0
+C000106,Elsie Tidoy,09563796192,9563796192,Poblacion Albuera Leyte,,Gracyl Tidoy,Jason Cayanong,4,39000.0,12103.0
+C000107,Rebecca T. Luna,09067563248,9067563248,"Balugo 2, Albuera, Leyte",,Bryan Luna,Jason Cayanong,2,10000.0,4705.0
+C000108,Elizabeth A. Giyao,09477431065,9477431065,"Sitio Cantawagon Brgy. Tabgas, Albuera",Laborer/Helper,Proceso Misperos,Jason Cayanong,3,17000.0,3140.0
+C000109,Lorena G. Capacao,09551123933,9551123933,"Balugo 2, Albuera, Leyte",,Jessel Capacao,Jason Cayanong,4,27000.0,10473.0
+C000110,Jenelyn H. Cardines,09068903203,9068903203,"Purok 8, Brgy. Alta Vista Ormoc City",,Arceline M. Sestoso,Jason Cayanong,2,12000.0,5340.0
+C000111,Kenneth C. Marquez,09951571694,9951571694,Brgy. Cogon Ormoc City,,Irma Marquez,Jason Cayanong,3,19000.0,4488.0
+C000112,Reynaldo T. Valoria,09308283893,9308283893,"Purok 4, Bagong Buhay Ormoc City",,Margie N. Palmitos,Jason Cayanong,1,5000.0,1800.0
+C000113,Marilyn S. Sanchez,09630522298,9630522298,"Doña Aurora, Ipil Ormoc City",,Samantha Quisha Mae Redondo,Jason Cayanong,1,5000.0,0.0
+C000114,Joela Elliza L. Salvame,09491513217,9491513217,East Dist. 28 Ormoc City,,Elizabeth O. Lubon,Jason Cayanong,3,19000.0,7755.0
+C000115,Lucita C. Cagabhion,09067823576,9067823576,"Balugo 1, Albuera, Leyte",Sari-sari Store,Mercedita M. Cagabhion,Jason Cayanong,5,41000.0,15011.0
+C000116,Mae Anne Castañares,09658073623,9658073623,"Sitio Cantawagon Brgy. Tabgas, Albuera",,Reymond A.Sandahan,Jason Cayanong,3,19000.0,7350.0
+C000117,Vanessa Giva,09604494599,9604494599,"Poblacion Albuera, Leyte",,Cristel Dionson,Jason Cayanong,4,29000.0,4788.0
+C000118,Maria Milagros Concon,09622387462,9622387462,Cogon Ormoc City,,Joel Peroso,Jason Cayanong,5,37000.0,11421.0
+C000119,Martin B. Abad,09709962402,9709962402,Brgy. Tabgas Albuera Leyte,,Gemma R. Abad,Jason Cayanong,5,32000.0,8513.0
+C000120,Maria Fe A. Gencianos,93681172975,93681172975,"Poblacion Albuera, Leyte",School Canteen,Cindy Pastoril,Jason Cayanong,5,48000.0,17212.0
+C000121,Maria Fel M. Ariño,09750742135,9750742135,"Poblacion Albuera, Leyte",,Maria Fe A. Gencianos,Jason Cayanong,5,48000.0,17625.0
+C000122,Cerlita Abastas,09067733068,9067733068,Balugo Albuera Leyte,,Lucita Cagabhion,Jason Cayanong,5,39000.0,14626.0
+C000123,Gracyl Tidoy,09669968595,9669968595,Poblacion Albuera Leyte,,Elsie Tidoy,Jason Cayanong,4,31000.0,10795.0
+C000124,Allan J. Dagondon,09125001408,9125001408,Katipunan San Pedro Albuera Leyte,,Senith M. Dagondon,Jason Cayanong,3,21000.0,1145.0
+C000125,Joselito P. Surima,09383273489,9383273489,Brgy. Bilwang Albuera,,Nicomar E.Nicolas,Jason Cayanong,1,5000.0,1530.0
+C000126,Nicomar E. Nicolas,09317086049,9317086049,Brgy. Bilwang Albuera,,Joselito P. Surima,Jason Cayanong,1,5000.0,3335.0
+C000127,Vanessa L. Nuñez,09168609800,9168609800,Tambulilid Ormoc City,,Cristina G. Nuñez,Jason Cayanong,1,5000.0,1265.0
+C000128,Jeboy M. Etang,,,"Albuera, Leyte",,Myrna Surima,Jason Cayanong,1,5000.0,2625.0
+C000129,Erica Nuñez Palmitos,09100209898,9100209898,Blk. 7 Rafi Tambulilid Ormoc City,,Jesus Espina Palmitos,Jason Cayanong,1,5000.0,3565.0
+C000130,Jenelyn C. Gulayan,09485561956,9485561956,Dist. 24 Brgy. West Ormoc City,,Jhozel Dean B. Calvero,Jason Cayanong,1,5000.0,0.0
+C000131,Mark Casinay,09306943951,9306943951,Dist. 24 Brgy. West Ormoc City,,Mario Pawa-an Jr.,Jason Cayanong,2,12000.0,930.0
+C000132,Flora Mae C. Espina,90511488334,90511488334,"Balugo 2, Albuera, Leyte",Fish Vendor,Cristina F. Rodriguez,Jason Cayanong,1,5000.0,0.0
+C000133,Raquel G. Manawatao,09077586645,9077586645,Rudy Revilla Ave. Purok 1 Can-Adieng Ormoc City,Food Vending,Alicia S. Galicia,Jason Cayanong,1,5000.0,1280.0
+C000134,Myrna Formentera,09069629216,9069629216,"Balugo, Albuera, Leyte",Food Vending,Cristina F. Rodriguez,Jason Cayanong,1,5000.0,2655.0
+C000135,Mercy Suhayon,09061722540,9061722540,Poblacion Albuera Leyte,,Gracyl Tidoy,Jason Cayanong,2,10000.0,2195.0
+C000136,Cleofe Sasing,09676343559,9676343559,Poblacion Albuera Leyte,,Mercy Suhayon,Jason Cayanong,5,49000.0,19326.0
+C000137,Josephine Rufin,09363750372,9363750372,Dist. 24 Brgy. West Ormoc City,Food Vending,Ireis Ritshil A. Paawa-an,Bernie Casera,3,21000.0,3411.0
+C000138,Haidee P. Gulane,09420090337,9420090337,Dist. 24 Brgy. West Ormoc City,Food Vending,Ireis Ritshil A. Paawa-an,Bernie Casera,4,33000.0,13731.0
+C000139,Adrian Zuela,09915172584,9915172584,Balugo Albuera Leyte,,Neiresa Zuela,Bernie Casera,3,22000.0,5835.0
+C000140,Mark Anthony Pastoril,09066097090,9066097090,Poblacion Albuera Leyte,School Canteen,Lorena Baloro,Bernie Casera,5,44000.0,16947.0
+C000141,Aida Rosetase,09120678302,9120678302,Brgy. North Ormoc City,,Miran Arcenal,Bernie Casera,5,42000.0,12910.0
+C000142,Rutchel S. Palo,09639445198,9639445198,Sitio Sangi Brgy.Ipil,,Frank David S.Palo,Bernie Casera,3,25000.0,2455.0
+C000143,Caroline Jhona Sanghilan,09758632162,9758632162,Brgy. Airport Purok 2 Ormoc City,,Maricris Dalaguit,Bernie Casera,1,0.0,0.0
+C000144,Ireis Ritshil A. Paawa-an,09363750372,9363750372,Dist. 24 Brgy. West Ormoc City,Food Vending,Mario R. Pawa-an Jr.,Bernie Casera,1,5000.0,1070.0
+C000145,Rosita Degorio,977343623,977343623,Balugo Albuera Leyte,,Felipe Degorio,Bernie Casera,4,21000.0,8935.0
+C000146,Maria Renelyn Gulayan,09300204410,9300204410,Dist. 24 Brgy. West Ormoc City,,Mark Casinay,Bernie Casera,4,32000.0,11430.0
+C000147,May P. Denso,09068258895,9068258895,Dist. 24 Brgy. West Ormoc City,,Mario R. Pawa-an Jr.,Bernie Casera,1,5000.0,0.0
+C000148,Geraldine Comendador,09363750372,9363750372,Dist. 24 Brgy. West Ormoc City,,Ireis Ritshil A. Paawa-an,Bernie Casera,4,32000.0,8760.0
+C000149,Denaro A. Manlucot,09302119071,9302119071,Purok Dahlia Cogon,,Leonora P. Trigosa,Bernie Casera,1,5000.0,775.0
+C000150,Geronimo Labahanan Jr.,09561382635,9561382635,Purok Dahlia Cogon,Tricycle Driver,Rodel Concon,Bernie Casera,2,12000.0,1975.0
+C000151,Jie Ann J. Junco,09774883653,9774883653,Balugo Albuera Leyte,,Hana Mae Sepe,Bernie Casera,2,10000.0,930.0
+C000152,Genaro A. Manlucot,09302119071,9302119071,Purok Dahlia Cogon,,Leonora P. Trigosa,Bernie Casera,2,16000.0,8584.0
+C000153,Gertrudes Sotto,09923554785,9923554785,"Brgy. Balugo, Albuera, Leyte",Food Vending,Ciracio Orapa,Bernie Casera,4,29000.0,11940.0
+C000154,Janice Sallomon,09361425124,9361425124,Bantigue Ormoc City,Food Vending,Gina Navarro,Bernie Casera,1,5000.0,0.0
+C000155,Aileen Mendoza,09158816015,9158816015,Brgy. Poblacion Albuera,,Maricel Nabre,Bernie Casera,4,34000.0,11189.0
+C000156,Maricel B. Nabre,09658914941,9658914941,Brgy. Poblacion Albuera,,Aileen Nabre,Bernie Casera,4,34000.0,11561.0
+C000157,Lorena Cagabhion Malayan,09352696548,9352696548,"Balugo 1, Albuera, Leyte",Food Vending,Alona Malayan,Bernie Casera,2,12000.0,2915.0
+C000158,Gerry G. Casero,09557802587,9557802587,"Balugo 1, Albuera, Leyte",,Jhovelyn Casero,Bernie Casera,3,22000.0,6000.0
+C000159,Vangie Domanillo,09926058507,9926058507,Real St. Albuera Leyte,,Vanessa Giva,Bernie Casera,4,28000.0,10915.0
+C000160,Reynaldo Casamero,09656035348,9656035348,Balugo Albuera Leyte,,Jovelyn Devera,Bernie Casera,1,5000.0,0.0
+C000161,Arthur L. Senillo,09526037229,9526037229,Cantawagon Tabgas Albuera,,Rosalyn Senillo,Bernie Casera,2,10000.0,4820.0
+C000162,Angielyn Porcadilla,09107902422,9107902422,Doña Feliza Mejia Ormoc City,Fruit Vendor,Reymart Antiligando,Bernie Casera,1,5000.0,1550.0
+C000163,Regie Abrahan,09949478530,9949478530,Cantawagon Tabgas Albuera,,Geraldine Abrahan,Bernie Casera,1,5000.0,1115.0
+C000164,James Borinaga,09924668635,9924668635,Brgy. Balugo Albuera,,Aine Mae Tan,Bernie Casera,2,12000.0,1500.0
+C000165,Maria Chona Paylado,09948520836,9948520836,Balugo Albuera Leyte,,Jun-Jun Catalogo,Bernie Casera,1,5000.0,1410.0
+C000166,Marical Junio,09368485237,9368485237,Poblacion Albuera Leyte,,Elsie Tidoy,Bernie Casera,1,5000.0,0.0
+C000167,Cristita Cagabhion,,,"Balugo 1, Albuera, Leyte",,Alicia Cagabhion,Bernie Casera,3,21000.0,2616.0
+C000168,Maria Rogelyn Sestoso,09997887082,9997887082,Poblacion Albuera Leyte,,Jemaima Gonzales,Bernie Casera,3,17000.0,1262.0
+C000169,Fely Solis,09923554785,9923554785,Sitio Sangi Ipil,,Ronnie Agustin,Bernie Casera,3,20000.0,3919.0
+C000170,Lydia C. Toyong,09972592439,9972592439,Balugo Albuera Leyte,,Rowena Madaya,Bernie Casera,1,5000.0,0.0
+C000171,Rowena Madaya,09551964593,9551964593,Balugo Albuera Leyte,,Lydia C. Toyong,Bernie Casera,1,5000.0,2195.0
+C000172,Ruseller Sereño,09630201560,9630201560,"San Pedro, Albuera, Leyte",,Miguel Diza,Bernie Casera,1,5000.0,1815.0
+C000173,Florencio Jing Cayanong,09054955499,9054955499,Balugo Albuera Leyte,,Jinnefer B. Cayanong,Bernie Casera,1,5000.0,1000.0
+C000174,Jona Pendijito,09275315350,9275315350,"Balugo 1, Albuera Leyte",,Vennis Cagabhion,Bernie Casera,3,19000.0,9858.0
+C000175,Jonessa Doguiles,09532343161,9532343161,"Balugo 1, Albuera Leyte",,Emma Lajara,Bernie Casera,3,25000.0,6260.0
+C000176,Mary Jane Basan,09532981282,9532981282,Poblacion Albuera Leyte,,Maria Fe Gencianos,Bernie Casera,4,34000.0,17492.0
+C000177,Joel Abata,09566154001,9566154001,Balugo Albuera Leyte,,Evi Marie A. Sarsonas,Bernie Casera,2,12000.0,6450.0
+C000178,Angielyn Porcadilla,09107902488,9107902488,Doña Feliza Mejia Ormoc City,,Reymart Antiligando,,1,7000.0,2260.0
+C000179,Marical Junio,09243653357,9243653357,Poblacion Albuera Leyte,Private Employee,Christian Mandras,Jason Cayanong,3,25000.0,11459.0
+C000180,Sheila G. Andrade,,,Balugo Albuera Leyte,,,Jason Cayanong,1,5000.0,2840.0
+C000181,Mary Ann Abastas,09973249159,9973249159,Balugo Albuera Leyte,,Jenny Ann Abastas,Jason Cayanong,2,12000.0,5970.0
+C000182,Artnel M. Benedicto,09856184415,9856184415,Bilwang Poblacion Albuera,,Jovelyn P. Duarte,Jason Cayanong,3,15000.0,5280.0
+C000183,Nancy Raga,09914402737,9914402737,Cantawagon Tabgas Albuera,,Rowena Raga,Jason Cayanong,3,21000.0,6115.0
+C000184,Marife B. Cabahug,09671398163,9671398163,Brgy. North Albuera Leyte,,Marcelina Pantas,Jason Cayanong,3,19000.0,1945.0
+C000185,Mary Joy Gamusa,09659843048,9659843048,"Planas, Brgy. Damulaan Albuera",,Daniel Gamusa,Jason Cayanong,1,5000.0,0.0
+C000186,Agnes Manatad,09754304632,9754304632,Balugo 2 Albuera Leyte,,Alvin Manatad,Jason Cayanong,3,21000.0,9600.0
+C000187,Gerald Gera,,,Balugo Albuera Leyte,,,Jason Cayanong,1,5000.0,3450.0
+C000188,Evangeline Bantes,09910618302,9910618302,Balugo Albuera Leyte,,Michael Bantes,Jason Cayanong,1,5000.0,2800.0
+C000189,Araceli C. Daigdigan,09270245607,9270245607,San Pedro Poblacion,,Isabel Roncal,Gerald Gera,1,5000.0,0.0
+C000190,Astrid B.Gorre,09272621269,9272621269,"Balugo 2, Albuera Leyte",,Maribel Gorre,Gerald Gera,3,19000.0,10574.0
+C000191,Armando F. Mondejar,09557239745,9557239745,Palanas Albuera Leyte,,Evangeline Mondejar,Gerald Gera,3,19000.0,11190.0
+C000192,Rosalie G. Celedio,09161619151,9161619151,"Cantawagon Tabgas, Albuera",,Arturo Penafiel,Gerald Gera,2,12000.0,7805.0
+C000193,Angelie Andrade,09971956828,9971956828,"Palanas, Albuera, Leyte",Fish Vendor,Felix Jolly Andrade,Gerald Gera,2,12000.0,3851.0
+C000194,Cristina Tidoy,09750337646,9750337646,"Balugo, Albuera, Leyte",,Renero Tidoy,Gerald Gera,1,5000.0,0.0
+C000195,Bill Romulo Ebero,09276503591,9276503591,"Palanas, Albuera, Leyte",,Florencio Jing Cayanong,Gerald Gera,1,5000.0,4500.0
+C000196,Michelle Galaging,09977146805,9977146805,Cantawagon Tabgas Albuera,,Dalia Urtula,Gerald Gera,3,19000.0,11200.0
+C000197,Roy Gamusa,09279662772,9279662772,Balugo Albuera Leyte,,Haya Hara Hope Pilleren,Gerald Gera,1,5000.0,2750.0
+C000198,Ma. Lyka C. Andrade,09161841215,9161841215,"Markabaling Balugo, Albuera, Leyte",,Manolito Biarino,Gerald Gera,1,5000.0,0.0
+C000199,Bryan Boyd Baldozanso,09486200525,9486200525,Benolho Sitio Tinago,Multicab Driver,Lea Poria Diano,Cresencio Junco,1,5000.0,1820.0
+C000200,Ma. Melodina C. Martinito,09313170048,9313170048,Poblacion Albuera Leyte,Buy & Sell,Maria Fe Gencianos,Jason Cayanong,3,21000.0,12646.0
+C000201,Rowena Misperos,09458163510,9458163510,Cantawagon Tabgas Albuera,,Nancy Raga,Gerald Gera,3,21000.0,10270.0
+C000202,Dennis Lunzaga,,,Palanas Albuera Leyte,,,Gerald Gera,1,5000.0,3800.0
+C000203,Dionesia Rosal,09639073028,9639073028,San Andres Poblacion Albuera,,Margarita B. Cayanong,Jason Cayanong,3,21000.0,11030.0
+C000204,Hipolito Alao,09517312734,9517312734,Balugo Albuera,,Virginia Alao,Gerald gera,2,13000.0,9168.0
+C000205,Lorina Cagabhion Malayan,09352696548,9352696548,"Balugo 1, Albuera, Leyte",Food Vending,Alona Malayan,Cresencio Junco,2,19000.0,10016.0
+C000206,Irene J. Cabintoy,09272859426,9272859426,Zone 3 Talisayan Albuera,,Nilfe J. Cabintoy,Jason Cayanong,1,5000.0,1670.0
+C000207,Rhealyn Caindoc,09265443537,9265443537,Cantawagon Tabgas Albuera Leyte,,Mary Cris Lustre,Gerald Gera,1,5000.0,1050.0
+C000208,Napoleon D. Bello,09924593986,9924593986,Cantawagon Albuera Leyte,Store,Rosalie Celedio,Gerald Gera,2,12000.0,5680.0
+C000209,Flair B. Piamonte,09273074513,9273074513,Zone 5 Talisayan Albuera Leyte,,Ryan F. Tumampo,Jason Cayanong,2,12000.0,3389.0
+C000210,Ginalyn S. Cano,09534629747,9534629747,Talisayan Albuera Leyte,Store,Gina N. Manigo,Gerald Gera,2,12000.0,5620.0
+C000211,Elyboy C. Laroya,09533987070,9533987070,Poblacion Bilwang Albuera,,Emegen E. Bayarcal,Cresencio Junco,2,10000.0,4505.0
+C000212,Jhongco E. Ramos,09538740714,9538740714,Balugo Albuera Leyte,,Joan Labandria,Cresencio Junco,1,5000.0,770.0
+C000213,Romeo G. Cernol Jr.,,,Balugo Albuera Leyte,,,,1,6000.0,2640.0
+C000214,Geraliz B. Bucao,,,Balugo Albuera Leyte,,,,1,25000.0,30000.0
+C000215,Miraluna P. Mañoza,09103935299,9103935299,Brgy.Cogon ormoc City,BHW/ Sari sari store,Anita D. Pepito,Cresencio Junco,2,10000.0,6160.0
+C000216,Michelle M. Alao,09397074109,9397074109,Balugo Albuera Leyte,store,Virginia Alao,Gerald Gera,1,5000.0,4060.0
+C000217,Marites R. Noval,09265459780,9265459780,Palanas Albuera Leyte,,Quen Sarco,Cesencio Junco,1,5000.0,1095.0
+C000218,Arlene S. Pernites,09071396934,9071396934,Palanas Albuera Leyte,,Larry P. Sarco,Cesencio Junco,1,5000.0,495.0
+C000219,Marissa S. Coraza,09659249270,9659249270,Balugo Albuera Leyte,,Paul Aldrin Coraza,Gerald Gera,2,12000.0,7499.0
+C000220,Liza Wenceslao,09929720892,9929720892,Cantawagon Tabgas Albuera,,Michelle L. Calaging,Gerald Gera,2,12000.0,6930.0
+C000221,Monthly,,,,,,,1,0.0,0.0
+C000222,Rom Domingo,09702925065,9702925065,Poblacion Albuera leyte,Owner/Rental Bakery,,Gera gerald,1,50000.0,60000.0
+C000223,Weekly,,,,,,,1,0.0,0.0
+C000224,Greggy Francisco,,,Tabgas Albuera leyte,Piggery Farm worker,,Gerald Gera,1,5000.0,2500.0
+C000225,Mercy Cagabhion,,,"Balugo,Albuera ,leyte",House Cleaner,,Gera Gerald,1,5000.0,2500.0
+C000226,Genara A. Cantiga,09513352526,9513352526,Real Street Poblacion Albuera,Food vending,Rodulfo T. Noveda,Jason Cayanong,1,9000.0,2080.0
+C000227,Fe B. Garbe,09091745030,9091745030,Tambulilid BLK. 3 Ormoc City,,Geraldine Garbe,Cresencio Junco,1,10000.0,2080.0
+C000228,Emelia T. Montuerto,09630436512,9630436512,Alta Vista Ormoc City,Sari Sari Store,Mary Vanissa Sumaljag,Cresencio Junco,1,5000.0,2810.0
+C000229,Grand Total,,,,,,,1,4911000.0,1177350.0

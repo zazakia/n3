@@ -4,7 +4,11 @@ import { Database } from '@nozbe/watermelondb';
 import { synchronize } from '@nozbe/watermelondb/sync';
 
 jest.mock('@nozbe/watermelondb/sync', () => ({
-    synchronize: jest.fn().mockResolvedValue(undefined),
+    synchronize: jest.fn().mockImplementation(async (options) => {
+        if (options.pullChanges) await options.pullChanges({ lastPulledAt: null });
+        if (options.pushChanges) await options.pushChanges({ changes: {}, lastPulledAt: null });
+        return undefined;
+    }),
 }));
 
 const createQueryBuilder = (result = { data: [], error: null }) => {
@@ -187,6 +191,77 @@ describe('SyncService', () => {
         await service.sync();
     });
 
+    it('manages singleton instance correctly', async () => {
+        const customService = new SyncService(database, mockSupabase as any);
+        SyncService.setInstance(customService);
+        
+        const count = await SyncService.updatePendingCount();
+        expect(typeof count).toBe('number');
+    });
+
+    it('static sync calls instance method', async () => {
+        const customService = new SyncService(database, mockSupabase as any);
+        const spy = jest.spyOn(customService, 'sync').mockResolvedValue();
+        SyncService.setInstance(customService);
+        
+        await SyncService.sync(true);
+        expect(spy).toHaveBeenCalledWith(true);
+    });
+
+    it('static checkAndSync calls instance method', async () => {
+        const customService = new SyncService(database, mockSupabase as any);
+        const spy = jest.spyOn(customService, 'checkAndSync').mockResolvedValue();
+        SyncService.setInstance(customService);
+        
+        await SyncService.checkAndSync({ force: true });
+        expect(spy).toHaveBeenCalledWith({ force: true });
+    });
+
+    it('performPull executes the pull logic with progress updates', async () => {
+        const { useSyncStore } = require('../../stores/syncStore');
+        const setSyncProgress = jest.fn();
+        const addLog = jest.fn();
+        useSyncStore.getState.mockReturnValue({
+            isOnline: true,
+            setSyncProgress,
+            addLog,
+        });
+
+        const result = await service.performPull();
+
+        expect(result).toHaveProperty('changes');
+        expect(result).toHaveProperty('timestamp');
+        expect(setSyncProgress).toHaveBeenCalledWith(expect.objectContaining({
+            currentModel: 'Pulling changes...',
+        }));
+    });
+
+    it('performPush executes the push logic and logs changes', async () => {
+        const { useSyncStore } = require('../../stores/syncStore');
+        const setSyncProgress = jest.fn();
+        const addLog = jest.fn();
+        useSyncStore.getState.mockReturnValue({
+            isOnline: true,
+            setSyncProgress,
+            addLog,
+        });
+
+        const changes = {
+            borrowers: {
+                created: [{ id: 'b1', full_name: 'New' }],
+                updated: [],
+                deleted: [],
+            }
+        };
+
+        const result = await service.performPush(changes);
+
+        expect(result).toHaveProperty('experimentalRejectedIds');
+        expect(addLog).toHaveBeenCalledWith(expect.objectContaining({
+            message: 'Pushed 1 local changes',
+        }));
+    });
+
     it('ignores concurrent synchronization errors', async () => {
         (synchronize as jest.Mock).mockRejectedValueOnce(
             new Error('Concurrent synchronization is not allowed')
@@ -232,6 +307,32 @@ describe('SyncService', () => {
 
         await expect((service as any).fetchTableChanges('payments', null))
             .rejects.toThrow('missing borrower_id');
+    });
+
+    it('performPull throws when table fetches fail', async () => {
+        mockSupabase.from.mockReturnValue({
+            select: jest.fn().mockReturnValue({
+                is: jest.fn(() => createQueryBuilder({
+                    data: null,
+                    error: { message: 'Network error' },
+                })),
+                not: jest.fn(() => createQueryBuilder()),
+            }),
+        });
+
+        await expect(service.performPull()).rejects.toThrow(/Pull failed for 18 table\(s\)/);
+    });
+
+    it('performPull handles server time RPC failure gracefully', async () => {
+        mockSupabase.rpc.mockRejectedValueOnce(new Error('RPC failed'));
+        const result = await service.performPull();
+        expect(result).toHaveProperty('timestamp');
+        // Should use local time + offset
+    });
+
+    it('performPush handles empty changes gracefully', async () => {
+        const result = await service.performPush({});
+        expect(result.experimentalRejectedIds).toEqual({});
     });
 
     it('throws after a push table failure so WatermelonDB keeps local changes pending', async () => {
@@ -393,6 +494,39 @@ describe('SyncService', () => {
         const syncSpy = jest.spyOn(service, 'sync');
         await service.checkAndSync();
         expect(syncSpy).not.toHaveBeenCalled();
+    });
+
+    it('fetchTableChanges handles error response', async () => {
+        mockSupabase.from.mockReturnValue({
+            select: jest.fn().mockReturnValue({
+                is: jest.fn(() => createQueryBuilder({
+                    data: null,
+                    error: { message: 'Fetch error' },
+                })),
+                not: jest.fn(() => createQueryBuilder()),
+            }),
+        });
+
+        await expect((service as any).fetchTableChanges('borrowers', null))
+            .rejects.toThrow('Fetch error');
+    });
+
+    it('pushChangesToSupabase handles error response', async () => {
+        mockSupabase.from.mockReturnValue({
+            insert: jest.fn(() => createQueryBuilder({
+                data: null,
+                error: { message: 'Insert error' },
+            })),
+            upsert: jest.fn(() => createQueryBuilder({
+                data: null,
+                error: { message: 'Upsert error' },
+            })),
+            select: jest.fn(() => createQueryBuilder()),
+        });
+
+        await expect((service as any).pushChangesToSupabase({
+            borrowers: { created: [{ id: '1' }], updated: [], deleted: [] }
+        })).rejects.toThrow('Insert error');
     });
 });
 

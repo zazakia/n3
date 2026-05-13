@@ -18,6 +18,7 @@ import { formatPHP } from '../../../src/utils/currency';
 import { PaymentService } from '../../../src/services/PaymentService';
 import { DatePicker } from '../../../src/components/DatePicker';
 import { format, parseISO } from 'date-fns';
+import { formatDate } from '../../../src/utils/dates';
 
 
 const schema = z.object({
@@ -46,7 +47,8 @@ export default function NewPaymentScreen() {
         borrowerName: string,
         loanNumber: string,
         group: string,
-        area: string 
+        area: string,
+        releaseDate: number | null
     }[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedGroup, setSelectedGroup] = useState('All');
@@ -98,7 +100,8 @@ export default function NewPaymentScreen() {
                     borrowerName: bInfo.name,
                     loanNumber: l.loanNumber,
                     group: bInfo.group,
-                    area: bInfo.area
+                    area: bInfo.area,
+                    releaseDate: l.releaseDate
                 };
             });
             setLoans(opts);
@@ -305,7 +308,10 @@ export default function NewPaymentScreen() {
                                                             <View className="bg-gray-200 px-2 py-0.5 rounded-md mr-2">
                                                                 <Text className="text-[10px] font-black text-gray-600">{l.loanNumber}</Text>
                                                             </View>
-                                                            <Text className="text-gray-700 text-xs font-medium">{l.group} • {l.area}</Text>
+                                                            <Text className="text-gray-600 text-[10px] font-bold mr-2 uppercase tracking-wide">
+                                                                {l.releaseDate ? formatDate(new Date(l.releaseDate)) : '—'}
+                                                            </Text>
+                                                            <Text className="text-gray-700 text-[10px] font-medium">{l.group} • {l.area}</Text>
                                                         </View>
                                                     </View>
                                                     <View className="flex-row items-center">

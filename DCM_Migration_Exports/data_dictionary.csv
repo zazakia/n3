@@ -1,0 +1,24 @@
+﻿Target Table,Column,Type,Required,Source / Logic,Migration Notes
+staging_clients,client_stage_id,text,yes,Generated C000001..,Temporary migration key; replace with UUID in production.
+staging_clients,client_name,text,yes,DATA of Clients / Name Of Client,Needs deduplication and standardized casing.
+staging_clients,cell_number_norm,text,no,Normalized from Cell Number,Use 09XXXXXXXXX PH format; validate length.
+staging_clients,address,text,no,Address,Split barangay/city/province later if needed.
+staging_clients,business,text,no,Business,Can become business_type lookup.
+staging_clients,co_maker_name,text,no,Co Maker name,Consider separate guarantor/co-maker entity.
+staging_loans,loan_stage_id,text,yes,Generated L000001..,Temporary migration key.
+staging_loans,client_stage_id,text,yes,Derived from client matching,Foreign key to staging_clients.
+staging_loans,collector,text,yes,Collector 1/2/etc.,Normalize collector aliases before production.
+staging_loans,batch,number,no,Batch,Keep as legacy reference.
+staging_loans,cycle,number,no,Cycle,Required for borrower reloan history.
+staging_loans,date_release,date,yes,Date Release,Mixed date serial/text normalized to ISO date.
+staging_loans,end_date,date,no,End Date,Some rows have suspect serials; verify.
+staging_loans,loan_amount,currency,yes,Loan Amount,Principal amount.
+staging_loans,daily,currency,no,Daily,Expected daily collection.
+staging_loans,interest,currency,no,Interest,Total interest/charges per cycle.
+staging_loans,net_loan,currency,no,Net Loan,Cash released after adjustments.
+staging_loans,total_loan,currency,yes,Total Loan,Contractual receivable.
+staging_loans,total_loan_balance,currency,yes,Total Loan Balance,Open balance as of workbook date.
+staging_payments,payment_stage_id,text,yes,Generated P0000001..,Temporary payment ledger key.
+staging_payments,loan_stage_id,text,yes,Source row link,Foreign key to staging_loans.
+staging_payments,payment_date,date,yes,Date columns in collection monitoring,Wide date columns unpivoted to long ledger.
+staging_payments,amount,currency,yes,Cell under payment date,Non-zero payment/collection amount.

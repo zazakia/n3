@@ -1,0 +1,219 @@
+﻿severity,table,stage_id,field,issue,recommendation,source
+Medium,staging_clients,C000008,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 20
+Medium,staging_clients,C000009,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 21
+Medium,staging_clients,C000018,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 30
+Medium,staging_clients,C000008,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 44
+Medium,staging_clients,C000009,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 45
+Medium,staging_clients,C000018,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 52
+High,staging_loans,L000136,total_loan_balance,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 172
+High,staging_loans,L000180,loan_amount,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 224
+High,staging_loans,L000180,total_loan,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 224
+High,staging_loans,L000180,total_loan_balance,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 224
+Medium,staging_clients,C000128,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 283
+High,staging_loans,L000268,loan_amount,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 328
+High,staging_loans,L000268,total_loan,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 328
+High,staging_loans,L000268,total_loan_balance,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 328
+Medium,staging_clients,C000145,cell_number,Phone number not 11 digits after normalization,Verify raw phone value manually.,DATA of Clients!row 330
+Medium,staging_clients,C000167,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 394
+High,staging_loans,L000369,collector,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 457
+Medium,staging_clients,C000180,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 462
+Medium,staging_clients,C000187,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 472
+Medium,staging_clients,C000145,cell_number,Phone number not 11 digits after normalization,Verify raw phone value manually.,DATA of Clients!row 493
+Medium,staging_clients,C000167,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 497
+Medium,staging_clients,C000202,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 595
+Medium,staging_loans,L000472,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 601
+Medium,staging_loans,L000473,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 602
+Medium,staging_loans,L000474,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 603
+Medium,staging_loans,L000475,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 604
+Medium,staging_loans,L000476,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 605
+Medium,staging_loans,L000477,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 606
+Medium,staging_loans,L000478,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 607
+Medium,staging_loans,L000479,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 608
+Medium,staging_loans,L000480,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 609
+Medium,staging_loans,L000481,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 610
+Medium,staging_loans,L000482,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 611
+Medium,staging_loans,L000483,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 612
+Medium,staging_loans,L000484,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 613
+Medium,staging_loans,L000485,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 614
+Medium,staging_loans,L000486,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 615
+Medium,staging_loans,L000487,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 616
+Medium,staging_loans,L000488,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 617
+Medium,staging_loans,L000489,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 618
+Medium,staging_loans,L000490,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 619
+Medium,staging_loans,L000491,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 620
+Medium,staging_loans,L000492,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 624
+Medium,staging_loans,L000493,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 625
+Medium,staging_loans,L000494,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 626
+Medium,staging_loans,L000495,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 627
+Medium,staging_loans,L000496,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 628
+Medium,staging_loans,L000497,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 629
+Medium,staging_loans,L000498,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 630
+High,staging_loans,L000499,collector,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 631
+Medium,staging_clients,C000213,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 631
+Medium,staging_loans,L000499,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 631
+High,staging_loans,L000500,collector,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 632
+Medium,staging_clients,C000214,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 632
+Medium,staging_loans,L000500,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 632
+Medium,staging_loans,L000501,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 636
+Medium,staging_loans,L000502,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 637
+Medium,staging_loans,L000503,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 638
+Medium,staging_loans,L000504,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 639
+Medium,staging_loans,L000505,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 640
+Medium,staging_loans,L000506,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 641
+Medium,staging_loans,L000507,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 642
+Medium,staging_loans,L000508,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 643
+Medium,staging_loans,L000509,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 644
+Medium,staging_loans,L000510,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 645
+Medium,staging_loans,L000511,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 646
+Medium,staging_clients,C000167,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 647
+Medium,staging_loans,L000512,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 647
+Medium,staging_loans,L000513,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 648
+Medium,staging_loans,L000514,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 649
+Medium,staging_loans,L000515,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 650
+Medium,staging_loans,L000516,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 651
+Medium,staging_loans,L000517,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 652
+Medium,staging_loans,L000518,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 656
+Medium,staging_loans,L000519,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 657
+Medium,staging_loans,L000520,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 658
+Medium,staging_loans,L000521,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 659
+Medium,staging_loans,L000522,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 660
+Medium,staging_loans,L000523,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 664
+Medium,staging_loans,L000524,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 665
+Medium,staging_loans,L000525,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 666
+Medium,staging_loans,L000526,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 667
+Medium,staging_clients,C000145,cell_number,Phone number not 11 digits after normalization,Verify raw phone value manually.,DATA of Clients!row 668
+Medium,staging_loans,L000527,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 668
+Medium,staging_loans,L000528,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 669
+Medium,staging_loans,L000529,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 670
+Medium,staging_loans,L000530,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 671
+Medium,staging_loans,L000531,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 672
+Medium,staging_loans,L000532,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 673
+Medium,staging_loans,L000533,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 674
+Medium,staging_loans,L000534,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 675
+High,staging_loans,L000535,collector,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 678
+High,staging_loans,L000535,loan_amount,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 678
+High,staging_loans,L000535,date_release,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 678
+High,staging_loans,L000535,total_loan,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 678
+High,staging_loans,L000535,total_loan_balance,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 678
+Medium,staging_clients,C000221,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 678
+High,staging_loans,L000536,date_release,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 680
+High,staging_loans,L000537,collector,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 682
+High,staging_loans,L000537,loan_amount,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 682
+High,staging_loans,L000537,date_release,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 682
+High,staging_loans,L000537,total_loan,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 682
+High,staging_loans,L000537,total_loan_balance,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 682
+Medium,staging_clients,C000223,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 682
+High,staging_loans,L000538,date_release,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 684
+Medium,staging_clients,C000224,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 684
+High,staging_loans,L000539,date_release,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 685
+Medium,staging_clients,C000225,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 685
+Medium,staging_loans,L000540,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 690
+Medium,staging_loans,L000541,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 691
+Medium,staging_loans,L000542,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 692
+Medium,staging_loans,L000543,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 693
+Medium,staging_loans,L000544,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 694
+Medium,staging_loans,L000545,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 695
+Medium,staging_loans,L000546,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 696
+Medium,staging_loans,L000547,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 697
+Medium,staging_loans,L000548,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 698
+Medium,staging_loans,L000549,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 699
+Medium,staging_loans,L000550,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 700
+Medium,staging_loans,L000551,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 701
+Medium,staging_loans,L000552,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 702
+Medium,staging_loans,L000553,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 703
+Medium,staging_loans,L000554,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 704
+Medium,staging_loans,L000555,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 705
+Medium,staging_loans,L000556,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 706
+Medium,staging_loans,L000557,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 710
+Medium,staging_loans,L000558,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 711
+Medium,staging_loans,L000559,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 715
+Medium,staging_loans,L000560,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 716
+Medium,staging_loans,L000561,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 717
+Medium,staging_loans,L000562,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 718
+Medium,staging_loans,L000563,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 719
+Medium,staging_loans,L000564,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 720
+Medium,staging_loans,L000565,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 721
+Medium,staging_loans,L000566,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 722
+Medium,staging_loans,L000567,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 723
+Medium,staging_loans,L000568,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 724
+Medium,staging_loans,L000569,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 725
+Medium,staging_loans,L000570,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 726
+Medium,staging_loans,L000571,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 727
+Medium,staging_loans,L000572,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 728
+Medium,staging_loans,L000573,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 729
+Medium,staging_loans,L000576,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 735
+Medium,staging_loans,L000577,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 739
+Medium,staging_loans,L000578,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 740
+Medium,staging_loans,L000579,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 741
+Medium,staging_loans,L000580,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 742
+Medium,staging_loans,L000581,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 743
+Medium,staging_loans,L000582,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 744
+Medium,staging_loans,L000593,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 758
+Medium,staging_loans,L000594,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 759
+Medium,staging_loans,L000595,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 760
+Medium,staging_clients,C000145,cell_number,Phone number not 11 digits after normalization,Verify raw phone value manually.,DATA of Clients!row 785
+Medium,staging_loans,L000621,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 793
+Medium,staging_loans,L000622,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 794
+High,staging_loans,L000637,collector,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 812
+High,staging_loans,L000637,date_release,Missing required migration field,Backfill before production migration or flag as exception.,DATA of Clients!row 812
+Medium,staging_clients,C000229,cell_number,Missing or unusable phone number,Ask collector/client and normalize to PH mobile format 09XXXXXXXXX.,DATA of Clients!row 812
+Medium,staging_loans,L000637,total_loan,Loan amount + interest does not equal total loan,Check whether insurance/deductions/reloan adjustments should be modeled separately.,DATA of Clients!row 812
+Medium,staging_clients,C000162,client_identity,Same normalized name has multiple client_stage_ids,Deduplicate by phone/address/co-maker before migration.,Client staging
+Medium,staging_clients,C000178,client_identity,Same normalized name has multiple client_stage_ids,Deduplicate by phone/address/co-maker before migration.,Client staging
+Medium,staging_clients,C000166,client_identity,Same normalized name has multiple client_stage_ids,Deduplicate by phone/address/co-maker before migration.,Client staging
+Medium,staging_clients,C000179,client_identity,Same normalized name has multiple client_stage_ids,Deduplicate by phone/address/co-maker before migration.,Client staging
+High,source_workbook,,"DATA of Clients!36,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 36
+High,source_workbook,,"DATA of Clients!57,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 57
+High,source_workbook,,"DATA of Clients!78,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 78
+High,source_workbook,,"DATA of Clients!98,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 98
+High,source_workbook,,"DATA of Clients!121,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 121
+High,source_workbook,,"DATA of Clients!139,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 139
+High,source_workbook,,"DATA of Clients!164,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 164
+High,source_workbook,,"DATA of Clients!172,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 172
+High,source_workbook,,"DATA of Clients!172,19",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 172
+High,source_workbook,,"DATA of Clients!181,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 181
+High,source_workbook,,"DATA of Clients!207,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 207
+High,source_workbook,,"DATA of Clients!237,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 237
+High,source_workbook,,"DATA of Clients!258,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 258
+High,source_workbook,,"DATA of Clients!279,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 279
+High,source_workbook,,"DATA of Clients!298,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 298
+High,source_workbook,,"DATA of Clients!321,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 321
+High,source_workbook,,"DATA of Clients!339,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 339
+High,source_workbook,,"DATA of Clients!366,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 366
+High,source_workbook,,"DATA of Clients!381,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 381
+High,source_workbook,,"DATA of Clients!391,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 391
+High,source_workbook,,"DATA of Clients!397,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 397
+High,source_workbook,,"DATA of Clients!408,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 408
+High,source_workbook,,"DATA of Clients!417,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 417
+High,source_workbook,,"DATA of Clients!438,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 438
+High,source_workbook,,"DATA of Clients!445,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 445
+High,source_workbook,,"DATA of Clients!461,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 461
+High,source_workbook,,"DATA of Clients!471,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 471
+High,source_workbook,,"DATA of Clients!477,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 477
+High,source_workbook,,"DATA of Clients!501,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 501
+High,source_workbook,,"DATA of Clients!509,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 509
+High,source_workbook,,"DATA of Clients!528,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 528
+High,source_workbook,,"DATA of Clients!536,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 536
+High,source_workbook,,"DATA of Clients!541,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 541
+High,source_workbook,,"DATA of Clients!559,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 559
+High,source_workbook,,"DATA of Clients!566,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 566
+High,source_workbook,,"DATA of Clients!594,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 594
+High,source_workbook,,"DATA of Clients!600,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 600
+High,source_workbook,,"DATA of Clients!623,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 623
+High,source_workbook,,"DATA of Clients!635,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 635
+High,source_workbook,,"DATA of Clients!655,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 655
+High,source_workbook,,"DATA of Clients!663,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 663
+High,source_workbook,,"DATA of Clients!683,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 683
+High,source_workbook,,"DATA of Clients!689,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 689
+High,source_workbook,,"DATA of Clients!709,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 709
+High,source_workbook,,"DATA of Clients!714,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 714
+High,source_workbook,,"DATA of Clients!734,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 734
+High,source_workbook,,"DATA of Clients!738,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 738
+High,source_workbook,,"DATA of Clients!757,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 757
+High,source_workbook,,"DATA of Clients!779,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 779
+High,source_workbook,,"DATA of Clients!792,15",Formula/display error #VALUE!,Resolve spreadsheet formula errors before treating workbook as final source.,DATA of Clients!row 792
+High,source_workbook,,"Susan Guevarra!12,4",Formula/display error #REF!,Resolve spreadsheet formula errors before treating workbook as final source.,Susan Guevarra!row 12
+High,source_workbook,,"Geralien Benitez!12,4",Formula/display error #REF!,Resolve spreadsheet formula errors before treating workbook as final source.,Geralien Benitez!row 12
+High,source_workbook,,"Emma dela Pena!12,4",Formula/display error #REF!,Resolve spreadsheet formula errors before treating workbook as final source.,Emma dela Pena!row 12
+High,source_workbook,,"Warlito Decio!12,4",Formula/display error #REF!,Resolve spreadsheet formula errors before treating workbook as final source.,Warlito Decio!row 12
+High,source_workbook,,"Benjamin Beltran!12,4",Formula/display error #REF!,Resolve spreadsheet formula errors before treating workbook as final source.,Benjamin Beltran!row 12

@@ -245,7 +245,12 @@ export default function ClientPassbookScreen() {
                                                 </View>
                                             )}
                                         </View>
-                                        <Text className={`text-[10px] font-bold uppercase ${selectedLoanId === loan.id ? 'text-white/80' : 'text-gray-700'}`}>{loan.status}</Text>
+                                        <View className="flex-row justify-between items-center mt-0.5">
+                                            <Text className={`text-[10px] font-bold uppercase ${selectedLoanId === loan.id ? 'text-white/80' : 'text-gray-700'}`}>{loan.status}</Text>
+                                            <Text className={`text-[8px] font-bold ml-4 ${selectedLoanId === loan.id ? 'text-white/60' : 'text-gray-500'}`}>
+                                                {loan.releaseDate ? formatDate(new Date(loan.releaseDate)) : '—'}
+                                            </Text>
+                                        </View>
                                     </View>
                                 </Pressable>
                             ))}
