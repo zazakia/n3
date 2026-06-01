@@ -103,7 +103,7 @@ export const BorrowerSelector: React.FC<BorrowerSelectorProps> = ({ selectedBorr
                         </View>
                         <Pressable
                             testID="person-add"
-                            className="bg-[#1A237E] px-4 rounded-xl flex-row items-center justify-center active:bg-blue-900 shadow-sm"
+                            className="bg-primary px-4 rounded-xl flex-row items-center justify-center active:bg-blue-900 shadow-sm"
                             onPress={() => setIsQuickAddVisible(true)}
                         >
                             <MaterialIcons name="person-add" size={20} color="white" className="mr-2" />

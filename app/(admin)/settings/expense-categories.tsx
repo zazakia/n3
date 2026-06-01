@@ -121,7 +121,7 @@ export default function ExpenseCategoriesScreen() {
                         <Pressable
                             onPress={handleAdd}
                             disabled={saving || !newName.trim()}
-                            className={`w-12 h-12 rounded-2xl items-center justify-center ${saving || !newName.trim() ? 'bg-gray-200' : 'bg-[#1A237E] active:bg-blue-900'}`}
+                            className={`w-12 h-12 rounded-2xl items-center justify-center ${saving || !newName.trim() ? 'bg-gray-200' : 'bg-primary active:bg-blue-900'}`}
                         >
                             {saving ? <ActivityIndicator color="white" size="small" /> : <MaterialIcons name="add" size={24} color="white" />}
                         </Pressable>

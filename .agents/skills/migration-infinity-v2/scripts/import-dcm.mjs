@@ -189,6 +189,12 @@ async function main() {
   let borrowerOk = 0, borrowerSkip = 0;
 
   for (const c of clients) {
+    const nameStr = (c.client_name || '').trim().toLowerCase();
+    if (['grand total', 'monthly', 'weekly', 'total'].includes(nameStr)) {
+      borrowerSkip++;
+      continue;
+    }
+
     const uuid = stageIdToUUID(c.client_stage_id);
     clientIdMap[c.client_stage_id] = uuid;
 

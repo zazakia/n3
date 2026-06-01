@@ -107,7 +107,7 @@ export default function CollectorsListScreen() {
 
             {/* FAB */}
             <Pressable
-                className="absolute bottom-6 right-6 flex-row items-center bg-[#1A237E] px-6 py-4 rounded-full shadow-xl active:bg-blue-900"
+                className="absolute bottom-6 right-6 flex-row items-center bg-primary px-6 py-4 rounded-full shadow-xl active:bg-blue-900"
                 onPress={() => router.push('/(admin)/collectors/new')}
             >
                 <MaterialIcons name="person-add" size={24} color="#FFFFFF" className="mr-2" />

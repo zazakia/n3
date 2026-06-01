@@ -47,7 +47,8 @@
       "expo-sharing",
       "expo-sqlite",
       "@react-native-community/datetimepicker",
-      "expo-font"
+      "expo-font",
+      "expo-notifications"
     ],
     "scheme": "infinityfinance",
     "extra": {

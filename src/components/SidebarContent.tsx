@@ -110,7 +110,7 @@ export function SidebarContent({ onClose }: { onClose?: () => void }) {
     );
 
     return (
-        <View className="flex-1 bg-[#1A237E]">
+        <View className="flex-1 bg-primary">
             <SafeAreaView className="flex-1">
                 <View className="p-4 items-center justify-center border-b border-white/10 mb-4 h-24">
                     <View className="flex-row items-center">

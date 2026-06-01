@@ -198,7 +198,7 @@ export default function NewUserScreen() {
                                     <Pressable
                                         key={roleValue}
                                         onPress={() => onChange(roleValue)}
-                                        className={`mr-2 mb-2 px-4 py-2 rounded-full border ${value === roleValue ? 'bg-[#1A237E] border-blue-900' : 'bg-gray-100 border-gray-200'}`}
+                                        className={`mr-2 mb-2 px-4 py-2 rounded-full border ${value === roleValue ? 'bg-primary border-blue-900' : 'bg-gray-100 border-gray-200'}`}
                                     >
                                         <Text className={`text-xs font-bold ${value === roleValue ? 'text-white' : 'text-gray-600'}`}>
                                             {ROLE_LABELS[roleValue as keyof typeof ROLE_LABELS]}
@@ -275,7 +275,7 @@ export default function NewUserScreen() {
                 </View>
 
                 <Pressable
-                    className={`w-full py-4 rounded-2xl items-center shadow-lg ${saving ? 'bg-blue-400' : 'bg-[#1A237E] active:bg-blue-900'}`}
+                    className={`w-full py-4 rounded-2xl items-center shadow-lg ${saving ? 'bg-blue-400' : 'bg-primary active:bg-blue-900'}`}
                     onPress={handleSubmit(onSubmit)}
                     disabled={saving}
                 >

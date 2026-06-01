@@ -95,7 +95,7 @@ export default function UsersListScreen() {
             )}
 
             <Pressable
-                className="absolute bottom-6 right-6 w-14 h-14 bg-[#1A237E] rounded-full items-center justify-center shadow-lg active:bg-blue-900"
+                className="absolute bottom-6 right-6 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-lg active:bg-blue-900"
                 onPress={() => router.push('/(admin)/users/new')}
             >
                 <MaterialIcons name="person-add" size={28} color="#FFFFFF" />

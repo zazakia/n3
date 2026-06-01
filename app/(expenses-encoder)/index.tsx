@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import {
-    View, Text, TextInput, Pressable, ScrollView,
+import { View, Text, TextInput, Pressable, ScrollView,
     ActivityIndicator, Alert, SafeAreaView, StatusBar,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -41,6 +41,7 @@ type FormData = z.infer<typeof schema>;
 
 export default function ExpensesEncoderScreen() {
     const { user, signOut } = useAuth();
+    const router = useRouter();
     const [saving, setSaving] = useState(false);
     const [recentExpenses, setRecentExpenses] = useState<Expense[]>([]);
     const [dbCategories, setDbCategories] = useState<string[]>([]);
@@ -127,7 +128,13 @@ export default function ExpensesEncoderScreen() {
                 {/* Form Card */}
                 <View className="px-6 -mt-12 mb-6">
                     <View className="bg-white rounded-[32px] p-6 border border-gray-50" style={{ boxShadow: '0 20px 25px -5px rgba(88,28,135,0.1)' }}>
-                        <Text className="text-gray-900 text-xl font-black mb-6">Record Expense</Text>
+                        <View className="flex-row justify-between items-center mb-6">
+                            <Text className="text-gray-900 text-xl font-black">Record Expense</Text>
+                            <Pressable onPress={() => router.push('/(expenses-encoder)/recurring')} className="bg-purple-100 px-3 py-1.5 rounded-full flex-row items-center">
+                                <MaterialIcons name="event-repeat" size={16} color="#7B1FA2" />
+                                <Text className="text-purple-700 text-xs font-bold ml-1">Recurring</Text>
+                            </Pressable>
+                        </View>
 
                         {/* Category */}                        <Text className="text-xs font-bold text-gray-700 mb-3 uppercase tracking-wider">Category</Text>
                         <Controller

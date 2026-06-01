@@ -119,15 +119,24 @@ export default function ExpensesListScreen() {
                     />
                 )}
 
-                {/* FAB */}
+                {/* FABs */}
                 {!visibleSwipeActionId && (
-                    <Pressable
-                        className={`${Platform.OS === 'web' ? 'absolute bottom-6 left-6' : 'absolute bottom-6 right-6'} flex-row items-center bg-[#D32F2F] px-6 py-4 rounded-full shadow-xl active:bg-red-800`}
-                        onPress={() => router.push('/(admin)/expenses/new')}
-                    >
-                        <MaterialIcons name="add" size={24} color="#FFFFFF" className="mr-2" />
-                        <Text className="text-white font-black uppercase tracking-wider">Add Expense</Text>
-                    </Pressable>
+                    <View className={`${Platform.OS === 'web' ? 'absolute bottom-6 left-6' : 'absolute bottom-6 right-6'} flex-row gap-3`}>
+                        <Pressable
+                            className="flex-row items-center bg-purple-600 px-6 py-4 rounded-full shadow-xl active:bg-purple-800"
+                            onPress={() => router.push('/(admin)/expenses/recurring')}
+                        >
+                            <MaterialIcons name="event-repeat" size={24} color="#FFFFFF" className="mr-2" />
+                            <Text className="text-white font-black uppercase tracking-wider">Recurring</Text>
+                        </Pressable>
+                        <Pressable
+                            className="flex-row items-center bg-[#D32F2F] px-6 py-4 rounded-full shadow-xl active:bg-red-800"
+                            onPress={() => router.push('/(admin)/expenses/new')}
+                        >
+                            <MaterialIcons name="add" size={24} color="#FFFFFF" className="mr-2" />
+                            <Text className="text-white font-black uppercase tracking-wider">Add Expense</Text>
+                        </Pressable>
+                    </View>
                 )}
 
                 <ConfirmDialog

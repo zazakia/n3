@@ -292,7 +292,7 @@ export default function EditBorrowerScreen() {
             {/* Passbook & Reminders */}
             <View className="flex-row mb-8">
                 <Pressable
-                    className="flex-1 bg-[#1A237E] flex-row p-4 rounded-xl items-center justify-center mr-2 shadow-sm active:bg-blue-900"
+                    className="flex-1 bg-primary flex-row p-4 rounded-xl items-center justify-center mr-2 shadow-sm active:bg-blue-900"
                     onPress={() => router.push(`/(admin)/borrowers/${id}/passbook`)}
                 >
                     <MaterialIcons name="menu-book" size={20} color="#FFFFFF" className="mr-2" />

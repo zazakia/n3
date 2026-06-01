@@ -571,7 +571,7 @@ export default function NewLoanScreen() {
                                             onPress={() => onChange(unit)}
                                             className={`flex-1 py-3 items-center rounded-lg ${value === unit ? 'bg-white shadow-sm' : ''}`}
                                         >
-                                            <Text className={`text-xs font-bold capitalize ${value === unit ? 'text-[#1A237E]' : 'text-gray-700'}`}>{unit}</Text>
+                                            <Text className={`text-xs font-bold capitalize ${value === unit ? 'text-primary' : 'text-gray-700'}`}>{unit}</Text>
                                         </Pressable>
                                     ))}
                                 </View>
@@ -593,7 +593,7 @@ export default function NewLoanScreen() {
                                         onPress={() => onChange(type)}
                                         className={`flex-1 py-3 items-center rounded-lg ${value === type ? 'bg-white shadow-sm' : ''}`}
                                     >
-                                        <Text className={`font-bold capitalize ${value === type ? 'text-[#1A237E]' : 'text-gray-700'}`}>{type}</Text>
+                                        <Text className={`font-bold capitalize ${value === type ? 'text-primary' : 'text-gray-700'}`}>{type}</Text>
                                     </Pressable>
                                 ))}
                             </View>
@@ -614,7 +614,7 @@ export default function NewLoanScreen() {
                                         onPress={() => onChange(freq)}
                                         className={`w-1/2 py-3 items-center rounded-lg ${value === freq ? 'bg-white shadow-sm' : ''}`}
                                     >
-                                        <Text className={`font-bold capitalize ${value === freq ? 'text-[#1A237E]' : 'text-gray-700'}`}>
+                                        <Text className={`font-bold capitalize ${value === freq ? 'text-primary' : 'text-gray-700'}`}>
                                             {freq.replace('_', '-')}
                                         </Text>
                                     </Pressable>
@@ -627,7 +627,7 @@ export default function NewLoanScreen() {
 
             {calcResult && (
                 <View className="mb-6">
-                    <View className="bg-[#1A237E] p-6 rounded-3xl shadow-md relative overflow-hidden">
+                    <View className="bg-primary p-6 rounded-3xl shadow-md relative overflow-hidden">
                         <View className="absolute -right-10 -top-10 bg-white/10 w-40 h-40 rounded-full" />
                         <Text className="text-indigo-200 text-xs font-bold uppercase tracking-widest mb-1">Total Loan Amount</Text>
                         <Text className="text-4xl font-extrabold text-white mb-6">{formatPHP(calcResult.totalAmount)}</Text>
@@ -690,11 +690,11 @@ export default function NewLoanScreen() {
 
             <View className="flex-row mb-10">
                 <Pressable
-                    className="flex-1 bg-white border border-[#1A237E] py-4 rounded-xl items-center mr-2 active:bg-gray-50"
+                    className="flex-1 bg-white border border-primary py-4 rounded-xl items-center mr-2 active:bg-gray-50"
                     onPress={handleSubmit(d => onSubmit(d, 'pending'))}
                     disabled={saving}
                 >
-                    <Text className="text-[#1A237E] font-bold text-lg">Save Draft</Text>
+                    <Text className="text-primary font-bold text-lg">Save Draft</Text>
                 </Pressable>
                 <Pressable
                     className={`flex-1 flex-row py-4 rounded-xl items-center justify-center ml-2 ${saving ? 'bg-green-400' : 'bg-[#388E3C] active:bg-green-800'}`}

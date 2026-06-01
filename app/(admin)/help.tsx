@@ -19,7 +19,7 @@ function Accordion({ title, icon, children, defaultOpen = false }: any) {
     return (
         <View className="bg-white rounded-3xl overflow-hidden mb-4 border border-gray-100 shadow-sm">
             <Pressable onPress={toggle} className="flex-row items-center p-5 active:bg-gray-50">
-                <View className="w-10 h-10 rounded-2xl bg-[#1A237E] items-center justify-center mr-4">
+                <View className="w-10 h-10 rounded-2xl bg-primary items-center justify-center mr-4">
                     <MaterialIcons name={icon} size={20} color="#FFFFFF" />
                 </View>
                 <Text className="flex-1 font-bold text-gray-900 text-lg">{title}</Text>
@@ -48,7 +48,7 @@ function BulletList({ items }: { items: string[] }) {
         <View className="mb-5">
             {items.map((item) => (
                 <View key={item} className="flex-row items-start mb-2.5">
-                    <View className="w-1.5 h-1.5 rounded-full bg-[#1A237E] mt-2.5 mr-3" />
+                    <View className="w-1.5 h-1.5 rounded-full bg-primary mt-2.5 mr-3" />
                     <Text className="flex-1 text-gray-600 text-sm leading-6">{item}</Text>
                 </View>
             ))}

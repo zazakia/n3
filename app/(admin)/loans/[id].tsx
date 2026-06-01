@@ -283,7 +283,7 @@ export default function LoanDetailsScreen() {
                 </View>
 
                 {/* Financial Summary */}
-                <View className="bg-[#1A237E] p-6 rounded-3xl shadow-md mb-6 relative overflow-hidden">
+                <View className="bg-primary p-6 rounded-3xl shadow-md mb-6 relative overflow-hidden">
                     <View className="absolute -right-10 -bottom-10 bg-white/10 w-40 h-40 rounded-full" />
 
                     <View className="flex-row justify-between items-end mb-6">
@@ -452,7 +452,7 @@ function TermItem({ label, value }: { label: string, value: string }) {
     return (
         <View className="w-1/2 mb-4 pr-2">
             <Text className="text-xs font-bold text-gray-700 mb-1 uppercase tracking-wider">{label}</Text>
-            <Text className="text-sm font-extrabold text-[#1A237E] capitalize">{value}</Text>
+            <Text className="text-sm font-extrabold text-primary capitalize">{value}</Text>
         </View>
     );
 }

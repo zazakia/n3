@@ -107,7 +107,7 @@ export default function MonthlyClosingScreen() {
                         <Pressable
                             onPress={handleCloseMonth}
                             disabled={closing}
-                            className={`mt-6 w-full py-4 rounded-2xl items-center flex-row justify-center ${closing ? 'bg-gray-100' : 'bg-[#1A237E] active:bg-[#283593]'}`}
+                            className={`mt-6 w-full py-4 rounded-2xl items-center flex-row justify-center ${closing ? 'bg-gray-100' : 'bg-primary active:bg-[#283593]'}`}
                         >
                             {closing ? <ActivityIndicator color="#1A237E" /> : (
                                 <>

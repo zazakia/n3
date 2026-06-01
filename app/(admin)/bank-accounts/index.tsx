@@ -43,7 +43,7 @@ export default function BankAccountsScreen() {
             </View>
             <View className="items-end">
                 <Text className="text-sm font-bold text-gray-700 uppercase tracking-tighter mb-1">Balance</Text>
-                <Text className="text-lg font-black text-[#1A237E]">{formatPHP(item.startingBalance)}</Text>
+                <Text className="text-lg font-black text-primary">{formatPHP(item.startingBalance)}</Text>
             </View>
         </Pressable>
     );
@@ -75,7 +75,7 @@ export default function BankAccountsScreen() {
 
             {/* FAB */}
             <Pressable
-                className="absolute bottom-6 right-6 flex-row items-center bg-[#1A237E] px-6 py-4 rounded-full shadow-xl active:bg-blue-900"
+                className="absolute bottom-6 right-6 flex-row items-center bg-primary px-6 py-4 rounded-full shadow-xl active:bg-blue-900"
                 onPress={() => router.push('/(admin)/bank-accounts/new')}
             >
                 <MaterialIcons name="add" size={24} color="#FFFFFF" className="mr-2" />

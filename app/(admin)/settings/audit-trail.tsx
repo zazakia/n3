@@ -266,7 +266,7 @@ export default function AuditTrailScreen() {
                                 <Pressable 
                                     key={log.id}
                                     onPress={() => toggleExpand(log.id)}
-                                    className={`bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden ${isExpanded ? 'border-[#1A237E]/30 ring-1 ring-[#1A237E]/10' : ''}`}
+                                    className={`bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden ${isExpanded ? 'border-primary/30 ring-1 ring-[#1A237E]/10' : ''}`}
                                 >
                                     <View className="p-4">
                                         <View className="flex-row justify-between items-start">

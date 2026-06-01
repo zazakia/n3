@@ -4,8 +4,6 @@ import { Q } from '@nozbe/watermelondb';
 import UserProfile from '../database/models/UserProfile';
 import { ErrorService, ErrorType } from './ErrorService';
 
-console.log('[AuthService] Module loaded V3');
-
 export class AuthService {
     static isQuickLoginEnabled(): boolean {
         const explicitSetting = process.env.EXPO_PUBLIC_ENABLE_QUICK_LOGIN?.trim().toLowerCase();
@@ -31,7 +29,6 @@ export class AuthService {
     }
 
     static async signIn(email: string, password: string): Promise<void> {
-        console.log(`[AuthService] Attempting signIn for: ${email}`);
         try {
             const { data, error } = await supabase.auth.signInWithPassword({
                 email: email.trim(),
@@ -39,13 +36,12 @@ export class AuthService {
             });
 
             if (error) {
-                console.error(`[AuthService] Supabase signIn error details: ${error.message} [Status: ${(error as any).status}]`);
+                if (__DEV__) console.warn(`[AuthService] signIn error: ${error.message} [Status: ${(error as any).status}]`);
                 throw error;
             }
 
-            console.log('[AuthService] signIn successful for user ID:', data?.user?.id);
+            if (__DEV__) console.log('[AuthService] signIn successful for user ID:', data?.user?.id);
         } catch (error) {
-            console.error('[AuthService] error in signIn:', error);
             throw ErrorService.handleError(error, 'AuthService.signIn', ErrorType.AUTH);
         }
     }
@@ -59,11 +55,11 @@ export class AuthService {
 
     static async getCurrentUserRole(uid: string, email?: string): Promise<string | null> {
         if (!uid) {
-            console.log('[AuthService] getCurrentUserRole called with no UID');
+            if (__DEV__) console.warn('[AuthService] getCurrentUserRole called with no UID');
             return null;
         }
 
-        console.log(`[AuthService] Resolving role for ${email || uid}...`);
+        if (__DEV__) console.log(`[AuthService] Resolving role for ${uid}...`);
 
         try {
             // Supabase is the source of truth for authorization while online.
@@ -75,7 +71,7 @@ export class AuthService {
                     .maybeSingle();
 
                 if (error) {
-                    console.warn(`[AuthService] Remote role lookup failed for ${uid}:`, error.message);
+                    if (__DEV__) console.warn(`[AuthService] Remote role lookup failed for ${uid}:`, error.message);
                     const status = (error as any).status;
                     const message = (error.message || '').toLowerCase();
                     const isAuthorizationFailure =
@@ -86,21 +82,21 @@ export class AuthService {
                         message.includes('unauthorized');
 
                     if (isAuthorizationFailure) {
-                        console.warn('[AuthService] Unauthorized role lookup detected. Keeping auth session and falling back.');
+                        if (__DEV__) console.warn('[AuthService] Unauthorized role lookup detected. Keeping auth session and falling back.');
                         return null;
                     }
                 } else if (!data) {
-                    console.warn(`[AuthService] No active remote profile found for UID ${uid}.`);
+                    if (__DEV__) console.warn(`[AuthService] No active remote profile found for UID ${uid}.`);
                     return null;
                 } else if (data.deleted_at || data.is_active === false || !data.role) {
-                    console.warn(`[AuthService] Remote profile for UID ${uid} is inactive, deleted, or missing a role.`);
+                    if (__DEV__) console.warn(`[AuthService] Remote profile for UID ${uid} is inactive, deleted, or missing a role.`);
                     return null;
                 } else {
-                    console.log(`[AuthService] Found remote role for ${uid}: ${data.role}`);
+                    if (__DEV__) console.log(`[AuthService] Found remote role for ${uid}: ${data.role}`);
                     return data.role;
                 }
             } catch (remoteErr) {
-                console.warn('[AuthService] Remote role check failed or skipped:', remoteErr instanceof Error ? remoteErr.message : String(remoteErr));
+                if (__DEV__) console.warn('[AuthService] Remote role check failed or skipped:', remoteErr instanceof Error ? remoteErr.message : String(remoteErr));
             }
 
             // Local WatermelonDB is only a fallback cache when remote role is unavailable.
@@ -111,24 +107,24 @@ export class AuthService {
                         try {
                             const profile = await profilesCollection.find(uid);
                             if (profile && !profile.deletedAt) {
-                                console.log(`[AuthService] Found local role for ${uid}: ${profile.role}`);
+                                if (__DEV__) console.log(`[AuthService] Found local role for ${uid}: ${profile.role}`);
                                 return profile.role;
                             }
                         } catch (e) {
                             // find() throws if not found, try query as fallback
                             const allProfiles = await profilesCollection.query(Q.where('id', uid)).fetch();
                             if (allProfiles.length > 0 && !allProfiles[0].deletedAt) {
-                                console.log(`[AuthService] Found local role via query for ${uid}: ${allProfiles[0].role}`);
+                                if (__DEV__) console.log(`[AuthService] Found local role via query for ${uid}: ${allProfiles[0].role}`);
                                 return allProfiles[0].role;
                             }
                         }
                     }
                 } catch (dbErr) {
-                    console.log('[AuthService] Local DB check failed or skipped:', dbErr instanceof Error ? dbErr.message : String(dbErr));
+                    if (__DEV__) console.warn('[AuthService] Local DB check failed or skipped:', dbErr instanceof Error ? dbErr.message : String(dbErr));
                 }
             }
 
-            console.warn(`[AuthService] No role found for UID ${uid} in any source.`);
+            if (__DEV__) console.warn(`[AuthService] No role found for UID ${uid} in any source.`);
             return null;
         } catch (e) {
             console.error('[AuthService] Error in getCurrentUserRole:', e);
@@ -148,7 +144,7 @@ export class AuthService {
                 return collectorRecords[0].id;
             }
 
-            console.log(`[AuthService] Collector not found locally for UID: ${uid}, checking remote...`);
+            if (__DEV__) console.log(`[AuthService] Collector not found locally for UID: ${uid}, checking remote...`);
             const { data, error } = await supabase
                 .from('app_collectors')
                 .select('id')
@@ -157,7 +153,7 @@ export class AuthService {
                 .maybeSingle();
 
             if (error) {
-                console.warn('[AuthService] Remote collector lookup failed:', error.message);
+                if (__DEV__) console.warn('[AuthService] Remote collector lookup failed:', error.message);
                 return null;
             }
 
@@ -199,7 +195,7 @@ export class AuthService {
                         }
                     });
                 } catch (dbErr) {
-                    console.log('[AuthService] Local profiles fetch failed/skipped', dbErr);
+                    if (__DEV__) console.warn('[AuthService] Local profiles fetch failed/skipped', dbErr);
                 }
             }
 
@@ -255,6 +251,15 @@ export class AuthService {
     static async getCurrentUserId(): Promise<string | null> {
         const { data } = await supabase.auth.getUser();
         return data.user?.id || null;
+    }
+
+    static async sendPasswordResetEmail(email: string): Promise<void> {
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+            if (error) throw error;
+        } catch (error) {
+            throw ErrorService.handleError(error, 'AuthService.sendPasswordResetEmail', ErrorType.AUTH);
+        }
     }
 }
 

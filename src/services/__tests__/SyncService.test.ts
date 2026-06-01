@@ -526,7 +526,7 @@ describe('SyncService', () => {
 
         await expect((service as any).pushChangesToSupabase({
             borrowers: { created: [{ id: '1' }], updated: [], deleted: [] }
-        })).rejects.toThrow('Insert error');
+        })).rejects.toThrow(/Push failed/);
     });
 });
 

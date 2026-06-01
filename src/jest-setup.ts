@@ -1,5 +1,12 @@
 import 'reflect-metadata';
 
+// Mock AppToast globally so ErrorService.handleError never throws in tests
+jest.mock('./components/AppToast', () => ({
+    __esModule: true,
+    default: { show: jest.fn() },
+    show: jest.fn(),
+}));
+
 // Mock Gesture Handler
 require('react-native-gesture-handler/jestSetup');
 jest.mock('react-native-gesture-handler', () => {

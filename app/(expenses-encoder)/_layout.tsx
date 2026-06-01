@@ -46,6 +46,7 @@ export default function ExpensesEncoderLayout() {
             }}
         >
             <Stack.Screen name="index" options={{ title: 'Expenses Encoder' }} />
+            <Stack.Screen name="recurring" options={{ title: 'Recurring Expenses' }} />
         </Stack>
     );
 }

@@ -13,6 +13,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { ROLES, ROLE_LABELS } from '../../../src/constants/roles';
 import { ConfirmDialog } from '../../../src/components/ConfirmDialog';
 import ActionLogService from '../../../src/services/ActionLogService';
+import { AuthService } from '../../../src/services/AuthService';
 
 
 const schema = z.object({
@@ -34,6 +35,7 @@ export default function EditUserScreen() {
     const [borrowers, setBorrowers] = useState<Borrower[]>([]);
     const [loadingBorrowers, setLoadingBorrowers] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [resettingPassword, setResettingPassword] = useState(false);
 
     const { control, handleSubmit, watch, reset, formState: { errors, isDirty } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -242,6 +244,60 @@ export default function EditUserScreen() {
         }
     };
 
+    const handleResetPassword = async () => {
+        if (!user?.email) {
+            if (Platform.OS === 'web') {
+                window.alert("User email is not available.");
+            } else {
+                Alert.alert("Error", "User email is not available.");
+            }
+            return;
+        }
+
+        const confirmMessage = `Are you sure you want to send a password reset email to ${user.email}?`;
+        
+        if (Platform.OS === 'web') {
+            if (window.confirm(confirmMessage)) {
+                executeResetPassword();
+            }
+            return;
+        }
+
+        Alert.alert(
+            "Reset Password",
+            confirmMessage,
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Send Email",
+                    onPress: executeResetPassword
+                }
+            ]
+        );
+    };
+
+    const executeResetPassword = async () => {
+        if (!user?.email) return;
+        setResettingPassword(true);
+        try {
+            await AuthService.sendPasswordResetEmail(user.email);
+            if (Platform.OS === 'web') {
+                window.alert(`Password reset email sent to ${user.email}.`);
+            } else {
+                Alert.alert("Success", `Password reset email sent to ${user.email}.`);
+            }
+        } catch (error: any) {
+            console.error('Failed to send password reset email:', error);
+            if (Platform.OS === 'web') {
+                window.alert(error?.message || 'Failed to send password reset email.');
+            } else {
+                Alert.alert('Error', error?.message || 'Failed to send password reset email.');
+            }
+        } finally {
+            setResettingPassword(false);
+        }
+    };
+
     const handleDelete = () => {
         if (Platform.OS === 'web') {
             setShowDeleteConfirm(true);
@@ -392,7 +448,7 @@ export default function EditUserScreen() {
                                     <Pressable
                                         key={roleValue}
                                         onPress={() => onChange(roleValue)}
-                                        className={`mr-2 mb-2 px-4 py-2 rounded-full border ${value === roleValue ? 'bg-[#1A237E] border-blue-900' : 'bg-gray-100 border-gray-200'}`}
+                                        className={`mr-2 mb-2 px-4 py-2 rounded-full border ${value === roleValue ? 'bg-primary border-blue-900' : 'bg-gray-100 border-gray-200'}`}
                                     >
                                         <Text className={`text-xs font-bold ${value === roleValue ? 'text-white' : 'text-gray-600'}`}>
                                             {ROLE_LABELS[roleValue as keyof typeof ROLE_LABELS]}
@@ -458,7 +514,7 @@ export default function EditUserScreen() {
                 </View>
 
                 <Pressable
-                    className={`w-full py-4 rounded-2xl items-center shadow-lg mb-4 ${saving ? 'bg-blue-400' : 'bg-[#1A237E] active:bg-blue-900'}`}
+                    className={`w-full py-4 rounded-2xl items-center shadow-lg mb-4 ${saving ? 'bg-blue-400' : 'bg-primary active:bg-blue-900'}`}
                     onPress={handleSubmit(onSubmit)}
                     disabled={saving}
                 >
@@ -470,9 +526,21 @@ export default function EditUserScreen() {
                 </Pressable>
 
                 <Pressable
+                    className={`w-full py-4 rounded-2xl items-center shadow-lg mb-4 ${resettingPassword || saving ? 'bg-gray-400' : 'bg-white border border-gray-300 active:bg-gray-100'}`}
+                    onPress={handleResetPassword}
+                    disabled={resettingPassword || saving}
+                >
+                    {resettingPassword ? (
+                        <ActivityIndicator color="#1A237E" />
+                    ) : (
+                        <Text className="text-gray-800 font-bold uppercase tracking-widest text-xs">Send Password Reset Email</Text>
+                    )}
+                </Pressable>
+
+                <Pressable
                     className="w-full py-4 rounded-2xl items-center bg-red-50 border border-red-100 active:bg-red-100"
                     onPress={handleDelete}
-                    disabled={saving}
+                    disabled={saving || resettingPassword}
                 >
                     <Text className="text-red-600 font-bold uppercase tracking-widest text-xs">Delete Profile</Text>
                 </Pressable>

@@ -293,6 +293,84 @@ describe('PaymentService', () => {
         expect(balanceSummary.balance).toBe(270);
     });
 
+    it('does not revert a renewed loan to active when a payment is deleted', async () => {
+        const { borrower, collector, loan } = await createLoanWithSchedules();
+
+        // Pay the loan in full
+        const payment = await PaymentService.postPayment({
+            loanId: loan.id,
+            amount: 300,
+            paymentDate: Date.now(),
+            encodedBy: 'admin-user',
+            database,
+        });
+
+        // Create a child reloan referencing the paid loan (simulates renewal)
+        await database.write(async () => {
+            await database.get<Loan>('loans').create(l => {
+                l.borrowerId = borrower.id;
+                l.principalAmount = 500;
+                l.totalAmount = 600;
+                l.status = 'active';
+                l.frequency = 'daily';
+                l.isReloan = true;
+                l.previousLoanId = loan.id;
+                l.collectorId = collector.id;
+            });
+        });
+
+        // Delete the payment — loan should stay 'paid' because it was renewed
+        await PaymentService.softDeletePayment(payment.id, { database, performedBy: 'admin-user' });
+
+        const updatedLoan = await database.get<Loan>('loans').find(loan.id);
+        expect(updatedLoan.status).toBe('paid');
+    });
+
+    it('marks overdue schedules as late when payment does not cover them', async () => {
+        const { loan } = await createLoanWithSchedules();
+
+        // Make all schedules overdue
+        await database.write(async () => {
+            const schedules = await database.get<PaymentSchedule>('payment_schedules').query().fetch();
+            for (const s of schedules) {
+                await s.update(record => {
+                    record.dueDate = Date.now() - 86400000 * 2; // 2 days ago
+                });
+            }
+        });
+
+        // Post a partial payment that doesn't cover any full schedule
+        await PaymentService.postPayment({
+            loanId: loan.id,
+            amount: 10,
+            paymentDate: Date.now(),
+            encodedBy: 'admin-user',
+            database,
+        });
+
+        const schedules = await database.get<PaymentSchedule>('payment_schedules').query(Q.sortBy('due_date', Q.asc)).fetch();
+        // First schedule should be partial, rest should be late
+        expect(schedules[0].status).toBe('partial');
+        expect(schedules[1].status).toBe('late');
+        expect(schedules[2].status).toBe('late');
+    });
+
+    it('getLoanBalance returns zero balance when fully paid', async () => {
+        const { loan } = await createLoanWithSchedules();
+
+        await PaymentService.postPayment({
+            loanId: loan.id,
+            amount: 300,
+            paymentDate: Date.now(),
+            encodedBy: 'admin-user',
+            database,
+        });
+
+        const summary = await PaymentService.getLoanBalance(loan.id, database);
+        expect(summary.balance).toBe(0);
+        expect(summary.totalPaid).toBe(300);
+    });
+
     it('updates a payment that has a linked savings withdrawal', async () => {
         const { borrower, loan } = await createLoanWithSchedules();
         const originalDate = Date.now() - 86400000;

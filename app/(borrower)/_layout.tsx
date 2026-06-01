@@ -57,7 +57,7 @@ export default function BorrowerLayout() {
     )?.label ?? 'Borrower Portal';
 
     const renderSidebar = () => (
-        <View className="flex-1 bg-[#1A237E]">
+        <View className="flex-1 bg-primary">
             <SafeAreaView className="flex-1">
                 <View className="p-6 items-center flex-row border-b border-white/10 mb-4 h-24">
                     <View className="bg-red-500/20 p-2 rounded-lg mr-3">
@@ -123,7 +123,7 @@ export default function BorrowerLayout() {
 
     return (
         <View className="flex-1 bg-gray-50">
-            <SafeAreaView className="bg-[#1A237E] shadow-sm z-10">
+            <SafeAreaView className="bg-primary shadow-sm z-10">
                 <View className="flex-row items-center justify-between p-4">
                     <View className="flex-row items-center">
                         <Pressable onPress={() => setDrawerOpen(true)} className="mr-4 p-1 active:bg-white/10 rounded-full">
@@ -158,7 +158,7 @@ export default function BorrowerLayout() {
                                     color={isActive ? '#1A237E' : '#9CA3AF'}
                                     className="mb-1"
                                 />
-                                <Text className={`text-[10px] font-bold ${isActive ? 'text-[#1A237E]' : 'text-gray-700'}`}>
+                                <Text className={`text-[10px] font-bold ${isActive ? 'text-primary' : 'text-gray-700'}`}>
                                     {item.label}
                                 </Text>
                             </Pressable>

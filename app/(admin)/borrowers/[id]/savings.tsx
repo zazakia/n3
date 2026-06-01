@@ -328,7 +328,7 @@ export default function SavingsScreen() {
                 </View>
 
                 {/* Balance Card */}
-                <View className="bg-[#1A237E] p-6 rounded-3xl shadow-md mb-6 relative overflow-hidden">
+                <View className="bg-primary p-6 rounded-3xl shadow-md mb-6 relative overflow-hidden">
                     <View className="absolute -right-10 -top-10 bg-white/10 w-40 h-40 rounded-full" />
                     <Text className="text-indigo-200 text-xs font-bold uppercase tracking-widest mb-1">Available Savings</Text>
                     <Text className="text-4xl font-extrabold text-white mb-6">{formatPHP(balance)}</Text>
@@ -433,7 +433,7 @@ export default function SavingsScreen() {
                                 <Text className="font-bold text-gray-700">Cancel</Text>
                             </Pressable>
                             <Pressable 
-                                className={`px-6 py-3 rounded-xl bg-[#1A237E] flex-row items-center ${saving ? 'opacity-50' : ''}`}
+                                className={`px-6 py-3 rounded-xl bg-primary flex-row items-center ${saving ? 'opacity-50' : ''}`}
                                 onPress={handleWithdrawCash}
                                 disabled={saving}
                             >

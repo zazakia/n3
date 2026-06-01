@@ -76,7 +76,7 @@ function UpdateCard({ update, isLatest }: { update: AppUpdateEntry; isLatest: bo
 export default function UpdatesScreen() {
     return (
         <ScrollView className="flex-1 bg-gray-50" contentContainerStyle={{ padding: 16, paddingBottom: 80 }}>
-            <View className="bg-[#1A237E] rounded-3xl p-6 mb-6 shadow-sm">
+            <View className="bg-primary rounded-3xl p-6 mb-6 shadow-sm">
                 <View className="w-14 h-14 rounded-2xl bg-white/10 items-center justify-center mb-4">
                     <MaterialIcons name="campaign" size={28} color="#FFFFFF" />
                 </View>

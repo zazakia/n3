@@ -91,3 +91,16 @@ excel_loans.json
 # Local Supabase runtime folders
 supabase/.branches/
 supabase/.temp/
+
+/src/generated/prisma
+
+# MCP and tool state
+.commandcode/
+.opencode/
+.playwright-mcp/
+
+# Temporary excel and data zips
+*.xlsx
+*.zip
+files (1)/
+

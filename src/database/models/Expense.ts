@@ -10,6 +10,7 @@ export default class Expense extends Model {
     @field('amount') amount: number;
     @date('expense_date') expenseDate: number;
     @field('encoded_by') encodedBy: string;
+    @field('recurring_expense_id') recurringExpenseId: string | null;
     @date('created_at') createdAt: number;
     @date('updated_at') updatedAt: number;
     @date('deleted_at') deletedAt: number | null;

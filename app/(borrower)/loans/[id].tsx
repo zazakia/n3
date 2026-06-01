@@ -164,7 +164,7 @@ export default function LoanDetailsScreen() {
                         <Text className="text-gray-900 font-black">{Math.round(loanDetail.progress)}%</Text>
                     </View>
                     <View className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <View className="h-full bg-[#1A237E] rounded-full" style={{ width: `${loanDetail.progress}%` }} />
+                        <View className="h-full bg-primary rounded-full" style={{ width: `${loanDetail.progress}%` }} />
                     </View>
                 </View>
 
@@ -209,7 +209,7 @@ export default function LoanDetailsScreen() {
                     onPress={() => setActiveTab('schedule')}
                     className={`flex-1 py-3 rounded-xl items-center ${activeTab === 'schedule' ? 'bg-white shadow-sm' : ''}`}
                 >
-                    <Text className={`font-bold text-xs tracking-wider uppercase ${activeTab === 'schedule' ? 'text-[#1A237E]' : 'text-gray-700'}`}>
+                    <Text className={`font-bold text-xs tracking-wider uppercase ${activeTab === 'schedule' ? 'text-primary' : 'text-gray-700'}`}>
                         Payment Schedule
                     </Text>
                 </Pressable>
@@ -217,7 +217,7 @@ export default function LoanDetailsScreen() {
                     onPress={() => setActiveTab('ledger')}
                     className={`flex-1 py-3 rounded-xl items-center ${activeTab === 'ledger' ? 'bg-white shadow-sm' : ''}`}
                 >
-                    <Text className={`font-bold text-xs tracking-wider uppercase ${activeTab === 'ledger' ? 'text-[#1A237E]' : 'text-gray-700'}`}>
+                    <Text className={`font-bold text-xs tracking-wider uppercase ${activeTab === 'ledger' ? 'text-primary' : 'text-gray-700'}`}>
                         Payment Ledger
                     </Text>
                 </Pressable>

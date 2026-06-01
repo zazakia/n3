@@ -66,7 +66,7 @@ export default function AdminShellLayout() {
         <View className="flex-1 bg-gray-50">
             {/* Header - Hidden on dashboard index because it has its own header */}
             {!pathname.endsWith('/(admin)') && !pathname.endsWith('/(admin)/') && (
-                <SafeAreaView className="bg-[#1A237E] shadow-sm z-10">
+                <SafeAreaView className="bg-primary shadow-sm z-10">
                     <View className="flex-row items-center justify-between p-4">
                         <View className="flex-row items-center">
                             <Pressable onPress={() => setDrawerOpen(true)} className="mr-4 p-1 active:bg-white/10 rounded-full">
@@ -106,7 +106,7 @@ export default function AdminShellLayout() {
                                     color={isActive ? '#1A237E' : '#9CA3AF'}
                                     className="mb-1"
                                 />
-                                <Text className={`text-[10px] font-medium ${isActive ? 'text-[#1A237E]' : 'text-gray-700'}`}>
+                                <Text className={`text-[10px] font-medium ${isActive ? 'text-primary' : 'text-gray-700'}`}>
                                     {item.label}
                                 </Text>
                             </Pressable>
@@ -130,7 +130,7 @@ export default function AdminShellLayout() {
                     />
 
                     {/* Drawer Content */}
-                    <View className="w-72 bg-[#1A237E] h-full shadow-2xl">
+                    <View className="w-72 bg-primary h-full shadow-2xl">
                         <SidebarContent onClose={() => setDrawerOpen(false)} />
                     </View>
                 </View>

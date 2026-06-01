@@ -89,7 +89,7 @@ export default function BorrowerDashboard() {
             </Animated.View>
 
             {/* Key Stats Card */}
-            <Animated.View entering={FadeInUp.duration(500).delay(200)} className="bg-[#1A237E] p-6 rounded-[32px] shadow-xl mb-6 relative overflow-hidden">
+            <Animated.View entering={FadeInUp.duration(500).delay(200)} className="bg-primary p-6 rounded-[32px] shadow-xl mb-6 relative overflow-hidden">
                 <View className="absolute -right-10 -top-10 bg-white/10 w-40 h-40 rounded-full" />
                 <View className="absolute -left-10 -bottom-10 bg-white/5 w-32 h-32 rounded-full" />
                 

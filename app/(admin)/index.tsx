@@ -855,7 +855,7 @@ export default function AdminDashboardScreen() {
                     />
 
                     {/* Drawer Content */}
-                    <View className="w-72 bg-[#1A237E] h-full shadow-2xl">
+                    <View className="w-72 bg-primary h-full shadow-2xl">
                         {/* SidebarContent needs to be accessible here, or redundant content */}
                         <SidebarContent onClose={() => setDrawerOpen(false)} />
                     </View>

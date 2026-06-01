@@ -27,6 +27,7 @@ import Collector from './models/Collector';
 import LoanPenalty from './models/LoanPenalty';
 import CollectionGroup from './models/CollectionGroup';
 import ActionLog from './models/ActionLog';
+import RecurringExpense from './models/RecurringExpense';
 
 const adapter = new LokiJSAdapter({
     dbName: `infinityfinance-v${mySchema.version}`,
@@ -79,5 +80,6 @@ export const database = new Database({
         LoanPenalty,
         CollectionGroup,
         ActionLog,
+        RecurringExpense,
     ],
 });

@@ -119,7 +119,7 @@ export default function CollectorDetailsScreen() {
                 </View>
 
                 <Pressable
-                    className={`w-full py-4 rounded-xl items-center flex-row justify-center mb-4 ${saving ? 'bg-blue-300' : 'bg-[#1A237E]'}`}
+                    className={`w-full py-4 rounded-xl items-center flex-row justify-center mb-4 ${saving ? 'bg-blue-300' : 'bg-primary'}`}
                     onPress={handleUpdate} disabled={saving}
                 >
                     <MaterialIcons name="check" size={20} color="#fff" className="mr-2" />

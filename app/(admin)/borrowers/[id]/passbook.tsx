@@ -197,7 +197,7 @@ export default function ClientPassbookScreen() {
             <ScrollView contentContainerStyle={{ padding: 16 }}>
                 <BorrowerSearchBar currentBorrowerId={id} placeholder="Jump to another borrower..." />
                 {/* Header Info Card */}
-                <View className="bg-[#1A237E] p-6 rounded-3xl shadow-md mb-6 relative overflow-hidden">
+                <View className="bg-primary p-6 rounded-3xl shadow-md mb-6 relative overflow-hidden">
                     <View className="absolute -right-10 -top-10 bg-white/10 w-40 h-40 rounded-full" />
                     <View className="absolute -left-10 -bottom-10 bg-white/5 w-32 h-32 rounded-full" />
 
@@ -287,7 +287,7 @@ export default function ClientPassbookScreen() {
                             <View className="flex-row border-t border-gray-100 pt-5">
                                 <View className="flex-1 items-center border-r border-gray-100">
                                     <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1">Loan Amount (Principal)</Text>
-                                    <Text className="text-base font-extrabold text-[#1A237E]">{formatPHP(selectedLoan.principalAmount)}</Text>
+                                    <Text className="text-base font-extrabold text-primary">{formatPHP(selectedLoan.principalAmount)}</Text>
                                 </View>
                                 <View className="flex-1 items-center border-r border-gray-100">
                                     <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1">Total Loan (P+I)</Text>
@@ -402,7 +402,7 @@ export default function ClientPassbookScreen() {
                                     {selectedLoan.releaseDate ? formatDate(new Date(selectedLoan.releaseDate)) : 'Disbursement'}
                                 </Text>
                             </View>
-                            <Text className="flex-1 text-sm font-extrabold text-[#1A237E] text-right">Loan Issued</Text>
+                            <Text className="flex-1 text-sm font-extrabold text-primary text-right">Loan Issued</Text>
                             <Text className="flex-[0.8] text-sm font-bold text-gray-700 text-right">—</Text>
                             <View className="flex-1 items-end justify-center">
                                 <Text className="text-sm font-extrabold text-gray-900">{formatPHP(grossTotalLoan)}</Text>

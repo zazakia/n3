@@ -238,7 +238,7 @@ export default function CollectionReportScreen() {
                             key={preset}
                             testID={`preset-pill-${preset}`}
                             onPress={() => applyPreset(preset)}
-                            className={`px-4 py-2 rounded-full mr-2 ${selectedPreset === preset ? 'bg-[#1A237E]' : 'bg-gray-100'}`}
+                            className={`px-4 py-2 rounded-full mr-2 ${selectedPreset === preset ? 'bg-primary' : 'bg-gray-100'}`}
                         >
                             <Text className={`text-xs font-black uppercase tracking-wider ${selectedPreset === preset ? 'text-white' : 'text-gray-600'}`}>
                                 {PRESET_LABELS[preset]}
@@ -263,7 +263,7 @@ export default function CollectionReportScreen() {
                     <Pressable
                         testID="collector-pill-filter-all"
                         onPress={() => setSelectedCollectorId('all')}
-                        className={`px-4 py-2 rounded-full mr-2 ${selectedCollectorId === 'all' ? 'bg-[#1A237E]' : 'bg-gray-100'}`}
+                        className={`px-4 py-2 rounded-full mr-2 ${selectedCollectorId === 'all' ? 'bg-primary' : 'bg-gray-100'}`}
                     >
                         <Text className={`text-xs font-black uppercase tracking-wider ${selectedCollectorId === 'all' ? 'text-white' : 'text-gray-600'}`}>
                             All
@@ -274,7 +274,7 @@ export default function CollectionReportScreen() {
                             key={collector.id}
                             testID={`collector-pill-filter-${normalizeCollectorName(collector.fullName)}`}
                             onPress={() => setSelectedCollectorId(collector.id)}
-                            className={`px-4 py-2 rounded-full mr-2 ${selectedCollectorId === collector.id ? 'bg-[#1A237E]' : 'bg-gray-100'}`}
+                            className={`px-4 py-2 rounded-full mr-2 ${selectedCollectorId === collector.id ? 'bg-primary' : 'bg-gray-100'}`}
                         >
                             <Text className={`text-xs font-black uppercase tracking-wider ${selectedCollectorId === collector.id ? 'text-white' : 'text-gray-600'}`}>
                                 {collector.fullName}
@@ -284,7 +284,7 @@ export default function CollectionReportScreen() {
                 </ScrollView>
 
                 <View className="flex-row mb-4">
-                    <View className="flex-1 bg-[#1A237E] p-4 rounded-2xl mr-2">
+                    <View className="flex-1 bg-primary p-4 rounded-2xl mr-2">
                         <Text className="text-[10px] font-bold text-indigo-200 uppercase tracking-widest mb-1">Collected</Text>
                         <Text className="text-xl font-black text-white">{formatPHP(totalCollected)}</Text>
                     </View>

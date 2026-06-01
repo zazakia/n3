@@ -154,7 +154,7 @@ export default function NewCollectorScreen() {
                 </View>
 
                 <Pressable
-                    className={`w-full py-4 rounded-xl items-center flex-row justify-center ${saving ? 'bg-blue-300' : 'bg-[#1A237E] active:bg-blue-900'}`}
+                    className={`w-full py-4 rounded-xl items-center flex-row justify-center ${saving ? 'bg-blue-300' : 'bg-primary active:bg-blue-900'}`}
                     onPress={handleSave} disabled={saving}
                 >
                     {saving ? <ActivityIndicator color="#fff" /> : (

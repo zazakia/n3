@@ -207,7 +207,7 @@ export default function SettingsScreen() {
     return (
         <ScrollView className="flex-1 bg-gray-50" contentContainerStyle={{ padding: 16 }}>
             <View className="mb-8 p-4 items-center">
-                <View className="w-20 h-20 rounded-full bg-[#1A237E] items-center justify-center mb-4 shadow-lg">
+                <View className="w-20 h-20 rounded-full bg-primary items-center justify-center mb-4 shadow-lg">
                     <MaterialIcons name="person" size={40} color="white" />
                 </View>
                 <Text className="text-xl font-black text-gray-900">{user?.email}</Text>
@@ -234,11 +234,11 @@ export default function SettingsScreen() {
                         disabled={syncing}
                         className="w-full"
                     >
-                        <View className={`py-4 rounded-xl items-center flex-row justify-center ${syncing ? 'bg-gray-200' : 'bg-white border border-[#1A237E]'}`}>
+                        <View className={`py-4 rounded-xl items-center flex-row justify-center ${syncing ? 'bg-gray-200' : 'bg-white border border-primary'}`}>
                             {syncing ? <ActivityIndicator color="#1A237E" /> : (
                                 <>
                                     <MaterialIcons name="sync" size={20} color="#1A237E" style={{ marginRight: 8 }} />
-                                    <Text className="text-[#1A237E] font-bold uppercase tracking-wider">Sync Now</Text>
+                                    <Text className="text-primary font-bold uppercase tracking-wider">Sync Now</Text>
                                 </>
                             )}
                         </View>
@@ -341,6 +341,12 @@ export default function SettingsScreen() {
                         onPress={() => Alert.alert("Infinity Finance v1.0", "Built with React Native Expo & WatermelonDB")}
                     />
                     <SettingsItem
+                        icon="palette"
+                        label="Theme Customization"
+                        color="#1A237E"
+                        onPress={() => router.push('/(admin)/settings/theme')}
+                    />
+                    <SettingsItem
                         icon="campaign"
                         label="Updates & Changes"
                         color="#1A237E"
@@ -429,7 +435,7 @@ export default function SettingsScreen() {
                                 }}
                                 className="w-full"
                             >
-                                <View className="py-3.5 rounded-xl bg-[#1A237E] items-center">
+                                <View className="py-3.5 rounded-xl bg-primary items-center">
                                     <Text className="text-white font-bold tracking-wider">Merge Data Safely</Text>
                                 </View>
                             </AnimatedPressable>

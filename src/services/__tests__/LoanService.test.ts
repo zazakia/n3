@@ -168,7 +168,7 @@ describe('LoanService', () => {
         expect(new Date(payments[0].paymentDate as any).getTime()).toBe(releaseDate.getTime());
     });
 
-    it('should close a previous loan on renewal even when deducted amount is zero', async () => {
+    it('closes previous loan on renewal even when deductedAmount is zero (no closing payment)', async () => {
         const { borrower, collector, loan: oldLoan } = await createTestData(database, {
             loanAmount: 1000,
             status: 'active'
@@ -214,16 +214,18 @@ describe('LoanService', () => {
         const updatedOldLoan = await database.get<Loan>('loans').find(oldLoan.id);
         expect(updatedOldLoan.status).toBe('paid');
 
+        // No closing payment when deductedAmount is 0
         const payments = await database.get<Payment>('payments').query(Q.where('loan_id', oldLoan.id)).fetch();
         expect(payments).toHaveLength(0);
 
+        // Old schedules should be marked paid
         const oldSchedules = await database.get<PaymentSchedule>('payment_schedules').query(Q.where('loan_id', oldLoan.id)).fetch();
         expect(oldSchedules.every(s => s.status === 'paid')).toBe(true);
     });
 
     it('should update an existing loan when isEditing is true', async () => {
         const { borrower, collector, loan: existingLoan } = await createTestData(database);
-        
+
         const calcResult = LoanCalculatorService.calculate(
             1500, 20, 30, 'days', 'flat', 'daily', new Date(), 0, 0
         );
@@ -256,7 +258,7 @@ describe('LoanService', () => {
         expect(updatedLoan.principalAmount).toBe(1500);
     });
 
-    it('blocks active-loan edits once payments exist to avoid orphaning schedules', async () => {
+    it('blocks active-loan edits once payments exist', async () => {
         const { borrower, collector, loan: existingLoan } = await createTestData(database, {
             loanAmount: 1000,
             status: 'active'
@@ -295,5 +297,73 @@ describe('LoanService', () => {
             existingLoan,
             database
         })).rejects.toThrow('Cannot edit an active loan after payments have been recorded');
+    });
+
+    it('saves a pending loan without generating schedules', async () => {
+        const { borrower, collector } = await createTestData(database);
+        const loanId = uuid.v4().toString();
+        const calcResult = LoanCalculatorService.calculate(
+            1000, 20, 30, 'days', 'flat', 'daily', new Date(), 0, 0
+        );
+
+        await LoanService.saveLoan({
+            loanId,
+            loanNumber: 'L-PENDING',
+            borrowerId: borrower.id,
+            principalAmount: 1000,
+            interestRate: 20,
+            interestType: 'flat',
+            term: 30,
+            termUnit: 'days',
+            frequency: 'daily',
+            calcResult,
+            collectorId: collector.id,
+            encodedBy: 'test-user',
+            releaseDate: new Date(),
+            status: 'pending',
+            isReloan: false,
+            interestAmount: 200,
+            isEditing: false,
+            database
+        });
+
+        const loan = await database.get<Loan>('loans').find(loanId);
+        expect(loan.status).toBe('pending');
+
+        const schedules = await database.get<PaymentSchedule>('payment_schedules').query(Q.where('loan_id', loanId)).fetch();
+        expect(schedules).toHaveLength(0);
+    });
+
+    it('accepts a numeric timestamp for releaseDate', async () => {
+        const { borrower, collector } = await createTestData(database);
+        const loanId = uuid.v4().toString();
+        const ts = new Date('2026-01-15').getTime();
+        const calcResult = LoanCalculatorService.calculate(
+            1000, 20, 30, 'days', 'flat', 'daily', new Date(ts), 0, 0
+        );
+
+        await LoanService.saveLoan({
+            loanId,
+            loanNumber: 'L-TS',
+            borrowerId: borrower.id,
+            principalAmount: 1000,
+            interestRate: 20,
+            interestType: 'flat',
+            term: 30,
+            termUnit: 'days',
+            frequency: 'daily',
+            calcResult,
+            collectorId: collector.id,
+            encodedBy: 'test-user',
+            releaseDate: ts,
+            status: 'active',
+            isReloan: false,
+            interestAmount: 200,
+            isEditing: false,
+            database
+        });
+
+        const loan = await database.get<Loan>('loans').find(loanId);
+        expect(loan.releaseDate).toBeTruthy();
     });
 });

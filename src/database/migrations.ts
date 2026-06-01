@@ -235,5 +235,33 @@ export const myMigrations = schemaMigrations({
         }),
       ],
     },
+    {
+      toVersion: 26,
+      steps: [
+        addColumns({
+          table: 'expenses',
+          columns: [
+            { name: 'recurring_expense_id', type: 'string', isOptional: true, isIndexed: true },
+          ],
+        }),
+        createTable({
+          name: 'recurring_expenses',
+          columns: [
+            { name: 'category', type: 'string' },
+            { name: 'description', type: 'string', isOptional: true },
+            { name: 'amount', type: 'number' },
+            { name: 'frequency', type: 'string' },
+            { name: 'next_due_date', type: 'number' },
+            { name: 'is_active', type: 'boolean' },
+            { name: 'reminders_enabled', type: 'boolean' },
+            { name: 'reminder_time', type: 'string', isOptional: true },
+            { name: 'encoded_by', type: 'string', isOptional: true },
+            { name: 'created_at', type: 'number' },
+            { name: 'updated_at', type: 'number' },
+            { name: 'deleted_at', type: 'number', isOptional: true },
+          ],
+        }),
+      ],
+    },
   ],
 })

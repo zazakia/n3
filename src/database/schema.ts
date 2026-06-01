@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const mySchema = appSchema({
-    version: 25,
+    version: 26,
     tables: [
         tableSchema({
             name: 'loan_penalties',
@@ -137,6 +137,24 @@ export const mySchema = appSchema({
                 { name: 'amount', type: 'number' },
                 { name: 'expense_date', type: 'number' },
                 { name: 'frequency', type: 'string', isOptional: true },
+                { name: 'encoded_by', type: 'string', isOptional: true },
+                { name: 'recurring_expense_id', type: 'string', isOptional: true, isIndexed: true },
+                { name: 'created_at', type: 'number' },
+                { name: 'updated_at', type: 'number' },
+                { name: 'deleted_at', type: 'number', isOptional: true },
+            ]
+        }),
+        tableSchema({
+            name: 'recurring_expenses',
+            columns: [
+                { name: 'category', type: 'string' },
+                { name: 'description', type: 'string', isOptional: true },
+                { name: 'amount', type: 'number' },
+                { name: 'frequency', type: 'string' }, // daily, weekly, monthly, yearly
+                { name: 'next_due_date', type: 'number' },
+                { name: 'is_active', type: 'boolean' },
+                { name: 'reminders_enabled', type: 'boolean' },
+                { name: 'reminder_time', type: 'string', isOptional: true }, // e.g. "09:00"
                 { name: 'encoded_by', type: 'string', isOptional: true },
                 { name: 'created_at', type: 'number' },
                 { name: 'updated_at', type: 'number' },

@@ -28,6 +28,7 @@ import Collector from './models/Collector';
 import LoanPenalty from './models/LoanPenalty';
 import CollectionGroup from './models/CollectionGroup';
 import ActionLog from './models/ActionLog';
+import RecurringExpense from './models/RecurringExpense';
 
 const modelClasses = [
     UserProfile,
@@ -48,6 +49,7 @@ const modelClasses = [
     LoanPenalty,
     CollectionGroup,
     ActionLog,
+    RecurringExpense,
 ];
 
 if (process.env.NODE_ENV !== 'test') console.log('[Database] Starting initialization...');

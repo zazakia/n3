@@ -18,6 +18,25 @@ import { database } from '../../../../src/database';
 
 describe('CollectionReportScreen', () => {
     let testDb: any;
+    const RealDate = Date;
+
+    beforeAll(() => {
+        const mockDate = new RealDate('2026-06-15T12:00:00.000Z');
+        global.Date = class extends RealDate {
+            constructor(...args: any[]) {
+                if (args.length === 0) {
+                    super(mockDate.getTime());
+                    return mockDate;
+                }
+                super(...args);
+            }
+        } as any;
+        global.Date.now = () => mockDate.getTime();
+    });
+
+    afterAll(() => {
+        global.Date = RealDate;
+    });
 
     beforeEach(async () => {
         testDb = database;

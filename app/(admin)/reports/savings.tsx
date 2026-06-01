@@ -65,7 +65,7 @@ export default function SavingsReportScreen() {
                 {data && (
                     <>
                         {/* Hero Card */}
-                        <Animated.View entering={FadeInDown.springify()} className="bg-[#1A237E] p-8 rounded-[40px] shadow-xl mb-8">
+                        <Animated.View entering={FadeInDown.springify()} className="bg-primary p-8 rounded-[40px] shadow-xl mb-8">
                             <View className="flex-row justify-between items-start mb-6">
                                 <View>
                                     <Text className="text-white/90 text-xs font-bold uppercase tracking-widest mb-1">Total Savings Portfolio</Text>
@@ -112,7 +112,7 @@ export default function SavingsReportScreen() {
                                     className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mr-4 w-48"
                                 >
                                     <Text className="text-gray-900 font-bold text-sm mb-1" numberOfLines={1}>{saver.name}</Text>
-                                    <Text className="text-[#1A237E] font-black text-lg">{formatPHP(saver.balance)}</Text>
+                                    <Text className="text-primary font-black text-lg">{formatPHP(saver.balance)}</Text>
                                     <View className="mt-3 bg-blue-50 self-start px-2 py-1 rounded-lg">
                                         <Text className="text-blue-700 font-bold text-[10px]">RANK #{idx + 1}</Text>
                                     </View>

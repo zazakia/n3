@@ -268,7 +268,7 @@ export default function DeletedItemsScreen() {
                         <Pressable
                             onPress={() => setActiveTab(item.id)}
                             className={`flex-row items-center px-4 py-2 rounded-full mr-2 ${
-                                activeTab === item.id ? 'bg-[#1A237E]' : 'bg-gray-100'
+                                activeTab === item.id ? 'bg-primary' : 'bg-gray-100'
                             }`}
                         >
                             <MaterialIcons 
@@ -380,7 +380,7 @@ export default function DeletedItemsScreen() {
                                     setIsDetailsVisible(false);
                                     setIsRestoreVisible(true);
                                 }}
-                                className="bg-[#1A237E] py-4 rounded-xl items-center shadow-lg shadow-indigo-200"
+                                className="bg-primary py-4 rounded-xl items-center shadow-lg shadow-indigo-200"
                             >
                                 <Text className="text-white font-bold text-base">Restore This Record</Text>
                             </Pressable>

@@ -56,7 +56,7 @@ export default function LoansHistoryScreen() {
             onPress={() => setFilter(tab)}
             className={`px-4 py-2 rounded-full mr-2 border ${
                 filter === tab 
-                    ? 'bg-[#1A237E] border-[#1A237E]' 
+                    ? 'bg-primary border-primary' 
                     : 'bg-white border-gray-200'
             }`}
         >

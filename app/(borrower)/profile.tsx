@@ -63,7 +63,7 @@ export default function BorrowerProfileScreen() {
         <ScrollView className="flex-1 bg-gray-50" contentContainerStyle={{ padding: 20 }}>
             {/* Profile Header */}
             <Animated.View entering={FadeInUp.duration(400)} className="items-center mb-8">
-                <View className="w-24 h-24 rounded-full bg-[#1A237E] items-center justify-center shadow-lg border-4 border-white mb-4">
+                <View className="w-24 h-24 rounded-full bg-primary items-center justify-center shadow-lg border-4 border-white mb-4">
                     <Text className="text-white text-3xl font-black">{profile.fullName.charAt(0)}</Text>
                 </View>
                 <Text className="text-2xl font-black text-gray-900">{profile.fullName}</Text>

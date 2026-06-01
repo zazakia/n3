@@ -7,7 +7,12 @@ module.exports = {
     "./src/services/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: 'var(--color-primary)',
+        secondary: 'var(--color-secondary)'
+      }
+    },
   },
   plugins: [],
 }

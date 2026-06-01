@@ -101,7 +101,7 @@ export default function NewPaymentScreen() {
                     loanNumber: l.loanNumber,
                     group: bInfo.group,
                     area: bInfo.area,
-                    releaseDate: l.releaseDate
+                    releaseDate: l.releaseDate instanceof Date ? l.releaseDate.getTime() : l.releaseDate
                 };
             });
             setLoans(opts);
@@ -270,7 +270,7 @@ export default function NewPaymentScreen() {
                                 <Pressable
                                     key={group}
                                     onPress={() => setSelectedGroup(group)}
-                                    className={`px-4 py-2 rounded-full mr-2 border ${selectedGroup === group ? 'bg-[#1A237E] border-[#1A237E]' : 'bg-white border-gray-200'}`}
+                                    className={`px-4 py-2 rounded-full mr-2 border ${selectedGroup === group ? 'bg-primary border-primary' : 'bg-white border-gray-200'}`}
                                 >
                                     <Text className={`text-xs font-bold ${selectedGroup === group ? 'text-white' : 'text-gray-700'}`}>
                                         {group}
@@ -301,7 +301,7 @@ export default function NewPaymentScreen() {
                                                     className={`p-4 flex-row justify-between items-center ${i < filteredLoans.length - 1 ? 'border-b border-gray-100' : ''} ${value === l.id ? 'bg-blue-50/50' : ''}`}
                                                 >
                                                     <View className="flex-1">
-                                                        <Text className={value === l.id ? 'text-[#1A237E] font-black text-base' : 'text-gray-900 font-bold text-base'}>
+                                                        <Text className={value === l.id ? 'text-primary font-black text-base' : 'text-gray-900 font-bold text-base'}>
                                                             {l.borrowerName}
                                                         </Text>
                                                         <View className="flex-row items-center mt-1">

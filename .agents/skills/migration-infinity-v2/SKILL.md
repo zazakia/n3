@@ -32,6 +32,9 @@ The migration maps legacy collector names to normalized system collectors:
 *   *Jayson Cayanong* → *Jason Cayanong*
 *   *Gera Gerald* → *Gerald Gera*
 
+### Borrower Exclusion
+The migration actively ignores non-borrower summary rows exported from the source data (e.g., "Grand Total", "Monthly", "Weekly", "Total") to prevent them from creating invalid loan profiles.
+
 ### Loan State Mapping
 To comply with the `unique_active_loan_per_borrower` constraint:
 - Only the **most recently released** loan (sorted by `date_release` descending, falling back to `cycle` number) with a positive balance is marked as `active`.

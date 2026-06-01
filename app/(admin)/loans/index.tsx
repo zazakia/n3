@@ -122,7 +122,7 @@ export default function LoansListScreen() {
                 <View className="flex-row justify-between items-center">
                     <View>
                         <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Principal</Text>
-                        <Text className="text-sm font-extrabold text-[#1A237E] mt-0.5">{formatPHP(item.principalAmount)}</Text>
+                        <Text className="text-sm font-extrabold text-primary mt-0.5">{formatPHP(item.principalAmount)}</Text>
                     </View>
                     <View className="items-center">
                         <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Insurance</Text>
@@ -153,7 +153,7 @@ export default function LoansListScreen() {
                         <Pressable
                             key={status}
                             onPress={() => setFilterStatus(status)}
-                            className={`px-4 py-2 rounded-full border mr-2 ${filterStatus === status ? 'bg-[#1A237E] border-[#1A237E]' : 'bg-white border-gray-200'}`}
+                            className={`px-4 py-2 rounded-full border mr-2 ${filterStatus === status ? 'bg-primary border-primary' : 'bg-white border-gray-200'}`}
                         >
                             <Text className={`text-xs font-bold uppercase tracking-wider ${filterStatus === status ? 'text-white' : 'text-gray-700'}`}>
                                 {status}

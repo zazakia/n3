@@ -41,7 +41,7 @@ describe('Supabase Infrastructure', () => {
         it('exports a valid supabase client', () => {
             expect(supabase).toBeDefined();
             expect(typeof supabase.from).toBe('function');
-            expect(typeof supabase.auth).toBe('function');
+            expect(typeof supabase.auth).toBe('object');
         });
     });
 });
