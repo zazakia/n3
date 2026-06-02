@@ -23,6 +23,7 @@ import { SeriesService } from '../../src/services/SeriesService';
 import { DatePicker } from '../../src/components/DatePicker';
 import { format, parseISO } from 'date-fns';
 import { PaymentService } from '../../src/services/PaymentService';
+import { LoanCalculatorService } from '../../src/services/LoanCalculatorService';
 
 
 const schema = z.object({
@@ -131,9 +132,18 @@ export default function PaymentEncoderScreen() {
                 return;
             }
 
+            let computedDeposit = 0;
+            if (selectedLoanForSubmit && data.amount) {
+                const numPayments = LoanCalculatorService.paymentsForFrequency(selectedLoanForSubmit.term, selectedLoanForSubmit.termUnit, selectedLoanForSubmit.frequency);
+                const periodicDeposit = (selectedLoanForSubmit.depositAmount || 0) / numPayments;
+                const ratio = parseFloat(data.amount) / selectedLoanForSubmit.installmentAmount;
+                computedDeposit = ratio * periodicDeposit;
+            }
+
             await PaymentService.postPayment({
                 loanId: data.selectedLoanId,
                 amount: parseFloat(data.amount),
+                depositAmount: computedDeposit,
                 paymentDate: parseISO(data.paymentDate),
                 receiptNumber: data.receiptNumber,
                 notes: data.notes,
@@ -156,6 +166,25 @@ export default function PaymentEncoderScreen() {
     };
 
     const selectedLoan = loans.find(l => l.id === selectedLoanId);
+
+    const amountStr = watch('amount');
+    let computedPrincipal = 0;
+    let computedDeposit = 0;
+    let computedInsurance = 0;
+
+    if (selectedLoan && amountStr) {
+        const amount = parseFloat(amountStr);
+        if (!isNaN(amount) && selectedLoan.installmentAmount > 0) {
+            const numPayments = LoanCalculatorService.paymentsForFrequency(selectedLoan.term, selectedLoan.termUnit, selectedLoan.frequency);
+            const periodicDeposit = (selectedLoan.depositAmount || 0) / numPayments;
+            const periodicInsurance = (selectedLoan.insuranceAmount || 0) / numPayments;
+            
+            const ratio = amount / selectedLoan.installmentAmount;
+            computedDeposit = ratio * periodicDeposit;
+            computedInsurance = ratio * periodicInsurance;
+            computedPrincipal = amount - computedDeposit - computedInsurance;
+        }
+    }
 
     return (
         <SafeAreaView className="flex-1 bg-[#F8FAFC]">
@@ -283,6 +312,25 @@ export default function PaymentEncoderScreen() {
                             />
                             {errors.amount ? <Text className="text-red-500 text-xs mt-1">{errors.amount.message}</Text> : null}
                         </View>
+
+                        {/* Breakdown Display */}
+                        {selectedLoan && parseFloat(amountStr) > 0 ? (
+                            <View className="mb-6 bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
+                                <Text className="text-xs font-black text-indigo-900 mb-3 uppercase tracking-wider">Computed Breakdown</Text>
+                                <View className="flex-row justify-between mb-2">
+                                    <Text className="text-indigo-800 text-sm">Principal / Interest</Text>
+                                    <Text className="text-indigo-900 font-bold text-sm">{formatPHP(computedPrincipal)}</Text>
+                                </View>
+                                <View className="flex-row justify-between mb-2">
+                                    <Text className="text-indigo-800 text-sm">Deposit / Savings</Text>
+                                    <Text className="text-indigo-900 font-bold text-sm">{formatPHP(computedDeposit)}</Text>
+                                </View>
+                                <View className="flex-row justify-between pt-2 border-t border-indigo-100">
+                                    <Text className="text-indigo-800 text-sm">Insurance</Text>
+                                    <Text className="text-indigo-900 font-bold text-sm">{formatPHP(computedInsurance)}</Text>
+                                </View>
+                            </View>
+                        ) : null}
 
                         {/* Receipt */}
                         <View className="mb-4">

@@ -84,9 +84,6 @@ describe('PaymentService', () => {
         expect(payments[0].borrowerId).toBe(borrower.id);
         expect(payments[0].collectorId).toBe(collector.id);
 
-        const savings = await database.get<SavingsTransaction>('savings_transactions').query().fetch();
-        expect(savings).toHaveLength(1);
-        expect(savings[0].amount).toBeCloseTo(10);
     });
 
     it('marks a loan paid when posted payments cover the receivable', async () => {
@@ -113,6 +110,7 @@ describe('PaymentService', () => {
         await PaymentService.postPayment({
             loanId: loan.id,
             amount: 300,
+            depositAmount: 10,
             paymentDate: Date.now(),
             encodedBy: 'admin-user',
             database,
@@ -131,6 +129,7 @@ describe('PaymentService', () => {
         const payment = await PaymentService.postPayment({
             loanId: loan.id,
             amount: 300,
+            depositAmount: 10,
             paymentDate: Date.now(),
             encodedBy: 'admin-user',
             database,
@@ -203,41 +202,6 @@ describe('PaymentService', () => {
         expect(paymentUpdateLog?.newData).toContain('RCT-NEW');
     });
 
-    it('removes excess auto-deposits when a payment edit reduces paid schedules', async () => {
-        const { loan } = await createLoanWithSchedules();
-
-        const payment = await PaymentService.postPayment({
-            loanId: loan.id,
-            amount: 300,
-            paymentDate: Date.now(),
-            encodedBy: 'admin-user',
-            database,
-        });
-
-        let linkedAutoDeposits = await database.get<SavingsTransaction>('savings_transactions')
-            .query(Q.where('reference_id', payment.id), Q.where('type', 'deposit'))
-            .fetch();
-        expect(linkedAutoDeposits.filter(tx => tx.deletedAt === null)).toHaveLength(3);
-
-        await PaymentService.updatePayment(payment.id, {
-            amount: 50,
-            paymentDate: Date.now(),
-            performedBy: 'admin-user',
-            database,
-        });
-
-        linkedAutoDeposits = await database.get<SavingsTransaction>('savings_transactions')
-            .query(Q.where('reference_id', payment.id), Q.where('type', 'deposit'))
-            .fetch();
-        expect(linkedAutoDeposits.filter(tx => tx.deletedAt === null)).toHaveLength(0);
-
-        const schedules = await database.get<PaymentSchedule>('payment_schedules')
-            .query(Q.sortBy('due_date', Q.asc))
-            .fetch();
-        expect(schedules[0].status).toBe('partial');
-        expect(schedules.slice(1).every(schedule => schedule.status !== 'paid')).toBe(true);
-    });
-
     it('applies savings to a loan through the central payment flow', async () => {
         const { borrower, loan } = await createLoanWithSchedules();
 
@@ -256,13 +220,10 @@ describe('PaymentService', () => {
             .fetch();
 
         const withdrawal = linkedSavings.find(tx => tx.type === 'withdraw_loan');
-        const autoDeposit = linkedSavings.find(tx => tx.type === 'deposit');
 
         expect(withdrawal).toBeDefined();
         expect(withdrawal?.amount).toBe(100);
         expect(payment.borrowerId).toBe(borrower.id);
-        expect(autoDeposit).toBeDefined();
-        expect(autoDeposit?.amount).toBeCloseTo(10);
     });
 
     it('calculates getLoanBalance correctly with payments and penalties', async () => {

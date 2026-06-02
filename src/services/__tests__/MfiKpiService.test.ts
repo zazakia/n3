@@ -33,8 +33,8 @@ describe('MfiKpiService', () => {
 
                 const loan = await database.get('loans').create((r: any) => {
                     r.borrowerId = b.id;
-                    r.principalAmount = 10000;
-                    r.totalAmount = 12000;
+                    r.principalAmount = 1000;
+                    r.totalAmount = 1000;
                     r.status = 'active';
                     r.releaseDate = now.getTime() - 200 * 24 * 60 * 60 * 1000;
                 });
@@ -95,8 +95,8 @@ describe('MfiKpiService', () => {
 
                 const loan = await database.get('loans').create((r: any) => {
                     r.borrowerId = b.id;
-                    r.principalAmount = 5000;
-                    r.totalAmount = 6000;
+                    r.principalAmount = 500;
+                    r.totalAmount = 500;
                     r.status = 'active';
                     r.releaseDate = now.getTime();
                 });
@@ -113,6 +113,64 @@ describe('MfiKpiService', () => {
             const report = await service.getActiveLoansReportData();
             const entry = report.find((r: any) => r.clientName === 'Future Borrower');
             expect(entry?.agings.notDue).toBe(500);
+        });
+
+        it('allocates missing balance to the last overdue bucket when schedules do not sum to totalAmount', async () => {
+            const now = new Date();
+
+            await database.write(async () => {
+                const b = await database.get('borrowers').create((r: any) => {
+                    r.fullName = 'Missing Balance Borrower';
+                });
+
+                const loan = await database.get('loans').create((r: any) => {
+                    r.borrowerId = b.id;
+                    r.principalAmount = 10000;
+                    r.totalAmount = 12400; // true total loan
+                    r.status = 'active';
+                    r.releaseDate = now.getTime() - 200 * 24 * 60 * 60 * 1000;
+                });
+
+                // Schedule 1: 50 days overdue, 5000 scheduled
+                await database.get('payment_schedules').create((s: any) => {
+                    s.loanId = loan.id;
+                    s.scheduledAmount = 5000;
+                    s.status = 'pending';
+                    s.dueDate = now.getTime() - 50 * 24 * 60 * 60 * 1000;
+                });
+
+                // Schedule 2: 20 days overdue, 5000 scheduled
+                // Sum of schedules is 10000, but loan.totalAmount is 12400.
+                // The missing 2400 should be appended and tied to Schedule 2's dueDate (20 days overdue).
+                await database.get('payment_schedules').create((s: any) => {
+                    s.loanId = loan.id;
+                    s.scheduledAmount = 5000;
+                    s.status = 'pending';
+                    s.dueDate = now.getTime() - 20 * 24 * 60 * 60 * 1000;
+                });
+
+                // Make a payment of 2000
+                await database.get('payments').create((p: any) => {
+                    p.loanId = loan.id;
+                    p.borrowerId = b.id;
+                    p.amount = 2000;
+                    p.paymentDate = now.getTime() - 5 * 24 * 60 * 60 * 1000;
+                });
+            });
+
+            const report = await service.getActiveLoansReportData();
+            const entry = report.find((r: any) => r.clientName === 'Missing Balance Borrower');
+
+            // Total balance should be 12400 - 2000 = 10400
+            expect(entry.totalLoanBalance).toBe(10400);
+
+            // Payment of 2000 covers part of Schedule 1 (5000 - 2000 = 3000 remaining in day46_60 bucket)
+            expect(entry.agings.day46_60).toBe(3000);
+
+            // Schedule 2 is untouched (5000 in day1_45 bucket)
+            // PLUS missing balance of 2400 inherits Schedule 2's dueDate (day1_45 bucket)
+            // Total in day1_45 bucket = 5000 + 2400 = 7400
+            expect(entry.agings.day1_45).toBe(7400);
         });
     });
 
@@ -334,8 +392,8 @@ describe('MfiKpiService', () => {
                 const loan = await database.get('loans').create((l: any) => {
                     l.borrowerId = borrower.id;
                     l.loanNumber = 'LN-DRILL';
-                    l.principalAmount = 2000;
-                    l.totalAmount = 2400;
+                    l.principalAmount = 800;
+                    l.totalAmount = 800;
                     l.status = 'active';
                     l.releaseDate = now - 70 * dayMs;
                 });

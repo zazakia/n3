@@ -16,6 +16,7 @@ const AUTO_DEPOSIT_NOTE_PREFIX = 'Auto-deposit from payment for schedule';
 export interface PostPaymentParams {
     loanId: string;
     amount: number;
+    depositAmount?: number;
     paymentDate: Date | number;
     receiptNumber?: string | null;
     notes?: string | null;
@@ -26,6 +27,7 @@ export interface PostPaymentParams {
 
 export interface UpdatePaymentParams {
     amount: number;
+    depositAmount?: number;
     paymentDate: Date | number;
     receiptNumber?: string | null;
     notes?: string | null;
@@ -205,6 +207,26 @@ export class PaymentService {
                             amount: params.amount,
                             date: nextPaymentDate,
                             notes: savings.notes,
+                        },
+                    });
+                } else if (savings.type === 'deposit' && params.depositAmount !== undefined) {
+                    const oldSavingsData: any = { ...savings._raw };
+                    await savings.update(record => {
+                        record.amount = params.depositAmount!;
+                        record.date = nextPaymentDate;
+                    });
+                    logParams.push({
+                        entityType: 'savings_transactions',
+                        entityId: savings.id,
+                        action: 'UPDATE',
+                        performedBy: params.performedBy || undefined,
+                        oldData: {
+                            amount: oldSavingsData.amount,
+                            date: oldSavingsData.date,
+                        },
+                        newData: {
+                            amount: params.depositAmount!,
+                            date: nextPaymentDate,
                         },
                     });
                 }
@@ -390,7 +412,6 @@ export class PaymentService {
                 });
             }
         }
-
         await this.reconcileAutoDeposits(db, loan, schedules, options);
     }
 
@@ -519,6 +540,31 @@ export class PaymentService {
                 scheduleId: firstOpenSchedule?.id || '',
             },
         });
+
+        if (params.depositAmount && params.depositAmount > 0) {
+            const savings = await db.get<SavingsTransaction>('savings_transactions').create(record => {
+                record._raw.id = uuid.v4().toString();
+                record.borrowerId = loan.borrowerId;
+                record.type = 'deposit';
+                record.amount = params.depositAmount!;
+                record.referenceId = payment.id;
+                record.date = paymentDate;
+                record.notes = `Auto-deposit from payment`;
+            });
+
+            logParams.push({
+                entityType: 'savings_transactions',
+                entityId: savings.id,
+                action: 'CREATE',
+                performedBy: params.encodedBy || undefined,
+                newData: {
+                    borrowerId: loan.borrowerId,
+                    type: 'deposit',
+                    amount: params.depositAmount!,
+                    referenceId: payment.id,
+                },
+            });
+        }
 
         await this.recomputeLoanAfterPayment(db, loan, {
             paymentId: payment.id,

@@ -810,6 +810,26 @@ export class MfiKpiService {
             };
         });
         
+        // Distribution Pool 1.5: Missing Scheduled Amount (Legacy data inconsistency)
+        const scheduleTotal = sortedSchedules.reduce((sum, s) => sum + (s.scheduledAmount || 0), 0);
+        const expectedTotal = loan.totalAmount || 0;
+        
+        if (expectedTotal > scheduleTotal) {
+            const missingAmount = expectedTotal - scheduleTotal;
+            const paidForMissing = Math.min(remainingPaid, missingAmount);
+            remainingPaid -= paidForMissing;
+            
+            const lastScheduleDate = sortedSchedules.length > 0 
+                ? new Date(sortedSchedules[sortedSchedules.length - 1].dueDate)
+                : (loan.releaseDate ? new Date(loan.releaseDate) : now);
+            
+            balances.push({
+                schedule: { id: 'missing_balance', dueDate: lastScheduleDate } as any,
+                balance: Math.max(0, missingAmount - paidForMissing),
+                daysOverdue: differenceInDays(now, lastScheduleDate)
+            });
+        }
+        
         // Distribution Pool 2: Penalties (Any remaining payment applies to penalties)
         const remainingPenalty = Math.max(0, penaltyTotal - remainingPaid);
         if (remainingPenalty > 0) {

@@ -61,10 +61,10 @@ describe('LoanCalculatorService', () => {
 
             expect(result.numPayments).toBe(24);
             expect(result.totalInterest).toBe(1000);
-            expect(result.totalFees).toBe(67);
-            expect(result.totalAmount).toBe(6067);
-            expect(result.installmentAmount).toBeCloseTo(252.79, 2);
-            expect(result.schedule[0].fees).toBeCloseTo(2.79, 2);
+            expect(result.totalFees).toBe(1608);
+            expect(result.totalAmount).toBe(7608);
+            expect(result.installmentAmount).toBeCloseTo(317, 2);
+            expect(result.schedule[0].fees).toBeCloseTo(67, 2);
         });
 
         it('handles case with no payments correctly in maturityDate check', () => {

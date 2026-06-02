@@ -13,7 +13,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, placeho
     return (
         <View className="flex-row items-center bg-white border border-gray-200 rounded-xl px-3 py-2.5 shadow-sm">
             <MaterialIcons name="calendar-today" size={18} color="#64748b" />
-            <View style={{ flex: 1, marginLeft: 8, flexDirection: 'row', alignItems: 'center' }}>
+            <div style={{ flex: 1, marginLeft: 8, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                 <input
                     type="date"
                     value={value || ''}
@@ -29,8 +29,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, placeho
                         width: '100%'
                     }}
                 />
-            </View>
-            {value && onClear && (
+            </div>
+            {!!value && !!onClear && (
                 <Pressable onPress={onClear}>
                     <MaterialIcons name="close" size={18} color="#94a3b8" />
                 </Pressable>

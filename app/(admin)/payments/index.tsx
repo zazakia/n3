@@ -146,6 +146,11 @@ export default function PaymentsListScreen() {
                     onChangeText={setSearchQuery}
                     placeholder="Search name, loan #, receipt..."
                 />
+                {searchQuery.trim().length > 0 && (
+                    <Text className="text-xs text-gray-500 mt-1 ml-2 font-medium">
+                        Showing {filteredPayments.length} result(s)
+                    </Text>
+                )}
             </View>
 
             {loading ? (

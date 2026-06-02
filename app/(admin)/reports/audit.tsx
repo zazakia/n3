@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import AuditService, { AuditIssue, AuditReport } from '../../../src/services/AuditService';
 import { database } from '../../../src/database';
 import Loan from '../../../src/database/models/Loan';
+import Payment from '../../../src/database/models/Payment';
 import { AnimatedPressable } from '../../../src/components/AnimatedPressable';
 import { format } from 'date-fns';
 
@@ -93,6 +94,43 @@ export default function SystemAuditScreen() {
         }
     };
 
+    const handleNavigateToEntity = async (issue: AuditIssue) => {
+        if (issue.entityId === 'system' || issue.id.startsWith('report_')) {
+            Alert.alert('System Issue', 'This is a system-wide or report-specific issue and does not have a separate detail page.');
+            return;
+        }
+
+        if (issue.entityType === 'Loan') {
+            router.push(`/(admin)/loans/${issue.entityId}`);
+        } else if (issue.entityType === 'Borrower') {
+            router.push(`/(admin)/borrowers/${issue.entityId}`);
+        } else if (issue.entityType === 'Payment') {
+            try {
+                const payment = await database.get<Payment>('payments').find(issue.entityId);
+                if (payment && payment.loanId) {
+                    router.push(`/(admin)/loans/${payment.loanId}`);
+                } else {
+                    Alert.alert('Error', 'Could not locate associated loan for this payment.');
+                }
+            } catch (err) {
+                console.error(err);
+                Alert.alert('Error', 'Could not find payment details.');
+            }
+        } else {
+            // Fallback: If it's a schedule, try to find the schedule's loan
+            try {
+                const schedule = await database.get<any>('payment_schedules').find(issue.entityId);
+                if (schedule && schedule.loanId) {
+                    router.push(`/(admin)/loans/${schedule.loanId}`);
+                } else {
+                    Alert.alert('Info', `This ${issue.entityType} issue does not have a direct detail screen.`);
+                }
+            } catch (err) {
+                Alert.alert('Info', `This ${issue.entityType} issue does not have a direct detail screen.`);
+            }
+        }
+    };
+
     const criticalIssues = report?.issues.filter(i => i.category === 'Critical') || [];
     const warningIssues = report?.issues.filter(i => i.category === 'Warning') || [];
     const infoIssues = report?.issues.filter(i => i.category === 'Info') || [];
@@ -111,7 +149,17 @@ export default function SystemAuditScreen() {
                             <View className="flex-1 pr-4">
                                 <View className="flex-row items-center mb-1">
                                     <Text className="text-[10px] font-black uppercase text-gray-700 tracking-tighter mr-2">{issue.entityType}</Text>
-                                    {!!issue.entityName && <Text className="text-[10px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">{issue.entityName}</Text>}
+                                    {!!issue.entityName && (
+                                        <Pressable 
+                                            onPress={() => handleNavigateToEntity(issue)}
+                                            className="active:opacity-60 flex-row items-center bg-blue-50 px-2 py-0.5 rounded border border-blue-100"
+                                        >
+                                            <Text className="text-[10px] font-black text-blue-600 underline mr-1">
+                                                {issue.entityName}
+                                            </Text>
+                                            <MaterialIcons name="open-in-new" size={10} color="#2563EB" />
+                                        </Pressable>
+                                    )}
                                 </View>
                                 <Text className="text-gray-900 font-bold text-sm leading-tight">{issue.message || ''}</Text>
                                 {!!issue.suggestedFix && <Text className="text-gray-700 text-[11px] mt-1 italic">Suggestion: {issue.suggestedFix}</Text>}

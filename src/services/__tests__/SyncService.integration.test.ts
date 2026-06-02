@@ -1,4 +1,4 @@
-﻿import { Database } from '@nozbe/watermelondb';
+import { Database } from '@nozbe/watermelondb';
 import LokiJSAdapter from '@nozbe/watermelondb/adapters/lokijs';
 import Loki from 'lokijs';
 import { mySchema } from '../../database/schema';
@@ -20,6 +20,7 @@ import Collector from '../../database/models/Collector';
 import LoanPenalty from '../../database/models/LoanPenalty';
 import CollectionGroup from '../../database/models/CollectionGroup';
 import ActionLog from '../../database/models/ActionLog';
+import RecurringExpense from '../../database/models/RecurringExpense';
 import { SyncService } from '../SyncService';
 import { closeTestDatabase } from '../../__tests__/test-utils';
 
@@ -97,7 +98,8 @@ const modelClasses = [
     Collector,
     LoanPenalty,
     CollectionGroup,
-    ActionLog
+    ActionLog,
+    RecurringExpense
 ];
 
 let mockTestDb: Database;

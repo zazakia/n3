@@ -6,12 +6,23 @@ import { formatPHP } from '../../../src/utils/currency';
 import { startOfMonth, endOfMonth, addMonths, subMonths, format } from 'date-fns';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { SearchBar } from '../../../src/components/SearchBar';
 
 export default function DisbursementsScreen() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [loans, setLoans] = useState<any[]>([]);
     const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const filteredLoans = React.useMemo(() => {
+        if (!searchQuery) return loans;
+        const query = searchQuery.toLowerCase();
+        return loans.filter(loan => 
+            (loan.borrowerName && loan.borrowerName.toLowerCase().includes(query)) ||
+            (loan.loanNumber && loan.loanNumber.toLowerCase().includes(query))
+        );
+    }, [loans, searchQuery]);
 
     const startDate = startOfMonth(currentMonth).getTime();
     const endDate = endOfMonth(currentMonth).getTime();
@@ -43,8 +54,8 @@ export default function DisbursementsScreen() {
     };
     const isCurrentMonth = format(currentMonth, 'yyyy-MM') === format(new Date(), 'yyyy-MM');
 
-    const totalDisbursed = loans.reduce((sum, loan) => sum + loan.principalAmount, 0);
-    const totalInsurance = loans.reduce((sum, loan) => sum + (loan.insuranceAmount || 0), 0);
+    const totalDisbursed = filteredLoans.reduce((sum, loan) => sum + loan.principalAmount, 0);
+    const totalInsurance = filteredLoans.reduce((sum, loan) => sum + (loan.insuranceAmount || 0), 0);
     const netDisbursed = totalDisbursed - totalInsurance;
 
     return (
@@ -84,7 +95,7 @@ export default function DisbursementsScreen() {
                     <View className="bg-blue-600 rounded-3xl p-6 shadow-sm mb-3">
                         <Text className="text-blue-100 font-bold uppercase tracking-widest text-xs mb-1">Total Principal Disbursed</Text>
                         <Text className="text-white text-3xl font-black">{formatPHP(totalDisbursed)}</Text>
-                        <Text className="text-blue-200 mt-2 font-semibold">{loans.length} Loans Released</Text>
+                        <Text className="text-blue-200 mt-2 font-semibold">{filteredLoans.length} Loans Released</Text>
                     </View>
                     
                     <View className="flex-row gap-3">
@@ -98,6 +109,20 @@ export default function DisbursementsScreen() {
                         </View>
                     </View>
                 </View>
+
+                {/* Search Box */}
+                <View className="mb-2">
+                    <SearchBar 
+                        value={searchQuery} 
+                        onChangeText={setSearchQuery} 
+                        placeholder="Search by client name or loan number..." 
+                    />
+                    {searchQuery.trim().length > 0 && (
+                        <Text className="text-xs text-gray-500 mt-1 ml-2 font-medium">
+                            Showing {filteredLoans.length} result(s)
+                        </Text>
+                    )}
+                </View>
             </View>
 
             <View className="p-4 px-6">
@@ -105,7 +130,7 @@ export default function DisbursementsScreen() {
                     <ActivityIndicator color="#3B82F6" className="mt-10" />
                 ) : (
                     <>
-                        {loans.map((loan, idx) => (
+                        {filteredLoans.map((loan, idx) => (
                             <Animated.View
                                 key={loan.id}
                                 entering={FadeInDown.delay(idx * 50).springify()}
@@ -151,7 +176,7 @@ export default function DisbursementsScreen() {
                             </Animated.View>
                         ))}
 
-                        {loans.length === 0 && (
+                        {filteredLoans.length === 0 && (
                             <View className="items-center justify-center p-10 opacity-50">
                                 <MaterialIcons name="receipt-long" size={48} color="#9CA3AF" />
                                 <Text className="text-gray-700 font-bold mt-4">No disbursements for this month</Text>

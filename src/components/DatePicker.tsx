@@ -63,7 +63,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ value, onChange, placeho
                 >
                     {value && isValid(parseISO(value)) ? format(parseISO(value), 'MMM d, yyyy') : placeholder}
                 </Text>
-                {value && onClear && (
+                {!!value && !!onClear && (
                     <Pressable onPress={(e) => {
                         e.stopPropagation();
                         onClear();

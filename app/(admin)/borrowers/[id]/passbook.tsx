@@ -9,6 +9,7 @@ import Payment from '../../../../src/database/models/Payment';
 import { Q } from '@nozbe/watermelondb';
 import { MaterialIcons } from '@expo/vector-icons';
 import { formatPHP } from '../../../../src/utils/currency';
+import Collector from '../../../../src/database/models/Collector';
 import { formatDate } from '../../../../src/utils/dates';
 import { PdfGenerator } from '../../../../src/services/PdfGenerator';
 import { LoanCalculatorService } from '../../../../src/services/LoanCalculatorService';
@@ -40,6 +41,7 @@ export default function ClientPassbookScreen() {
     const [isConfirmDeletePaymentVisible, setIsConfirmDeletePaymentVisible] = useState(false);
     const [selectedPaymentToDelete, setSelectedPaymentToDelete] = useState<Payment | null>(null);
     const [saving, setSaving] = useState(false);
+    const [collectorName, setCollectorName] = useState<string>('—');
 
     const loadData = async () => {
         try {
@@ -56,6 +58,17 @@ export default function ClientPassbookScreen() {
             ).fetch();
 
             const orderedLoans = sortLoansChronologically(l);
+
+            let cName = '—';
+            if (b.collectorId) {
+                try {
+                    const c = await database.collections.get<Collector>('collectors').find(b.collectorId);
+                    if (c) cName = c.fullName;
+                } catch (e) {
+                    // Ignore if collector not found
+                }
+            }
+            setCollectorName(cName);
 
             setBorrower(b);
             setLoans(orderedLoans);
@@ -107,38 +120,50 @@ export default function ClientPassbookScreen() {
 
     const totalPaid = loanPayments.reduce((s, p) => s + p.amount, 0);
 
-    // GROSS METHOD: Everything is grouped together. Total Balance is simply Total Loan - Total Paid.
     const depositAmount = selectedLoan?.depositAmount || 0;
     const insuranceAmount = selectedLoan?.insuranceAmount || 0;
-    const grossTotalLoan = selectedLoan?.totalAmount || 1;
     
-    // Fraction of each payment that goes to Savings and Insurance (for informational tracking)
-    const savingsRatio = depositAmount / grossTotalLoan;
-    const insuranceRatio = insuranceAmount / grossTotalLoan;
-
-    // Totals for the summary cards
-    const accumulatedSavings = totalPaid * savingsRatio;
+    const expectedPrincipal = selectedLoan?.principalAmount || 0;
+    const expectedInterest = selectedLoan?.interestAmount > 0 ? selectedLoan.interestAmount : expectedPrincipal * ((selectedLoan?.interestRate || 0) / 100);
+    const expectedTotal = expectedPrincipal + expectedInterest + depositAmount + insuranceAmount;
+    const principalRatio = expectedTotal > 0 ? expectedPrincipal / expectedTotal : 0;
+    const savingsRatio = expectedTotal > 0 ? depositAmount / expectedTotal : 0;
+    const insuranceRatio = expectedTotal > 0 ? insuranceAmount / expectedTotal : 0;
+    
+    const accumulatedPrincipal = totalPaid * principalRatio;
+    const grossTotalLoan = selectedLoan?.totalAmount || 1;
     const grossBalance = Math.max(0, grossTotalLoan - totalPaid);
 
-    // New calculations for Loan Specifications
     const netLoanReleased = selectedLoan ? selectedLoan.principalAmount - (selectedLoan.deductedAmount || 0) : 0;
     const numTerms = selectedLoan ? LoanCalculatorService.paymentsForFrequency(selectedLoan.term, selectedLoan.termUnit, selectedLoan.frequency) : 1;
-    const dailySavings = selectedLoan ? (selectedLoan.depositAmount || 0) / numTerms : 0;
-    const dailyInsurance = selectedLoan ? (selectedLoan.insuranceAmount || 0) / numTerms : 0;
+
+    const periodicDeposit = depositAmount;
+    const periodicInsurance = insuranceAmount;
+    const expectedInstallment = selectedLoan?.installmentAmount || 1;
+
+    let accumulatedSavings = 0;
+    let accumulatedInsurance = 0;
 
     // Process Ledger with Gross Method
     let currentBalance = grossTotalLoan;
     const ledgerRows = [...loanPayments]
         .sort((a, b) => new Date(a.paymentDate).getTime() - new Date(b.paymentDate).getTime())
         .map(p => {
-            const pSavings = p.amount * savingsRatio;
+            const paymentRatio = p.amount / expectedInstallment;
+            const pSavings = paymentRatio * periodicDeposit;
+            const pInsurance = paymentRatio * periodicInsurance;
+            
+            accumulatedSavings += pSavings;
+            accumulatedInsurance += pInsurance;
+            
             currentBalance -= p.amount;
             return {
                 id: p.id,
                 paymentDate: p.paymentDate,
                 amount: p.amount,
-                pLoan: p.amount, // Whole amount contributes to balance reduction
+                pLoan: p.amount,
                 pSavings,
+                pInsurance,
                 runningBalance: Math.max(0, currentBalance)
             };
         })
@@ -180,6 +205,7 @@ export default function ClientPassbookScreen() {
                         paymentDate: p.paymentDate,
                         amount: p.amount,
                         pSavings: p.amount * savingsRatio,
+                        pInsurance: p.amount * insuranceRatio,
                         receiptNumber: p.receiptNumber || undefined,
                         notes: p.notes || undefined,
                         runningBalance: Math.max(0, rb)
@@ -189,6 +215,38 @@ export default function ClientPassbookScreen() {
         } catch (e) {
             console.error('Generate PDF failed:', e);
             alert('Failed to generate PDF.');
+        }
+    };
+
+    const handlePrintVoucher = async () => {
+        if (!selectedLoan || !borrower) return;
+        try {
+            await PdfGenerator.generateVoucher(
+                { fullName: borrower.fullName },
+                {
+                    loanNumber: selectedLoan.loanNumber,
+                    principalAmount: selectedLoan.principalAmount,
+                    interestRate: selectedLoan.interestRate,
+                    interestType: selectedLoan.interestType,
+                    term: selectedLoan.term,
+                    termUnit: selectedLoan.termUnit,
+                    frequency: selectedLoan.frequency,
+                    installmentAmount: selectedLoan.installmentAmount,
+                    totalAmount: selectedLoan.totalAmount,
+                    status: selectedLoan.status,
+                    deductedAmount: selectedLoan.deductedAmount,
+                    loanBatch: selectedLoan.loanBatch,
+                    isReloan: selectedLoan.isReloan,
+                    releaseDate: selectedLoan.releaseDate ? new Date(selectedLoan.releaseDate as number | Date).getTime() : undefined,
+                }
+            );
+        } catch (error) {
+            console.error('Failed to generate voucher', error);
+            if (Platform.OS === 'web') {
+                window.alert('Failed to generate voucher.');
+            } else {
+                Alert.alert('Error', 'Failed to generate voucher.');
+            }
         }
     };
 
@@ -207,7 +265,7 @@ export default function ClientPassbookScreen() {
                         </View>
                         <View className="flex-1">
                             <Text className="text-2xl font-extrabold text-white mb-1" numberOfLines={1}>{borrower.fullName}</Text>
-                            {borrower.phone && (
+                            {!!borrower.phone && (
                                 <Pressable className="flex-row items-center bg-white/10 px-3 py-1.5 rounded-full self-start" onPress={() => Linking.openURL(`tel:${borrower.phone}`)}>
                                     <MaterialIcons name="phone" size={14} color="#FFF" className="mr-1.5" />
                                     <Text className="text-white font-bold text-xs tracking-wider">{borrower.decryptedPhone}</Text>
@@ -216,24 +274,45 @@ export default function ClientPassbookScreen() {
                         </View>
                     </View>
 
-                    {borrower.address && (
+                    {!!borrower.address && (
                         <View className="flex-row items-start mt-2 bg-white/10 p-3 rounded-xl">
                             <MaterialIcons name="location-on" size={16} color="#FFF" className="mr-2 mt-0.5" />
                             <Text className="text-white/90 text-sm flex-1">{borrower.decryptedAddress}</Text>
                         </View>
                     )}
+
+                    <View className="flex-row flex-wrap mt-3 gap-2">
+                        {!!borrower.group && (
+                            <View className="flex-row items-center bg-white/20 px-2 py-1.5 rounded-md">
+                                <MaterialIcons name="groups" size={14} color="#FFF" className="mr-1" />
+                                <Text className="text-white text-xs font-bold">{borrower.group}</Text>
+                            </View>
+                        )}
+                        {!!borrower.business && (
+                            <View className="flex-row items-center bg-white/20 px-2 py-1.5 rounded-md">
+                                <MaterialIcons name="store" size={14} color="#FFF" className="mr-1" />
+                                <Text className="text-white text-xs font-bold">{borrower.business}</Text>
+                            </View>
+                        )}
+                        {collectorName !== '—' && (
+                            <View className="flex-row items-center bg-white/20 px-2 py-1.5 rounded-md">
+                                <MaterialIcons name="person-pin" size={14} color="#FFF" className="mr-1" />
+                                <Text className="text-white text-xs font-bold">{collectorName}</Text>
+                            </View>
+                        )}
+                    </View>
                 </View>
 
                 {/* Loan Selector (if multiple) */}
                 {loans.length > 1 && (
                     <View className="mb-6">
                         <Text className="text-xs font-bold text-gray-700 uppercase tracking-widest mb-3">Select Loan Timeline</Text>
-                        <ScrollView  horizontal showsHorizontalScrollIndicator={false} >
+                        <View className="flex-row flex-wrap">
                             {loans.map(loan => (
                                 <Pressable
                                     key={loan.id}
                                     onPress={() => setSelectedLoanId(loan.id)}
-                                    className={`px-5 py-3 rounded-2xl border mr-3 flex-row items-center ${selectedLoanId === loan.id ? 'bg-[#D32F2F] border-red-700' : 'bg-white border-gray-200'}`}
+                                    className={`px-5 py-3 rounded-2xl border mr-3 mb-3 flex-row items-center ${selectedLoanId === loan.id ? 'bg-[#D32F2F] border-red-700' : 'bg-white border-gray-200'}`}
                                 >
                                     <MaterialIcons name={loan.status === 'active' ? 'play-circle-outline' : 'check-circle'} size={18} color={selectedLoanId === loan.id ? '#FFF' : '#6B7280'} className="mr-2" />
                                     <View>
@@ -254,7 +333,7 @@ export default function ClientPassbookScreen() {
                                     </View>
                                 </Pressable>
                             ))}
-                        </ScrollView>
+                        </View>
                     </View>
                 )}
 
@@ -286,30 +365,67 @@ export default function ClientPassbookScreen() {
 
                             <View className="flex-row border-t border-gray-100 pt-5">
                                 <View className="flex-1 items-center border-r border-gray-100">
-                                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1">Loan Amount (Principal)</Text>
+                                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1 text-center">Loan Amount (Principal)</Text>
                                     <Text className="text-base font-extrabold text-primary">{formatPHP(selectedLoan.principalAmount)}</Text>
                                 </View>
                                 <View className="flex-1 items-center border-r border-gray-100">
-                                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1">Total Loan (P+I)</Text>
+                                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1 text-center">Total Loan (P+I)</Text>
                                     <Text className="text-base font-extrabold text-blue-600">{formatPHP(grossTotalLoan)}</Text>
                                 </View>
                                 <View className="flex-1 items-center border-r border-gray-100">
-                                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1">Total Paid</Text>
+                                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1 text-center">Total Paid</Text>
                                     <Text className="text-base font-extrabold text-[#388E3C]">{formatPHP(totalPaid)}</Text>
                                 </View>
                                 <View className="flex-1 items-center">
-                                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1">Total Savings</Text>
+                                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1 text-center">Total Savings</Text>
                                     <Text className="text-base font-extrabold text-orange-600">{formatPHP(accumulatedSavings)}</Text>
                                 </View>
                             </View>
 
-                            <Pressable
-                                className="mt-6 flex-row items-center justify-center p-3 bg-gray-50 rounded-xl"
-                                onPress={handlePrint}
-                            >
-                                <MaterialIcons name="picture-as-pdf" size={20} color="#D32F2F" className="mr-2" />
-                                <Text className="text-[#D32F2F] font-bold uppercase tracking-wider text-xs">Export Statement</Text>
-                            </Pressable>
+                            <View className="flex-row border-t border-gray-100 pt-4 mt-4">
+                                <View className="flex-1 items-center border-r border-gray-100">
+                                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1 text-center">Prin. Paid</Text>
+                                    <Text className="text-base font-extrabold text-gray-900">{formatPHP(accumulatedPrincipal)}</Text>
+                                </View>
+                                <View className="flex-1 items-center border-r border-gray-100">
+                                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1 text-center">Total Insurance</Text>
+                                    <Text className="text-base font-extrabold text-indigo-600">{formatPHP(accumulatedInsurance)}</Text>
+                                </View>
+                                <View className="flex-[2] items-center">
+                                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1 text-center">Remaining Balance</Text>
+                                    <Text className="text-base font-extrabold text-gray-900">{formatPHP(grossBalance)}</Text>
+                                </View>
+                            </View>
+
+                            {(selectedLoan.isReloan || (selectedLoan.deductedAmount || 0) > 0) && (
+                                <View className="flex-row border-t border-gray-100 pt-4 mt-4">
+                                    <View className="flex-1 items-center border-r border-gray-100">
+                                        <Text className="text-[10px] font-bold text-red-700 uppercase tracking-widest mb-1 text-center">Upfront Deduction (Prev. Bal)</Text>
+                                        <Text className="text-base font-extrabold text-red-600">-{formatPHP(selectedLoan.deductedAmount || 0)}</Text>
+                                    </View>
+                                    <View className="flex-1 items-center">
+                                        <Text className="text-[10px] font-bold text-green-700 uppercase tracking-widest mb-1 text-center">Net Loan Release</Text>
+                                        <Text className="text-base font-extrabold text-green-600">{formatPHP(netLoanReleased)}</Text>
+                                    </View>
+                                </View>
+                            )}
+
+                            <View className="flex-row mt-6 gap-2">
+                                <Pressable
+                                    className="flex-1 flex-row items-center justify-center p-3 bg-gray-50 rounded-xl"
+                                    onPress={handlePrint}
+                                >
+                                    <MaterialIcons name="picture-as-pdf" size={20} color="#D32F2F" className="mr-2" />
+                                    <Text className="text-[#D32F2F] font-bold uppercase tracking-wider text-xs">Statement</Text>
+                                </Pressable>
+                                <Pressable
+                                    className="flex-1 flex-row items-center justify-center p-3 bg-purple-50 rounded-xl border border-purple-100"
+                                    onPress={handlePrintVoucher}
+                                >
+                                    <MaterialIcons name="print" size={20} color="#7E22CE" className="mr-2" />
+                                    <Text className="text-purple-700 font-bold uppercase tracking-wider text-xs">Voucher</Text>
+                                </Pressable>
+                            </View>
                         </View>
 
                         {/* Loan Specifications Section */}
@@ -321,14 +437,14 @@ export default function ClientPassbookScreen() {
                                 <SpecItem label="Cycle" value={selectedLoan.loanCycle?.toString() || '—'} />
                                 <SpecItem label="Date Released" value={selectedLoan.releaseDate ? formatDate(new Date(selectedLoan.releaseDate)) : '—'} />
                                 <SpecItem label="Maturity Date" value={selectedLoan.maturityDate ? formatDate(new Date(selectedLoan.maturityDate)) : '—'} />
+                                <SpecItem label="Term" value={`${selectedLoan.term} ${selectedLoan.termUnit.charAt(0).toUpperCase() + selectedLoan.termUnit.slice(1)}`} />
                                 <SpecItem label="Loan Amount (Principal)" value={formatPHP(selectedLoan.principalAmount)} />
-                                <SpecItem label="Daily/Weekly Collection" value={formatPHP(selectedLoan.installmentAmount)} />
+                                <SpecItem label={`${selectedLoan.frequency.charAt(0).toUpperCase() + selectedLoan.frequency.slice(1).replace('_', ' ')} Collection`} value={formatPHP(selectedLoan.installmentAmount)} />
                                 <SpecItem label="Interest Rate" value={`${selectedLoan.interestRate}%`} />
-                                <SpecItem label="Interest Amount" value={formatPHP(selectedLoan.interestAmount || 0)} />
-                                <SpecItem label="Insurance Portion" value={`${formatPHP(dailyInsurance)} / terms`} />
-                                <SpecItem label="Savings Portion" value={`${formatPHP(dailySavings)} / terms`} />
+                                <SpecItem label="Interest Amount" value={formatPHP(selectedLoan.interestAmount > 0 ? selectedLoan.interestAmount : selectedLoan.principalAmount * (selectedLoan.interestRate / 100))} />
+                                <SpecItem label="Insurance Portion" value={formatPHP(selectedLoan.insuranceAmount || 0)} />
+                                <SpecItem label="Savings Portion" value={formatPHP(selectedLoan.depositAmount || 0)} />
                                 <SpecItem label="Net Loan Released" value={formatPHP(netLoanReleased)} highlight />
-                                <SpecItem label="Insurance Total" value={formatPHP(selectedLoan.insuranceAmount || 0)} />
                             </View>
 
                             {selectedLoan.deductedAmount > 0 && (
@@ -342,7 +458,19 @@ export default function ClientPassbookScreen() {
                             )}
                         </View>
 
-                        <CalculationBasisCard interestType={selectedLoan.interestType} title="Payment Distribution Logic" />
+                        <CalculationBasisCard 
+                            interestType={selectedLoan.interestType} 
+                            title="Payment Distribution Logic" 
+                            principalAmount={selectedLoan.principalAmount}
+                            interestRate={selectedLoan.interestRate}
+                            interestAmount={selectedLoan.interestAmount > 0 ? selectedLoan.interestAmount : selectedLoan.principalAmount * (selectedLoan.interestRate / 100)}
+                            totalAmount={selectedLoan.totalAmount}
+                            depositAmount={selectedLoan.depositAmount || 0}
+                            insuranceAmount={selectedLoan.insuranceAmount || 0}
+                            installmentAmount={selectedLoan.installmentAmount}
+                            numPayments={numTerms}
+                            deductedAmount={selectedLoan.deductedAmount || 0}
+                        />
                     </View>
                 ) : (
                     <View className="bg-white rounded-2xl p-8 mb-6 border border-gray-100 items-center justify-center">
@@ -358,9 +486,10 @@ export default function ClientPassbookScreen() {
 
                         <View className="flex-row border-b-2 border-gray-100 pb-3 mb-2">
                             <Text className="flex-1 text-xs font-bold text-gray-700 uppercase tracking-widest">Date</Text>
-                            <Text className="flex-1 text-xs font-bold text-gray-700 uppercase tracking-widest text-right">Amount</Text>
-                            <Text className="flex-[0.8] text-xs font-bold text-gray-700 uppercase tracking-widest text-right">Savings</Text>
-                            <Text className="flex-1 text-xs font-bold text-gray-700 uppercase tracking-widest text-right">Balance</Text>
+                            <Text className="flex-[1.2] text-xs font-bold text-gray-700 uppercase tracking-widest text-right">Amount</Text>
+                            <Text className="flex-1 text-xs font-bold text-gray-700 uppercase tracking-widest text-right">Savings</Text>
+                            <Text className="flex-1 text-xs font-bold text-gray-700 uppercase tracking-widest text-right">Insurance</Text>
+                            <Text className="flex-[1.2] text-xs font-bold text-gray-700 uppercase tracking-widest text-right">Balance</Text>
                             <View className="w-8 ml-2"></View>
                         </View>
 
@@ -373,9 +502,10 @@ export default function ClientPassbookScreen() {
                                         <View className="w-2 h-2 rounded-full bg-green-500 mr-2" />
                                         <Text className="text-sm font-bold text-gray-900">{formatDate(new Date(row.paymentDate))}</Text>
                                     </View>
-                                    <Text className="flex-1 text-sm font-extrabold text-[#388E3C] text-right">+{formatPHP(row.amount)}</Text>
-                                    <Text className="flex-[0.8] text-sm font-bold text-orange-600 text-right">{formatPHP(row.pSavings)}</Text>
-                                    <View className="flex-1 items-end justify-center">
+                                    <Text className="flex-[1.2] text-sm font-extrabold text-[#388E3C] text-right">+{formatPHP(row.amount)}</Text>
+                                    <Text className="flex-1 text-sm font-bold text-orange-600 text-right">{formatPHP(row.pSavings)}</Text>
+                                    <Text className="flex-1 text-sm font-bold text-indigo-600 text-right">{formatPHP(row.pInsurance)}</Text>
+                                    <View className="flex-[1.2] items-end justify-center">
                                         <Text className="text-sm font-bold text-gray-900">{formatPHP(row.runningBalance)}</Text>
                                     </View>
                                     <Pressable 
@@ -402,9 +532,10 @@ export default function ClientPassbookScreen() {
                                     {selectedLoan.releaseDate ? formatDate(new Date(selectedLoan.releaseDate)) : 'Disbursement'}
                                 </Text>
                             </View>
-                            <Text className="flex-1 text-sm font-extrabold text-primary text-right">Loan Issued</Text>
-                            <Text className="flex-[0.8] text-sm font-bold text-gray-700 text-right">—</Text>
-                            <View className="flex-1 items-end justify-center">
+                            <Text className="flex-[1.2] text-sm font-extrabold text-primary text-right">Loan Issued</Text>
+                            <Text className="flex-1 text-sm font-bold text-gray-700 text-right">—</Text>
+                            <Text className="flex-1 text-sm font-bold text-gray-700 text-right">—</Text>
+                            <View className="flex-[1.2] items-end justify-center">
                                 <Text className="text-sm font-extrabold text-gray-900">{formatPHP(grossTotalLoan)}</Text>
                             </View>
                             <View className="w-8 ml-2"></View>

@@ -1,9 +1,9 @@
-// Mock dependencies
 jest.mock('@expo/vector-icons', () => {
     const React = require('react');
     const { Text } = require('react-native');
     return {
         MaterialIcons: ({ name }: any) => React.createElement(Text, null, name),
+        Ionicons: ({ name }: any) => React.createElement(Text, null, name),
     };
 });
 
@@ -103,28 +103,34 @@ describe('ActiveLoansReport', () => {
         (MfiKpiService.getActiveLoansReportData as jest.Mock).mockResolvedValue(mockReportData);
     });
 
-    it('renders loading state initially', async () => {
+    function renderScreen() {
         const ActiveLoansReport = require('../active-loans').default;
-        
-        const view = render(<ActiveLoansReport />);
+        return render(<ActiveLoansReport />);
+    }
+
+    async function renderAndWait() {
+        const view = renderScreen();
+        await waitFor(() => expect(view.queryByTestId('loading-indicator')).toBeNull(), { timeout: 3000 });
+        return view;
+    }
+
+    it('renders loading state initially', async () => {
+        let resolve!: (v: typeof mockReportData) => void;
+        (MfiKpiService.getActiveLoansReportData as jest.Mock).mockReturnValue(
+            new Promise<typeof mockReportData>(r => { resolve = r; })
+        );
+
+        const view = renderScreen();
         expect(view.getByTestId('loading-indicator')).toBeTruthy();
-        
-        // Wait for load to finish to prevent test bleed
-        await waitFor(() => {
-            expect(view.queryByTestId('loading-indicator')).toBeNull();
-        }, { timeout: 1000 });
+
+        await act(async () => { resolve(mockReportData); });
+
+        await waitFor(() => expect(view.queryByTestId('loading-indicator')).toBeNull(), { timeout: 3000 });
     });
 
     it('renders report data after loading', async () => {
-        const ActiveLoansReport = require('../active-loans').default;
-        
-        let view: any;
-        view = render(<ActiveLoansReport />);
-        const { getByText, queryByTestId, getAllByText } = view;
-        
-        await waitFor(() => {
-            expect(queryByTestId('loading-indicator')).toBeNull();
-        }, { timeout: 1000 });
+        const view = await renderAndWait();
+        const { getByText, getAllByText } = view;
 
         expect(getByText('John Doe')).toBeTruthy();
         expect(getByText('Jane Smith')).toBeTruthy();
@@ -133,12 +139,8 @@ describe('ActiveLoansReport', () => {
     });
 
     it('filters data by collector', async () => {
-        const ActiveLoansReport = require('../active-loans').default;
-        let view: any;
-        view = render(<ActiveLoansReport />);
+        const view = await renderAndWait();
         const { getByText, getByTestId, queryByText } = view;
-        
-        await waitFor(() => expect(queryByText('John Doe')).toBeTruthy());
 
         const collectorAPill = getByTestId('collector-pill-Collector A');
         await act(async () => {
@@ -162,12 +164,8 @@ describe('ActiveLoansReport', () => {
     });
 
     it('exports to Excel', async () => {
-        const ActiveLoansReport = require('../active-loans').default;
-        let view: any;
-        view = render(<ActiveLoansReport />);
-        const { getByTestId, queryByText } = view;
-        
-        await waitFor(() => expect(queryByText('John Doe')).toBeTruthy());
+        const view = await renderAndWait();
+        const { getByTestId } = view;
 
         const exportButton = getByTestId('export-excel');
         await act(async () => {

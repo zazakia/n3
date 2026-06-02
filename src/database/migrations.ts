@@ -237,7 +237,17 @@ export const myMigrations = schemaMigrations({
     },
     {
       toVersion: 26,
+      steps: [],
+    },
+    {
+      toVersion: 27,
       steps: [
+        addColumns({
+          table: 'payments',
+          columns: [
+            { name: 'borrower_id', type: 'string', isOptional: true },
+          ],
+        }),
         addColumns({
           table: 'expenses',
           columns: [
@@ -259,6 +269,17 @@ export const myMigrations = schemaMigrations({
             { name: 'created_at', type: 'number' },
             { name: 'updated_at', type: 'number' },
             { name: 'deleted_at', type: 'number', isOptional: true },
+          ],
+        }),
+      ],
+    },
+    {
+      toVersion: 28,
+      steps: [
+        addColumns({
+          table: 'borrowers',
+          columns: [
+            { name: 'meeting_day', type: 'string', isOptional: true },
           ],
         }),
       ],

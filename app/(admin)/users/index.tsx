@@ -74,6 +74,11 @@ export default function UsersListScreen() {
                     onChangeText={setSearchQuery}
                     placeholder="Search users/roles..."
                 />
+                {searchQuery.trim().length > 0 && (
+                    <Text className="text-xs text-gray-500 mt-1 ml-2 font-medium">
+                        Showing {filtered.length} result(s)
+                    </Text>
+                )}
             </View>
 
             {loading ? (

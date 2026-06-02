@@ -142,6 +142,18 @@ export class AuditService {
             });
         }
 
+        // Sanity Check: Maturity Date < Release Date
+        if (calcResult.maturityDate.getTime() < releaseDate) {
+            issues.push({
+                id: 'pre_save_maturity_before_release',
+                category: 'Critical',
+                entityType: 'Loan',
+                entityId: 'new',
+                message: `Maturity date (${calcResult.maturityDate.toLocaleDateString()}) cannot be earlier than release date (${new Date(releaseDate).toLocaleDateString()}).`,
+                suggestedFix: 'Please check your term or release date settings.'
+            });
+        }
+
         const sixtyDaysAgo = now - (60 * 24 * 60 * 60 * 1000);
         if (releaseDate < sixtyDaysAgo) {
             issues.push({
@@ -344,6 +356,7 @@ export class AuditService {
                     category: 'Critical',
                     entityType: 'Payment',
                     entityId: payment.id,
+                    entityName: payment.receiptNumber || `Receipt #${payment.id.substring(0, 8)}`,
                     message: `Payment references non-existent loan ID: ${payment.loanId}`,
                     suggestedFix: 'Verify and delete if orphaned.'
                 });
@@ -355,6 +368,7 @@ export class AuditService {
                     category: 'Critical',
                     entityType: 'Payment',
                     entityId: payment.id,
+                    entityName: payment.receiptNumber || `Receipt #${payment.id.substring(0, 8)}`,
                     message: `Payment amount is zero or negative: PHP ${payment.amount}`,
                     suggestedFix: 'Delete or correct invalid payment.'
                 });
@@ -370,6 +384,7 @@ export class AuditService {
                     category: 'Warning',
                     entityType: 'Payment',
                     entityId: payment.id,
+                    entityName: payment.receiptNumber || `Receipt #${payment.id.substring(0, 8)}`,
                     message: `Payment date is in the future: ${new Date(paymentDate).toLocaleDateString()}`,
                     suggestedFix: 'Verify the date of payment.'
                 });
@@ -389,6 +404,7 @@ export class AuditService {
                     category: 'Warning',
                     entityType: 'Schedule',
                     entityId: schedule.id,
+                    entityName: `Sched #${schedule.id.substring(0, 8)}`,
                     message: `Schedule references non-existent loan ID: ${schedule.loanId}`,
                 });
             }

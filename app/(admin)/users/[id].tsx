@@ -67,7 +67,7 @@ export default function EditUserScreen() {
                     loadBorrowers();
                 }
             } catch (error) {
-                console.error('Failed to load user:', error);
+                console.warn('Failed to load user:', error);
                 safeBack(router, '/(admin)');
             } finally {
                 setLoading(false);

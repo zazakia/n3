@@ -19,6 +19,7 @@ import { PaymentService } from '../../../src/services/PaymentService';
 import { DatePicker } from '../../../src/components/DatePicker';
 import { format, parseISO } from 'date-fns';
 import { formatDate } from '../../../src/utils/dates';
+import { LoanCalculatorService } from '../../../src/services/LoanCalculatorService';
 
 
 const schema = z.object({
@@ -48,7 +49,13 @@ export default function NewPaymentScreen() {
         loanNumber: string,
         group: string,
         area: string,
-        releaseDate: number | null
+        releaseDate: number | null,
+        term: number,
+        termUnit: string,
+        frequency: string,
+        depositAmount: number,
+        insuranceAmount: number,
+        installmentAmount: number
     }[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedGroup, setSelectedGroup] = useState('All');
@@ -101,7 +108,13 @@ export default function NewPaymentScreen() {
                     loanNumber: l.loanNumber,
                     group: bInfo.group,
                     area: bInfo.area,
-                    releaseDate: l.releaseDate instanceof Date ? l.releaseDate.getTime() : l.releaseDate
+                    releaseDate: l.releaseDate instanceof Date ? l.releaseDate.getTime() : l.releaseDate,
+                    term: l.term,
+                    termUnit: l.termUnit,
+                    frequency: l.frequency,
+                    depositAmount: l.depositAmount || 0,
+                    insuranceAmount: l.insuranceAmount || 0,
+                    installmentAmount: l.installmentAmount || 0
                 };
             });
             setLoans(opts);
@@ -171,6 +184,26 @@ export default function NewPaymentScreen() {
         calcBalances();
     }, [selectedLoanId, isEditMode, paymentId, setValue]);
 
+    const amountStr = watch('amount');
+    let computedPrincipal = 0;
+    let computedDeposit = 0;
+    let computedInsurance = 0;
+
+    const selectedLoan = loans.find(l => l.id === selectedLoanId);
+
+    if (selectedLoan && amountStr) {
+        const amount = parseFloat(amountStr);
+        if (!isNaN(amount) && selectedLoan.installmentAmount > 0) {
+            const periodicDeposit = selectedLoan.depositAmount;
+            const periodicInsurance = selectedLoan.insuranceAmount;
+            
+            const ratio = amount / selectedLoan.installmentAmount;
+            computedDeposit = ratio * periodicDeposit;
+            computedInsurance = ratio * periodicInsurance;
+            computedPrincipal = amount - computedDeposit - computedInsurance;
+        }
+    }
+
     const onSubmit = async (data: FormData) => {
         const paymentAmount = parseFloat(data.amount);
         if (paymentAmount > outstandingBalance && outstandingBalance > 0) {
@@ -203,6 +236,7 @@ export default function NewPaymentScreen() {
             if (isEditMode && paymentId) {
                 await PaymentService.updatePayment(paymentId, {
                     amount: paymentAmount,
+                    depositAmount: computedDeposit,
                     paymentDate: parseISO(data.paymentDate),
                     receiptNumber: data.receiptNumber,
                     notes: data.notes,
@@ -213,6 +247,7 @@ export default function NewPaymentScreen() {
                 await PaymentService.postPayment({
                     loanId: data.selectedLoanId,
                     amount: paymentAmount,
+                    depositAmount: computedDeposit,
                     paymentDate: parseISO(data.paymentDate),
                     receiptNumber: data.receiptNumber,
                     notes: data.notes,
@@ -377,6 +412,25 @@ export default function NewPaymentScreen() {
                     />
                     {errors.amount && <Text className="text-red-500 text-xs mt-1">{errors.amount.message}</Text>}
                 </View>
+
+                {/* Breakdown Display */}
+                {selectedLoan && parseFloat(amountStr) > 0 ? (
+                    <View className="mb-4 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
+                        <Text className="text-xs font-black text-indigo-900 mb-3 uppercase tracking-wider">Computed Breakdown</Text>
+                        <View className="flex-row justify-between mb-2">
+                            <Text className="text-indigo-800 text-sm">Principal / Interest</Text>
+                            <Text className="text-indigo-900 font-bold text-sm">{formatPHP(computedPrincipal)}</Text>
+                        </View>
+                        <View className="flex-row justify-between mb-2">
+                            <Text className="text-indigo-800 text-sm">Deposit / Savings</Text>
+                            <Text className="text-indigo-900 font-bold text-sm">{formatPHP(computedDeposit)}</Text>
+                        </View>
+                        <View className="flex-row justify-between pt-2 border-t border-indigo-100">
+                            <Text className="text-indigo-800 text-sm">Insurance</Text>
+                            <Text className="text-indigo-900 font-bold text-sm">{formatPHP(computedInsurance)}</Text>
+                        </View>
+                    </View>
+                ) : null}
 
                 <View className="mb-4">
                     <Text className="text-xs font-bold text-gray-700 mb-2 uppercase">Receipt Number</Text>

@@ -28,6 +28,7 @@ export const BorrowerSearchBar: React.FC<BorrowerSearchBarProps> = ({
     const [results, setResults] = useState<Borrower[]>([]);
     const [allBorrowers, setAllBorrowers] = useState<Borrower[]>([]);
     const [loaded, setLoaded] = useState(false);
+    const [selectedIndex, setSelectedIndex] = useState(0);
     const inputRef = useRef<TextInput>(null);
 
     // Load borrowers once when expanded
@@ -52,6 +53,7 @@ export const BorrowerSearchBar: React.FC<BorrowerSearchBarProps> = ({
     useEffect(() => {
         if (!query.trim()) {
             setResults([]);
+            setSelectedIndex(0);
             return;
         }
         const q = query.toLowerCase();
@@ -59,12 +61,14 @@ export const BorrowerSearchBar: React.FC<BorrowerSearchBarProps> = ({
             .filter(b => b.id !== currentBorrowerId && b.fullName.toLowerCase().includes(q))
             .slice(0, 8);
         setResults(filtered);
+        setSelectedIndex(0);
     }, [query, allBorrowers, currentBorrowerId]);
 
     const handleSelect = (borrower: Borrower) => {
         setIsExpanded(false);
         setQuery('');
         setResults([]);
+        setSelectedIndex(0);
         Keyboard.dismiss();
         router.push(`/(admin)/borrowers/${borrower.id}`);
     };
@@ -74,10 +78,38 @@ export const BorrowerSearchBar: React.FC<BorrowerSearchBarProps> = ({
             setIsExpanded(false);
             setQuery('');
             setResults([]);
+            setSelectedIndex(0);
             Keyboard.dismiss();
         } else {
             setIsExpanded(true);
             setTimeout(() => inputRef.current?.focus(), 150);
+        }
+    };
+
+    const handleKeyDown = (e: any) => {
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setSelectedIndex((prev) => (prev < results.length - 1 ? prev + 1 : prev));
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setSelectedIndex((prev) => (prev > 0 ? prev - 1 : 0));
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (results.length > 0 && selectedIndex >= 0 && selectedIndex < results.length) {
+                handleSelect(results[selectedIndex]);
+            }
+        }
+    };
+
+    const handleKeyPress = (e: any) => {
+        if (e.nativeEvent.key === 'ArrowDown') {
+            setSelectedIndex((prev) => (prev < results.length - 1 ? prev + 1 : prev));
+        } else if (e.nativeEvent.key === 'ArrowUp') {
+            setSelectedIndex((prev) => (prev > 0 ? prev - 1 : 0));
+        } else if (e.nativeEvent.key === 'Enter') {
+            if (results.length > 0 && selectedIndex >= 0 && selectedIndex < results.length) {
+                handleSelect(results[selectedIndex]);
+            }
         }
     };
 
@@ -109,6 +141,9 @@ export const BorrowerSearchBar: React.FC<BorrowerSearchBarProps> = ({
                     placeholderTextColor="#94a3b8"
                     autoFocus
                     clearButtonMode="while-editing"
+                    {...(Platform.OS === 'web'
+                        ? { onKeyDown: handleKeyDown }
+                        : { onKeyPress: handleKeyPress })}
                 />
                 <Pressable onPress={handleToggle} className="p-1">
                     <MaterialIcons name="close" size={20} color="#9CA3AF" />
@@ -129,8 +164,8 @@ export const BorrowerSearchBar: React.FC<BorrowerSearchBarProps> = ({
                             <Pressable
                                 onPress={() => handleSelect(item)}
                                 className={`flex-row items-center px-4 py-3 active:bg-blue-50 ${
-                                    index < results.length - 1 ? 'border-b border-gray-50' : ''
-                                }`}
+                                    index === selectedIndex ? 'bg-blue-50' : ''
+                                } ${index < results.length - 1 ? 'border-b border-gray-50' : ''}`}
                             >
                                 <View className="w-9 h-9 rounded-full bg-blue-50 items-center justify-center mr-3">
                                     <Text className="text-blue-700 font-bold text-sm">
@@ -159,3 +194,4 @@ export const BorrowerSearchBar: React.FC<BorrowerSearchBarProps> = ({
         </View>
     );
 };
+

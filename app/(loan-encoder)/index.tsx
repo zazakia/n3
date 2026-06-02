@@ -36,7 +36,7 @@ const schema = z.object({
     principal: z.string().refine(v => !isNaN(parseFloat(v)) && parseFloat(v) > 0, 'Principal must be positive'),
     ratePercent: z.string().refine(v => !isNaN(parseFloat(v)) && parseFloat(v) >= 0, 'Rate cannot be negative'),
     term: z.string().refine(v => !isNaN(parseInt(v)) && parseInt(v) > 0, 'Term must be at least 1'),
-    termUnit: z.enum(['months', 'days']),
+    termUnit: z.enum(['months', 'days', 'weeks']),
     interestType: z.enum(['flat', 'diminishing']),
     frequency: z.enum(['daily', 'weekly', 'bi_monthly', 'monthly']),
     deposit: z.string().refine(v => !isNaN(parseFloat(v)) && parseFloat(v) >= 0, 'Deposit cannot be negative'),
@@ -450,6 +450,7 @@ export default function LoanEncoderScreen() {
                                                         <Text className={`font-bold ${value === loan.id ? 'text-blue-700' : 'text-gray-900'}`}>{loan.loanNumber}</Text>
                                                         <View className="flex-row items-center">
                                                             <Text className="text-[10px] text-gray-700 font-bold uppercase">{new Date(loan.releaseDate as any).toLocaleDateString()} • {formatPHP(loan.principalAmount)}</Text>
+                                                            <Text className="text-[10px] text-green-700 font-black uppercase ml-1"> • Net: {formatPHP(loan.principalAmount - (loan.deductedAmount || 0))}</Text>
                                                             {previousLoanBalances[loan.id] > 0 && (
                                                                 <Text className="text-[10px] text-amber-600 font-bold uppercase"> • Balance: {formatPHP(previousLoanBalances[loan.id])}</Text>
                                                             )}
@@ -497,7 +498,7 @@ export default function LoanEncoderScreen() {
                             <View className="flex-1">
                                 <FormLabel>Unit</FormLabel>
                                 <Controller control={control} name="termUnit" render={({ field: { onChange, value } }) =>
-                                    <SegmentControl options={['months', 'days']} value={value} onChange={onChange} />
+                                    <SegmentControl options={['months', 'days', 'weeks']} value={value} onChange={onChange} />
                                 } />
                             </View>
                         </View>

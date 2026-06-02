@@ -1,4 +1,5 @@
-require('dotenv').config({ path: 'd:/GitHub/ReactNative-expo-LoanWaterMelon/.env' });
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
 
@@ -67,6 +68,14 @@ function paymentsForFrequency(term, termUnit, frequency) {
             case 'bi_monthly': return Math.ceil(term / 15);
             case 'monthly': return Math.ceil(term / 30);
             default: return Math.ceil(term / 30);
+        }
+    } else if (termUnit === 'weeks') {
+        switch (frequency) {
+            case 'daily': return term * 7;
+            case 'weekly': return term;
+            case 'bi_monthly': return Math.ceil(term / 2);
+            case 'monthly': return Math.ceil(term / 4);
+            default: return term;
         }
     } else {
         switch (frequency) {

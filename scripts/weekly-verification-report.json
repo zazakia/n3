@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-06-02T03:02:59.443Z",
+  "summary": {
+    "excelBorrowerCount": 521,
+    "dbWeeklyLoanCount": 521,
+    "matched": 521,
+    "mismatched": 0,
+    "missingInDB": 0,
+    "extraInDB": 0,
+    "overallOK": true
+  },
+  "financialTotals": {
+    "excel": {
+      "totalPrincipal": 2605000,
+      "totalPortfolio": 163167,
+      "totalPaid": 1035904,
+      "totalBalance": 0
+    },
+    "db": {
+      "totalPrincipal": 2605000,
+      "totalPortfolio": 163167,
+      "totalPaid": 1035904,
+      "totalBalance": 0
+    }
+  },
+  "discrepancies": [],
+  "missing": [],
+  "extras": []
+}

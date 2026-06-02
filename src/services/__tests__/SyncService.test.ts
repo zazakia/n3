@@ -320,7 +320,7 @@ describe('SyncService', () => {
             }),
         });
 
-        await expect(service.performPull()).rejects.toThrow(/Pull failed for 18 table\(s\)/);
+        await expect(service.performPull()).rejects.toThrow(/Pull failed for 19 table\(s\)/);
     });
 
     it('performPull handles server time RPC failure gracefully', async () => {

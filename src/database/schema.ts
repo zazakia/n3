@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const mySchema = appSchema({
-    version: 26,
+    version: 28,
     tables: [
         tableSchema({
             name: 'loan_penalties',
@@ -55,6 +55,7 @@ export const mySchema = appSchema({
                 { name: 'latitude', type: 'number', isOptional: true },
                 { name: 'longitude', type: 'number', isOptional: true },
                 { name: 'group', type: 'string', isOptional: true },
+                { name: 'meeting_day', type: 'string', isOptional: true },
                 { name: 'first_name', type: 'string', isOptional: true },
                 { name: 'last_name', type: 'string', isOptional: true },
                 { name: 'co_maker_name', type: 'string', isOptional: true },

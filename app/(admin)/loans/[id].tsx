@@ -20,6 +20,7 @@ import { Platform } from 'react-native';
 import AuditService from '../../../src/services/AuditService';
 import { LoanService } from '../../../src/services/LoanService';
 import { CalculationBasisCard } from '../../../src/components/CalculationBasisCard';
+import { PdfGenerator } from '../../../src/services/PdfGenerator';
 
 export default function LoanDetailsScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -70,7 +71,7 @@ export default function LoanDetailsScreen() {
                 setPreviousLoan(prevL);
             }
         } catch (error) {
-            console.error("Failed to load loan details", error);
+            console.warn("Failed to load loan details", error);
             safeBack(router, '/(admin)');
         } finally {
             setLoading(false);
@@ -191,6 +192,38 @@ export default function LoanDetailsScreen() {
         }
     };
 
+    const handlePrintVoucher = async () => {
+        if (!loan || !borrower) return;
+        try {
+            await PdfGenerator.generateVoucher(
+                { fullName: borrower.fullName },
+                {
+                    loanNumber: loan.loanNumber,
+                    principalAmount: loan.principalAmount,
+                    interestRate: loan.interestRate,
+                    interestType: loan.interestType,
+                    term: loan.term,
+                    termUnit: loan.termUnit,
+                    frequency: loan.frequency,
+                    installmentAmount: loan.installmentAmount,
+                    totalAmount: loan.totalAmount,
+                    status: loan.status,
+                    deductedAmount: loan.deductedAmount,
+                    loanBatch: loan.loanBatch,
+                    isReloan: loan.isReloan,
+                    releaseDate: loan.releaseDate ? new Date(loan.releaseDate).getTime() : undefined,
+                }
+            );
+        } catch (error) {
+            console.error('Failed to generate voucher', error);
+            if (Platform.OS === 'web') {
+                window.alert('Failed to generate voucher.');
+            } else {
+                Alert.alert('Error', 'Failed to generate voucher.');
+            }
+        }
+    };
+
     if (loading || !loan || !borrower) {
         return <ActivityIndicator size="large" color="#D32F2F" className="flex-1 bg-gray-50 pt-20" />;
     }
@@ -238,25 +271,30 @@ export default function LoanDetailsScreen() {
                         </View>
                     </View>
 
-                    <View className="flex-row justify-between items-center mb-4">
-                        <View className="flex-row">
-                            <Pressable 
-                                className="bg-blue-50 px-3 py-2 rounded-xl mr-2"
-                                onPress={() => router.push(`/(admin)/loans/new?id=${loan.id}`)}
-                            >
-                                <Text className="text-blue-700 font-bold text-[10px] uppercase">Edit Loan</Text>
-                            </Pressable>
-                            <Pressable 
-                                className="bg-emerald-50 px-3 py-2 rounded-xl mr-2 flex-row items-center border border-emerald-100"
-                                onPress={handleRecompute}
-                                disabled={saving}
-                            >
-                                <MaterialIcons name="calculate" size={12} color="#059669" className="mr-1" />
-                                <Text className="text-emerald-700 font-bold text-[10px] uppercase">Recompute</Text>
-                            </Pressable>
-                        </View>
+                    <View className="flex-row flex-wrap items-center gap-2 mb-4">
                         <Pressable 
-                            className="bg-red-50 px-3 py-2 rounded-xl flex-row items-center border border-red-100"
+                            className="bg-blue-50 px-3 py-2 rounded-xl"
+                            onPress={() => router.push(`/(admin)/loans/new?id=${loan.id}`)}
+                        >
+                            <Text className="text-blue-700 font-bold text-[10px] uppercase">Edit Loan</Text>
+                        </Pressable>
+                        <Pressable 
+                            className="bg-emerald-50 px-3 py-2 rounded-xl flex-row items-center border border-emerald-100"
+                            onPress={handleRecompute}
+                            disabled={saving}
+                        >
+                            <MaterialIcons name="calculate" size={12} color="#059669" className="mr-1" />
+                            <Text className="text-emerald-700 font-bold text-[10px] uppercase">Recompute</Text>
+                        </Pressable>
+                        <Pressable 
+                            className="bg-purple-50 px-3 py-2 rounded-xl flex-row items-center border border-purple-100"
+                            onPress={handlePrintVoucher}
+                        >
+                            <MaterialIcons name="print" size={12} color="#7E22CE" className="mr-1" />
+                            <Text className="text-purple-700 font-bold text-[10px] uppercase">Voucher</Text>
+                        </Pressable>
+                        <Pressable 
+                            className="bg-red-50 px-3 py-2 rounded-xl flex-row items-center border border-red-100 ml-auto"
                             onPress={() => setIsConfirmDeleteVisible(true)}
                         >
                             <MaterialIcons name="delete-outline" size={14} color="#DC2626" className="mr-1" />
@@ -348,7 +386,19 @@ export default function LoanDetailsScreen() {
                     )}
                 </View>
 
-                <CalculationBasisCard interestType={loan.interestType} title="Understanding these values" />
+                <CalculationBasisCard 
+                    interestType={loan.interestType} 
+                    title="Understanding these values" 
+                    principalAmount={loan.principalAmount}
+                    interestRate={loan.interestRate}
+                    interestAmount={loan.interestAmount > 0 ? loan.interestAmount : loan.principalAmount * (loan.interestRate / 100)}
+                    totalAmount={loan.totalAmount}
+                    depositAmount={loan.depositAmount || 0}
+                    insuranceAmount={loan.insuranceAmount || 0}
+                    installmentAmount={loan.installmentAmount}
+                    numPayments={LoanCalculatorService.paymentsForFrequency(loan.term, loan.termUnit, loan.frequency)}
+                    deductedAmount={loan.deductedAmount || 0}
+                />
 
                 {/* Loan Terms */}
                 <View className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-6">
@@ -358,7 +408,7 @@ export default function LoanDetailsScreen() {
                         <TermItem label="Batch" value={loan.loanBatch?.toString() || '—'} />
                         <TermItem label="Cycle" value={loan.loanCycle?.toString() || '—'} />
                         <TermItem label="Interest Rate" value={`${loan.interestRate}% (${loan.interestType})`} />
-                        <TermItem label="Interest Amount" value={formatPHP(loan.interestAmount || 0)} />
+                        <TermItem label="Interest Amount" value={formatPHP(loan.interestAmount > 0 ? loan.interestAmount : loan.principalAmount * (loan.interestRate / 100))} />
                         <TermItem label="Term" value={`${loan.term} ${loan.termUnit}`} />
                         <TermItem label="Frequency" value={loan.frequency.replace('_', '-')} />
                         <TermItem label="Installment" value={formatPHP(loan.installmentAmount)} />

@@ -12,6 +12,7 @@ import Collector from '../../../src/database/models/Collector';
 import { DatePicker } from '../../../src/components/DatePicker';
 import { formatPHP } from '../../../src/utils/currency';
 import { formatDate } from '../../../src/utils/dates';
+import { SearchBar } from '../../../src/components/SearchBar';
 
 type PresetKey = 'today' | 'wtd' | 'mtd' | 'ytd' | 'custom';
 
@@ -99,8 +100,7 @@ export default function CollectionReportScreen() {
     const [endDate, setEndDate] = useState(toInputDate(defaultRange.end));
     const [collectors, setCollectors] = useState<Collector[]>([]);
     const [reportRows, setReportRows] = useState<PaymentRow[]>([]);
-    const [totalCollected, setTotalCollected] = useState(0);
-    const [uniqueBorrowers, setUniqueBorrowers] = useState(0);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const loadData = useCallback(async () => {
         setLoading(true);
@@ -123,8 +123,6 @@ export default function CollectionReportScreen() {
 
             if (payments.length === 0) {
                 setReportRows([]);
-                setTotalCollected(0);
-                setUniqueBorrowers(0);
                 return;
             }
 
@@ -173,17 +171,27 @@ export default function CollectionReportScreen() {
                 .filter((row): row is PaymentRow => !!row);
 
             setReportRows(rows);
-            setTotalCollected(rows.reduce((sum, row) => sum + row.amount, 0));
-            setUniqueBorrowers(new Set(rows.map(row => row.borrowerId)).size);
         } catch (error) {
             console.error('Failed to load collection report:', error);
             setReportRows([]);
-            setTotalCollected(0);
-            setUniqueBorrowers(0);
         } finally {
             setLoading(false);
         }
     }, [endDate, selectedCollectorId, startDate]);
+
+    const filteredRows = React.useMemo(() => {
+        if (!searchQuery) return reportRows;
+        const query = searchQuery.toLowerCase();
+        return reportRows.filter(row => 
+            (row.borrowerName && row.borrowerName.toLowerCase().includes(query)) ||
+            (row.collectorName && row.collectorName.toLowerCase().includes(query)) ||
+            (row.loanNumber && row.loanNumber.toLowerCase().includes(query)) ||
+            (row.receiptNumber && row.receiptNumber.toLowerCase().includes(query))
+        );
+    }, [reportRows, searchQuery]);
+
+    const totalCollected = React.useMemo(() => filteredRows.reduce((sum, row) => sum + row.amount, 0), [filteredRows]);
+    const uniqueBorrowers = React.useMemo(() => new Set(filteredRows.map(row => row.borrowerId)).size, [filteredRows]);
 
     useFocusEffect(useCallback(() => {
         loadData();
@@ -290,9 +298,23 @@ export default function CollectionReportScreen() {
                     </View>
                     <View className="flex-1 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm ml-2">
                         <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest mb-1">Transactions</Text>
-                        <Text className="text-xl font-black text-gray-900">{reportRows.length}</Text>
+                        <Text className="text-xl font-black text-gray-900">{filteredRows.length}</Text>
                         <Text className="text-xs text-gray-700 mt-1">{uniqueBorrowers} borrower{uniqueBorrowers === 1 ? '' : 's'}</Text>
                     </View>
+                </View>
+
+                {/* Search Box */}
+                <View className="mb-4">
+                    <SearchBar 
+                        value={searchQuery} 
+                        onChangeText={setSearchQuery} 
+                        placeholder="Search by client name, collector, or loan/receipt number..." 
+                    />
+                    {searchQuery.trim().length > 0 && (
+                        <Text className="text-xs text-gray-500 mt-1 ml-2 font-medium">
+                            Showing {filteredRows.length} result(s)
+                        </Text>
+                    )}
                 </View>
 
                 <View className="flex-row border-b-2 border-gray-100 pb-2">
@@ -308,7 +330,7 @@ export default function CollectionReportScreen() {
             ) : (
                 <FlatList
                     className="flex-1 bg-white px-4"
-                    data={reportRows}
+                    data={filteredRows}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
                         <View className="flex-row items-center py-3 border-b border-gray-50">

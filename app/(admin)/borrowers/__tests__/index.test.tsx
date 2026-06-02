@@ -21,6 +21,7 @@ jest.mock('@nozbe/watermelondb', () => ({
         on: jest.fn().mockReturnValue({}),
         and: jest.fn().mockReturnValue({}),
         or: jest.fn().mockReturnValue({}),
+        eq: jest.fn().mockReturnValue({}),
     },
 }));
 

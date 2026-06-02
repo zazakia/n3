@@ -2,6 +2,8 @@
 
 Welcome to the **LoanBrick** development guide. This document provides an in-depth look into the architecture, technology stack, and core logic of the LoanBrick React Native application, specifically tailored for assistant programmers.
 
+> **Note to End-Users:** For the business rules, loan computations, and day-to-day app usage guidelines in English and Cebuano, please refer strictly to the [User Manual (docs/USER_MANUAL.md)](file:///d:/GitHub/n3/docs/USER_MANUAL.md).
+
 ---
 
 ## 🏗 Architecture Overview

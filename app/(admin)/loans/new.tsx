@@ -32,7 +32,7 @@ const schema = z.object({
     principal: z.string().refine(v => !isNaN(parseFloat(v)) && parseFloat(v) > 0, "Principal must be positive"),
     ratePercent: z.string().refine(v => !isNaN(parseFloat(v)) && parseFloat(v) >= 0, "Rate cannot be negative"),
     term: z.string().refine(v => !isNaN(parseInt(v, 10)) && parseInt(v, 10) > 0, "Term must be at least 1"),
-    termUnit: z.enum(['months', 'days']),
+    termUnit: z.enum(['months', 'days', 'weeks']),
     interestType: z.enum(['flat', 'diminishing']),
     frequency: z.enum(['daily', 'weekly', 'bi_monthly', 'monthly']),
     deposit: z.string().refine(v => !isNaN(parseFloat(v)) && parseFloat(v) >= 0, "Invalid deposit"),
@@ -108,7 +108,7 @@ export default function NewLoanScreen() {
                         principal: l.principalAmount.toString(),
                         ratePercent: l.interestRate.toString(),
                         term: l.term.toString(),
-                        termUnit: l.termUnit as 'months' | 'days',
+                        termUnit: l.termUnit as 'months' | 'days' | 'weeks',
                         interestType: l.interestType as 'flat' | 'diminishing',
                         frequency: l.frequency as 'daily' | 'weekly' | 'bi_monthly' | 'monthly',
                         deposit: (l.depositAmount || 0).toString(),
@@ -283,10 +283,11 @@ export default function NewLoanScreen() {
             safeBack(router, '/(admin)');
         } catch (error) {
             console.error('Save loan failed:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
             if (Platform.OS === 'web') {
-                window.alert('Failed to save loan.');
+                window.alert(`Failed to save loan: ${errorMessage}`);
             } else {
-                Alert.alert('Error', 'Failed to save loan.');
+                Alert.alert('Error', `Failed to save loan: ${errorMessage}`);
             }
         } finally {
             setSaving(false);
@@ -330,14 +331,23 @@ export default function NewLoanScreen() {
             await performSave(data, status);
         } catch (error) {
             console.error('Audit failed:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
             if (Platform.OS === 'web') {
-                window.alert('Safety audit failed. Please try again.');
+                window.alert(`Safety audit failed: ${errorMessage}`);
             } else {
-                Alert.alert('Error', 'Safety audit failed. Please try again.');
+                Alert.alert('Error', `Safety audit failed: ${errorMessage}`);
             }
         } finally {
             setSaving(false);
-            setShowAudit(false);
+        }
+    };
+
+    const onFormError = (formErrors: any) => {
+        const errorMessages = Object.values(formErrors).map((err: any) => err.message).join('\n');
+        if (Platform.OS === 'web') {
+            window.alert(`Please fix the following validation errors:\n\n${errorMessages}`);
+        } else {
+            Alert.alert('Validation Error', `Please fix the following validation errors:\n\n${errorMessages}`);
         }
     };
 
@@ -514,7 +524,7 @@ export default function NewLoanScreen() {
 
                 <View className="flex-row mb-4">
                     <View className="flex-1 mr-2">
-                        <Text className="text-xs font-bold text-gray-700 mb-2 uppercase">Total Savings (₱) *</Text>
+                        <Text className="text-xs font-bold text-gray-700 mb-2 uppercase">Savings / Payment (₱) *</Text>
                         <Controller
                             control={control}
                             name="deposit"
@@ -528,7 +538,7 @@ export default function NewLoanScreen() {
                         {errors.deposit && <Text className="text-red-500 text-xs mt-1">{errors.deposit.message}</Text>}
                     </View>
                     <View className="flex-1 ml-2">
-                        <Text className="text-xs font-bold text-gray-700 mb-2 uppercase">Total Insurance (₱) *</Text>
+                        <Text className="text-xs font-bold text-gray-700 mb-2 uppercase">Insurance / Payment (₱) *</Text>
                         <Controller
                             control={control}
                             name="insurance"
@@ -565,7 +575,7 @@ export default function NewLoanScreen() {
                             name="termUnit"
                             render={({ field: { onChange, value } }) => (
                                 <View className="flex-row bg-gray-50 p-1 rounded-xl">
-                                    {['months', 'days'].map(unit => (
+                                    {['months', 'days', 'weeks'].map(unit => (
                                         <Pressable
                                             key={unit}
                                             onPress={() => onChange(unit)}
@@ -656,17 +666,17 @@ export default function NewLoanScreen() {
                         </View>
                         <View className="flex-row justify-between mb-2">
                             <View>
-                                <Text className="text-gray-600">Total Savings</Text>
-                                <Text className="text-[10px] text-gray-700">{formatPHP(parseFloat(watchedFields.deposit) / calcResult.numPayments)} per {watchedFields.frequency.replace('_', '-')}</Text>
+                                <Text className="text-gray-600">Savings Portion</Text>
+                                <Text className="text-[10px] text-gray-700">{formatPHP(parseFloat(watchedFields.deposit))} per {watchedFields.frequency.replace('_', '-')}</Text>
                             </View>
-                            <Text className="font-bold text-gray-900">{formatPHP(parseFloat(watchedFields.deposit))}</Text>
+                            <Text className="font-bold text-gray-900">{formatPHP(parseFloat(watchedFields.deposit) * calcResult.numPayments)} Total</Text>
                         </View>
                          <View className="flex-row justify-between">
                             <View>
-                                <Text className="text-gray-600">Total Insurance</Text>
-                                <Text className="text-[10px] text-gray-700">{formatPHP(parseFloat(watchedFields.insurance) / calcResult.numPayments)} per {watchedFields.frequency.replace('_', '-')}</Text>
+                                <Text className="text-gray-600">Insurance Portion</Text>
+                                <Text className="text-[10px] text-gray-700">{formatPHP(parseFloat(watchedFields.insurance))} per {watchedFields.frequency.replace('_', '-')}</Text>
                             </View>
-                            <Text className="font-bold text-gray-900">{formatPHP(parseFloat(watchedFields.insurance))}</Text>
+                            <Text className="font-bold text-gray-900">{formatPHP(parseFloat(watchedFields.insurance) * calcResult.numPayments)} Total</Text>
                         </View>
 
                         {previousLoanBalance > 0 && (
@@ -691,14 +701,14 @@ export default function NewLoanScreen() {
             <View className="flex-row mb-10">
                 <Pressable
                     className="flex-1 bg-white border border-primary py-4 rounded-xl items-center mr-2 active:bg-gray-50"
-                    onPress={handleSubmit(d => onSubmit(d, 'pending'))}
+                    onPress={handleSubmit(d => onSubmit(d, 'pending'), onFormError)}
                     disabled={saving}
                 >
                     <Text className="text-primary font-bold text-lg">Save Draft</Text>
                 </Pressable>
                 <Pressable
                     className={`flex-1 flex-row py-4 rounded-xl items-center justify-center ml-2 ${saving ? 'bg-green-400' : 'bg-[#388E3C] active:bg-green-800'}`}
-                    onPress={handleSubmit(d => onSubmit(d, 'active'))}
+                    onPress={handleSubmit(d => onSubmit(d, 'active'), onFormError)}
                     disabled={saving}
                 >
                     {saving ? <ActivityIndicator color="#fff" /> : (

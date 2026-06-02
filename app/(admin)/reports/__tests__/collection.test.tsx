@@ -28,6 +28,7 @@ describe('CollectionReportScreen', () => {
                     super(mockDate.getTime());
                     return mockDate;
                 }
+                // @ts-ignore
                 super(...args);
             }
         } as any;

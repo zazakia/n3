@@ -97,11 +97,16 @@ describe('PdfGenerator', () => {
     const originalOS = Platform.OS;
     Platform.OS = 'web';
 
+    // Mock window.open to return null so it falls back to Print.printAsync
+    const originalOpen = window.open;
+    window.open = jest.fn().mockReturnValue(null);
+
     await PdfGenerator.generateStatementOfAccount({ fullName: 'Web' } as any, { status: 'X', principalAmount: 0 } as any, []);
     
     expect(Print.printAsync).toHaveBeenCalled();
 
     Platform.OS = originalOS;
+    window.open = originalOpen;
   });
 });
 

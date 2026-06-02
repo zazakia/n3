@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { synchronize } from '@nozbe/watermelondb/sync';
 import { Q } from '@nozbe/watermelondb';
 import { database } from '../database';
@@ -26,6 +27,7 @@ const SYNC_TABLES = [
     'loan_penalties',
     'collection_groups',
     'action_logs',
+    'recurring_expenses',
 ];
 
 // Mapping from WatermelonDB local table name → Supabase remote table name
@@ -48,6 +50,7 @@ const REMOTE_TABLE_MAP: Record<string, string> = {
     loan_penalties: 'app_loan_penalties',
     collection_groups: 'collection_groups',
     action_logs: 'app_action_logs',
+    recurring_expenses: 'app_recurring_expenses',
 };
 
 const MIN_SYNC_INTERVAL = 60000; // 60 seconds cooldown
@@ -318,6 +321,29 @@ export class SyncService {
                 console.log('[SyncService] Ignored concurrent sync error (already syncing)');
                 return;
             }
+
+            // Detect LokiJS missing collection corruption (chain/find/null-collection error)
+            const isLokiCollectionError = error instanceof TypeError && (
+                error.message.includes('chain') ||
+                error.message.includes('find') ||
+                error.message.includes("Cannot read properties of null (reading 'find')") ||
+                error.message.includes("Cannot read properties of null (reading 'chain')")
+            );
+            if (isLokiCollectionError) {
+                console.error('[SyncService] Detected corrupted local database (missing LokiJS collection). Resetting local DB...');
+                try {
+                    await this.db.write(async () => {
+                        await this.db.unsafeResetDatabase();
+                    });
+                    console.log('[SyncService] Database reset successful. Reloading the app...');
+                    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                        window.location.reload();
+                    }
+                } catch (resetErr) {
+                    console.error('[SyncService] Failed to reset database:', resetErr);
+                }
+            }
+
             ErrorService.handleError(error, 'SyncService.sync', ErrorType.SYNC);
             const errStore = useSyncStore.getState();
             errStore.setSyncProgress({
@@ -597,7 +623,7 @@ export class SyncService {
                 const startTime = Date.now();
 
                 try {
-                    const incomingUpserts = [...(created || []), ...(updated || [])];
+                    const incomingUpserts = [...(updated || []), ...(created || [])];
                     const incomingDeletes = deleted || [];
                     const conflictingIds = await this.findConflictingRemoteIds(
                         remoteName,

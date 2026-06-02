@@ -15,6 +15,7 @@ import { logoBase64 } from '../../../src/utils/logoBase64';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system/legacy';
+import { SearchBar } from '../../../src/components/SearchBar';
 
 interface CollectionRow {
     borrowerName: string;
@@ -48,6 +49,17 @@ export default function DailyCollectionReport() {
     const [selectedCollectorId, setSelectedCollectorId] = useState<string>('all');
     const [selectedDate] = useState(new Date());
     const [reportRows, setReportRows] = useState<CollectionRow[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const filteredRows = React.useMemo(() => {
+        if (!searchQuery) return reportRows;
+        const query = searchQuery.toLowerCase();
+        return reportRows.filter(row => 
+            (row.borrowerName && row.borrowerName.toLowerCase().includes(query)) ||
+            (row.collectorName && row.collectorName.toLowerCase().includes(query)) ||
+            (row.address && row.address.toLowerCase().includes(query))
+        );
+    }, [reportRows, searchQuery]);
 
     const loadCollectors = async () => {
         const allCollectors = await database.collections.get<Collector>('collectors').query(
@@ -455,6 +467,20 @@ export default function DailyCollectionReport() {
                         </Pressable>
                     ))}
                 </ScrollView>
+
+                {/* Search Box */}
+                <View style={{ marginBottom: 12 }}>
+                    <SearchBar 
+                        value={searchQuery} 
+                        onChangeText={setSearchQuery} 
+                        placeholder="Search by client name, address, or collector..." 
+                    />
+                    {searchQuery.trim().length > 0 && (
+                        <Text style={{ fontSize: 12, color: '#6b7280', marginTop: 4, marginLeft: 8, fontWeight: '500' }}>
+                            Showing {filteredRows.length} result(s)
+                        </Text>
+                    )}
+                </View>
             </View>
 
             {loading && reportRows.length === 0
@@ -477,13 +503,13 @@ export default function DailyCollectionReport() {
 
                             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 80 }}>
                                 {/* Data rows */}
-                                {reportRows.length === 0 ? (
+                                {filteredRows.length === 0 ? (
                                     <View style={{ padding: 40, alignItems: 'center' }}>
                                         <MaterialIcons name="event-busy" size={48} color="#ccc" />
                                         <Text style={{ color: '#aaa', marginTop: 10 }}>No active loans found.</Text>
                                     </View>
                                 ) : (
-                                    reportRows.map((row, i) => {
+                                    filteredRows.map((row, i) => {
                                         const bg = i % 2 === 0 ? '#ffffff' : '#f9f9f9';
                                         return (
                                             <View key={i} style={{ flexDirection: 'row' }}>
@@ -511,28 +537,28 @@ export default function DailyCollectionReport() {
                                 )}
 
                                 {/* Totals row */}
-                                {reportRows.length > 0 && (
+                                {filteredRows.length > 0 && (
                                     <View style={{ flexDirection: 'row', backgroundColor: '#fff3cd', borderTopWidth: 2, borderTopColor: '#FFC000' }}>
                                         <Text style={{ ...tdStyle(COL_CLIENT + COL_ADDRESS + COL_COLLECTOR, false, '#fff3cd'), fontWeight: '800' }}>
-                                            TOTAL ({reportRows.length} clients)
+                                            TOTAL ({filteredRows.length} clients)
                                         </Text>
                                         <Text style={{ ...tdStyle(COL_LOAN, true, '#fff3cd'), fontWeight: '800' }}>
-                                            {reportRows.reduce((s, r) => s + r.loanAmount, 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                            {filteredRows.reduce((s, r) => s + r.loanAmount, 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                                         </Text>
                                         <Text style={{ ...tdStyle(COL_TOTAL_LOAN, true, '#fff3cd'), fontWeight: '800' }}>
-                                            {reportRows.reduce((s, r) => s + r.totalLoan, 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                            {filteredRows.reduce((s, r) => s + r.totalLoan, 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                                         </Text>
                                         <Text style={{ ...tdStyle(COL_TARGET, true, '#fff3cd'), fontWeight: '800' }}>
-                                            {reportRows.reduce((s, r) => s + r.target, 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                            {filteredRows.reduce((s, r) => s + r.target, 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                                         </Text>
                                         <Text style={{ ...tdStyle(COL_TOTAL_PAYMENTS, true, '#fff3cd'), fontWeight: '800' }}>
-                                            {reportRows.reduce((s, r) => s + r.totalPayments, 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                            {filteredRows.reduce((s, r) => s + r.totalPayments, 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                                         </Text>
                                         <Text style={{ ...tdStyle(COL_BALANCE, true, '#fff3cd'), fontWeight: '800' }}>
-                                            {reportRows.reduce((s, r) => s + r.balance, 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                            {filteredRows.reduce((s, r) => s + r.balance, 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                                         </Text>
                                         <Text style={{ ...tdStyle(COL_ACTUAL, true, '#fff3cd'), fontWeight: '800' }}>
-                                            {reportRows.reduce((s, r) => s + r.actual, 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+                                            {filteredRows.reduce((s, r) => s + r.actual, 0).toLocaleString('en-PH', { minimumFractionDigits: 2 })}
                                         </Text>
                                     </View>
                                 )}

@@ -19,6 +19,7 @@ export default class Borrower extends Model {
     @field('latitude') latitude: number;
     @field('longitude') longitude: number;
     @field('group') group: string;
+    @field('meeting_day') meetingDay: string;
     @field('first_name') firstName: string;
     @field('last_name') lastName: string;
     @field('co_maker_name') coMakerName: string;

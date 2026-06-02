@@ -37,6 +37,14 @@ function paymentsForFrequency(term, termUnit, frequency) {
             case 'monthly': return Math.ceil(term / 30);
             default: return Math.ceil(term / 30);
         }
+    } else if (termUnit === 'weeks') {
+        switch (frequency) {
+            case 'daily': return term * 7;
+            case 'weekly': return term;
+            case 'bi_monthly': return Math.ceil(term / 2);
+            case 'monthly': return Math.ceil(term / 4);
+            default: return term;
+        }
     } else {
         switch (frequency) {
             case 'daily': return Math.round(term * 30);

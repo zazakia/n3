@@ -6,6 +6,9 @@ import { Q } from '@nozbe/watermelondb';
 import Borrower from '../../../src/database/models/Borrower';
 import UserProfile from '../../../src/database/models/UserProfile';
 import Loan from '../../../src/database/models/Loan';
+import Payment from '../../../src/database/models/Payment';
+import LoanPenalty from '../../../src/database/models/LoanPenalty';
+import { formatPHP } from '../../../src/utils/currency';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { SearchBar } from '../../../src/components/SearchBar';
 import BaseModelService from '../../../src/services/BaseModelService';
@@ -25,6 +28,8 @@ export default function BorrowersListScreen() {
     const [groupFilter, setGroupFilter] = useState('all');
     const [dateFilter, setDateFilter] = useState('all');
     const [borrowerFrequencies, setBorrowerFrequencies] = useState<Record<string, string>>({});
+    const [borrowerBalances, setBorrowerBalances] = useState<Record<string, number>>({});
+    const [borrowerNetReleases, setBorrowerNetReleases] = useState<Record<string, number>>({});
     
     // Action & Confirm States
     const [selectedBorrower, setSelectedBorrower] = useState<Borrower | null>(null);
@@ -53,16 +58,43 @@ export default function BorrowersListScreen() {
             const fetchedBorrowers = await BaseModelService.fetchActive<Borrower>('borrowers');
             const fetchedUsers = await database.collections.get<UserProfile>('user_profiles').query(Q.where('role', 'collector')).fetch();
             const fetchedLoans = await database.collections.get<Loan>('loans').query(Q.where('status', 'active')).fetch();
+            const fetchedPayments = await database.collections.get<Payment>('payments').query(Q.where('deleted_at', Q.eq(null))).fetch();
+            const fetchedPenalties = await database.collections.get<LoanPenalty>('loan_penalties').query(Q.where('deleted_at', Q.eq(null))).fetch();
 
             const collectorMap: Record<string, string> = {};
             fetchedUsers.forEach(u => collectorMap[u.id] = u.fullName);
 
             const frequencyMap: Record<string, string> = {};
+            const activeLoanBalanceMap: Record<string, number> = {};
+            const activeLoanNetReleaseMap: Record<string, number> = {};
+
+            const paymentMap: Record<string, number> = {};
+            fetchedPayments.forEach(p => {
+                paymentMap[p.loanId] = (paymentMap[p.loanId] || 0) + (p.amount || 0);
+            });
+
+            const penaltyMap: Record<string, number> = {};
+            fetchedPenalties.forEach(p => {
+                penaltyMap[p.loanId] = (penaltyMap[p.loanId] || 0) + (p.amount || 0);
+            });
+
             fetchedLoans.forEach(l => {
                 frequencyMap[l.borrowerId] = l.frequency || 'other';
+                
+                const totalPaid = paymentMap[l.id] || 0;
+                const penaltyTotal = penaltyMap[l.id] || 0;
+                const expected = (l.totalAmount || 0) + penaltyTotal;
+                const bal = Math.max(0, expected - totalPaid);
+
+                activeLoanBalanceMap[l.borrowerId] = (activeLoanBalanceMap[l.borrowerId] || 0) + bal;
+                
+                const netRel = l.principalAmount - (l.deductedAmount || 0);
+                activeLoanNetReleaseMap[l.borrowerId] = (activeLoanNetReleaseMap[l.borrowerId] || 0) + netRel;
             });
 
             setBorrowerFrequencies(frequencyMap);
+            setBorrowerBalances(activeLoanBalanceMap);
+            setBorrowerNetReleases(activeLoanNetReleaseMap);
             setBorrowers(fetchedBorrowers);
             setCollectors(collectorMap);
         } catch (error) {
@@ -151,7 +183,7 @@ export default function BorrowersListScreen() {
                         <Text className="flex-1 text-base font-bold text-gray-900 leading-5" numberOfLines={2} ellipsizeMode="tail">
                             {item.fullName}
                         </Text>
-                        {borrowerFrequencies[item.id] && (
+                        {!!borrowerFrequencies[item.id] && (
                             <View className="bg-purple-50 px-2 py-1 rounded border border-purple-100 ml-2 max-w-[92px]">
                                 <Text className="text-[10px] text-purple-700 font-bold uppercase" numberOfLines={1} ellipsizeMode="tail">
                                     {borrowerFrequencies[item.id].replace('_', '-')}
@@ -165,7 +197,24 @@ export default function BorrowersListScreen() {
                             Added: {format(item.createdAt, 'MMM dd, yyyy')}
                         </Text>
                     </View>
-                    {item.decryptedPhone && (
+
+                    {borrowerBalances[item.id] !== undefined && (
+                        <View className="flex-row items-center mt-1">
+                            <MaterialIcons name="account-balance-wallet" size={12} color={borrowerBalances[item.id] > 0 ? "#D32F2F" : "#388E3C"} />
+                            <Text className={`text-xs font-bold ml-1 ${borrowerBalances[item.id] > 0 ? "text-[#D32F2F]" : "text-[#388E3C]"}`}>
+                                Balance: {formatPHP(borrowerBalances[item.id])}
+                            </Text>
+                        </View>
+                    )}
+                    {borrowerNetReleases[item.id] !== undefined && borrowerNetReleases[item.id] > 0 && (
+                        <View className="flex-row items-center mt-1">
+                            <MaterialIcons name="payments" size={12} color="#047857" />
+                            <Text className="text-xs font-bold ml-1 text-emerald-700">
+                                Net Release: {formatPHP(borrowerNetReleases[item.id])}
+                            </Text>
+                        </View>
+                    )}
+                    {!!item.decryptedPhone && (
                         <View className="flex-row items-center mt-1">
                             <MaterialIcons name="phone" size={12} color="#4B5563" />
                             <Text className="text-xs text-gray-700 ml-1" numberOfLines={1} ellipsizeMode="tail">
@@ -173,7 +222,7 @@ export default function BorrowersListScreen() {
                             </Text>
                         </View>
                     )}
-                    {item.decryptedAddress && (
+                    {!!item.decryptedAddress && (
                         <View className="flex-row items-center mt-1">
                             <MaterialIcons name="location-on" size={12} color="#9CA3AF" />
                             <Text className="flex-1 text-xs text-gray-700 ml-1" numberOfLines={1} ellipsizeMode="tail">
@@ -196,6 +245,11 @@ export default function BorrowersListScreen() {
                     onChangeText={setSearchQuery}
                     placeholder="Search name, phone, or address..."
                 />
+                {searchQuery.trim().length > 0 && (
+                    <Text className="text-xs text-gray-500 mt-1 ml-2 font-medium">
+                        Showing {filteredBorrowers.length} result(s)
+                    </Text>
+                )}
                 
                 <View className="mt-3">
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">

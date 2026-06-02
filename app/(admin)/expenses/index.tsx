@@ -99,6 +99,11 @@ export default function ExpensesListScreen() {
                         onChangeText={setSearchQuery}
                         placeholder="Search by description, category..."
                     />
+                    {searchQuery.trim().length > 0 && (
+                        <Text className="text-xs text-gray-500 mt-1 ml-2 font-medium">
+                            Showing {filteredExpenses.length} result(s)
+                        </Text>
+                    )}
                 </View>
 
                 {loading ? (

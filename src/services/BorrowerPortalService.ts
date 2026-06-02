@@ -491,7 +491,7 @@ export class BorrowerPortalService {
                     full_name: fullName.trim(),
                     email: email.trim().toLowerCase(),
                     role: 'borrower',
-                    is_active: true,
+                    is_active: false,
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString(),
                 });
@@ -507,7 +507,7 @@ export class BorrowerPortalService {
 
             return {
                 success: true,
-                message: 'Account created successfully! Please wait for an administrator to link your borrower profile.',
+                message: 'Account created successfully! Please wait for an administrator to activate your account and link your borrower profile.',
             };
         } catch (error: any) {
             console.error('[BorrowerPortalService] registerBorrower error:', error);

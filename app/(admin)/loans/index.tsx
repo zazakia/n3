@@ -5,6 +5,8 @@ import { database } from '../../../src/database';
 import { Q } from '@nozbe/watermelondb';
 import Loan from '../../../src/database/models/Loan';
 import Borrower from '../../../src/database/models/Borrower';
+import Payment from '../../../src/database/models/Payment';
+import LoanPenalty from '../../../src/database/models/LoanPenalty';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SearchBar } from '../../../src/components/SearchBar';
 import { formatPHP } from '../../../src/utils/currency';
@@ -12,10 +14,11 @@ import SwipeableItem from '../../../src/components/SwipeableItem';
 import ConfirmDialog from '../../../src/components/ConfirmDialog';
 import BaseModelService from '../../../src/services/BaseModelService';
 import { Alert, Platform } from 'react-native';
+import { format } from 'date-fns';
 
 export default function LoansListScreen() {
     const router = useRouter();
-    const [loans, setLoans] = useState<(Loan & { borrowerName: string })[]>([]);
+    const [loans, setLoans] = useState<(Loan & { borrowerName: string, balance: number })[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [loading, setLoading] = useState(true);
@@ -31,13 +34,31 @@ export default function LoansListScreen() {
                     Q.sortBy('created_at', Q.desc)
                 ).fetch();
             const fetchedBorrowers = await database.collections.get<Borrower>('borrowers').query(Q.where('deleted_at', Q.eq(null))).fetch();
+            const fetchedPayments = await database.collections.get<Payment>('payments').query(Q.where('deleted_at', Q.eq(null))).fetch();
+            const fetchedPenalties = await database.collections.get<LoanPenalty>('loan_penalties').query(Q.where('deleted_at', Q.eq(null))).fetch();
 
             const borrowerMap: Record<string, string> = {};
             fetchedBorrowers.forEach(b => borrowerMap[b.id] = b.fullName);
 
+            const paymentMap: Record<string, number> = {};
+            fetchedPayments.forEach(p => {
+                paymentMap[p.loanId] = (paymentMap[p.loanId] || 0) + (p.amount || 0);
+            });
+
+            const penaltyMap: Record<string, number> = {};
+            fetchedPenalties.forEach(p => {
+                penaltyMap[p.loanId] = (penaltyMap[p.loanId] || 0) + (p.amount || 0);
+            });
+
             const enrichedLoans = fetchedLoans.map(l => {
                 const loanAny = l as any;
                 loanAny.borrowerName = l.borrowerId ? (borrowerMap[l.borrowerId] ?? 'Unknown') : 'Unknown';
+                
+                const totalPaid = paymentMap[l.id] || 0;
+                const penaltyTotal = penaltyMap[l.id] || 0;
+                const totalExpected = (l.totalAmount || 0) + penaltyTotal;
+                loanAny.balance = Math.max(0, totalExpected - totalPaid);
+                
                 return loanAny;
             });
 
@@ -78,7 +99,7 @@ export default function LoansListScreen() {
         }
     };
 
-    const renderItem = ({ item }: { item: Loan & { borrowerName: string } }) => (
+    const renderItem = ({ item }: { item: Loan & { borrowerName: string, balance: number } }) => (
         <SwipeableItem
             onActionsVisibilityChange={(isVisible) => {
                 setVisibleSwipeActionId((currentId) => isVisible ? item.id : currentId === item.id ? null : currentId);
@@ -105,6 +126,14 @@ export default function LoansListScreen() {
                                 </View>
                             )}
                         </View>
+                        {!!item.releaseDate && (
+                            <View className="flex-row items-center mt-1">
+                                <MaterialIcons name="event" size={12} color="#9CA3AF" />
+                                <Text className="text-[10px] text-gray-600 ml-1 font-medium">
+                                    Released: {format(new Date(item.releaseDate as any), 'MMM dd, yyyy')}
+                                </Text>
+                            </View>
+                        )}
                     </View>
                     <View className={`px-2 py-1 rounded ${item.status === 'active' ? 'bg-blue-50' :
                         item.status === 'paid' ? 'bg-green-50' :
@@ -120,17 +149,32 @@ export default function LoansListScreen() {
                 <View className="h-px bg-gray-50 my-2" />
 
                 <View className="flex-row justify-between items-center">
-                    <View>
+                    <View className="flex-1">
                         <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Principal</Text>
                         <Text className="text-sm font-extrabold text-primary mt-0.5">{formatPHP(item.principalAmount)}</Text>
                     </View>
-                    <View className="items-center">
+                    <View className="flex-1 items-center">
                         <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Insurance</Text>
                         <Text className="text-sm font-bold text-orange-600 mt-0.5">{formatPHP(item.insuranceAmount || 0)}</Text>
                     </View>
-                    <View className="items-end">
+                    <View className="flex-1 items-end">
+                        <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Net Rel.</Text>
+                        <Text className="text-sm font-extrabold text-green-700 mt-0.5">{formatPHP(item.principalAmount - (item.deductedAmount || 0))}</Text>
+                    </View>
+                </View>
+                
+                <View className="flex-row justify-between items-center mt-2">
+                    <View className="flex-1">
                         <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Total Amnt</Text>
-                        <Text className="text-sm font-extrabold text-[#D32F2F] mt-0.5">{formatPHP(item.totalAmount)}</Text>
+                        <Text className="text-sm font-extrabold text-gray-900 mt-0.5">{formatPHP(item.totalAmount)}</Text>
+                    </View>
+                    <View className="flex-1 items-center">
+                        <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Interest</Text>
+                        <Text className="text-sm font-extrabold text-blue-700 mt-0.5">{formatPHP(item.interestAmount > 0 ? item.interestAmount : item.principalAmount * (item.interestRate / 100))}</Text>
+                    </View>
+                    <View className="flex-1 items-end">
+                        <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Balance</Text>
+                        <Text className="text-sm font-extrabold text-[#D32F2F] mt-0.5">{formatPHP(item.balance)}</Text>
                     </View>
                 </View>
             </Pressable>
@@ -145,6 +189,11 @@ export default function LoansListScreen() {
                     onChangeText={setSearchQuery}
                     placeholder="Search by loan # or name..."
                 />
+                {searchQuery.trim().length > 0 && (
+                    <Text className="text-xs text-gray-500 mt-1 ml-2 font-medium">
+                        Showing {filteredLoans.length} result(s)
+                    </Text>
+                )}
             </View>
 
             <View className="mb-4">

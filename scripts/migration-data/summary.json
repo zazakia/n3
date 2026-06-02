@@ -1,0 +1,9 @@
+{
+  "total_borrowers": 223,
+  "total_loans": 671,
+  "total_payments": 17632,
+  "total_principal": 5266000,
+  "total_principal_with_interest": 6537080,
+  "reloans_linked": 448,
+  "generated_at": "2026-06-02T11:29:42.486Z"
+}

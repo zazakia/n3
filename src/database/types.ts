@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -7,10 +7,30 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.4"
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -148,6 +168,7 @@ export type Database = {
           last_name: string | null
           latitude: number | null
           longitude: number | null
+          meeting_day: string | null
           notes: string | null
           phone: string | null
           route_index: number | null
@@ -172,6 +193,7 @@ export type Database = {
           last_name?: string | null
           latitude?: number | null
           longitude?: number | null
+          meeting_day?: string | null
           notes?: string | null
           phone?: string | null
           route_index?: number | null
@@ -196,6 +218,7 @@ export type Database = {
           last_name?: string | null
           latitude?: number | null
           longitude?: number | null
+          meeting_day?: string | null
           notes?: string | null
           phone?: string | null
           route_index?: number | null
@@ -349,6 +372,7 @@ export type Database = {
           expense_date: string
           frequency: string | null
           id: string
+          recurring_expense_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -361,6 +385,7 @@ export type Database = {
           expense_date: string
           frequency?: string | null
           id: string
+          recurring_expense_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -373,6 +398,7 @@ export type Database = {
           expense_date?: string
           frequency?: string | null
           id?: string
+          recurring_expense_id?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -459,15 +485,7 @@ export type Database = {
           reason?: string | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "app_loan_penalties_loan_id_fkey"
-            columns: ["loan_id"]
-            isOneToOne: false
-            referencedRelation: "app_loans"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       app_loans: {
         Row: {
@@ -570,7 +588,7 @@ export type Database = {
           created_at: string | null
           deleted_at: string | null
           due_date: string
-          fees_amount: number
+          fees_amount: number | null
           id: string
           interest_amount: number | null
           loan_id: string
@@ -583,7 +601,7 @@ export type Database = {
           created_at?: string | null
           deleted_at?: string | null
           due_date: string
-          fees_amount?: number
+          fees_amount?: number | null
           id: string
           interest_amount?: number | null
           loan_id: string
@@ -596,7 +614,7 @@ export type Database = {
           created_at?: string | null
           deleted_at?: string | null
           due_date?: string
-          fees_amount?: number
+          fees_amount?: number | null
           id?: string
           interest_amount?: number | null
           loan_id?: string
@@ -652,6 +670,54 @@ export type Database = {
           receipt_number?: string | null
           schedule_id?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      app_recurring_expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: number | null
+          deleted_at: number | null
+          description: string | null
+          encoded_by: string | null
+          frequency: string
+          id: string
+          is_active: boolean
+          next_due_date: number
+          reminder_time: string | null
+          reminders_enabled: boolean
+          updated_at: number | null
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: number | null
+          deleted_at?: number | null
+          description?: string | null
+          encoded_by?: string | null
+          frequency: string
+          id?: string
+          is_active?: boolean
+          next_due_date: number
+          reminder_time?: string | null
+          reminders_enabled?: boolean
+          updated_at?: number | null
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: number | null
+          deleted_at?: number | null
+          description?: string | null
+          encoded_by?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          next_due_date?: number
+          reminder_time?: string | null
+          reminders_enabled?: boolean
+          updated_at?: number | null
         }
         Relationships: []
       }
@@ -735,7 +801,7 @@ export type Database = {
       }
       collection_groups: {
         Row: {
-          collection_day: number
+          collection_day: number | null
           collector_id: string | null
           created_at: string | null
           deleted_at: string | null
@@ -745,7 +811,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          collection_day?: number
+          collection_day?: number | null
           collector_id?: string | null
           created_at?: string | null
           deleted_at?: string | null
@@ -755,7 +821,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          collection_day?: number
+          collection_day?: number | null
           collector_id?: string | null
           created_at?: string | null
           deleted_at?: string | null
@@ -806,7 +872,6 @@ export type Database = {
     Functions: {
       get_current_collector_id: { Args: never; Returns: string }
       get_current_role: { Args: never; Returns: string }
-      get_next_serial: { Args: { prefix: string }; Returns: string }
       get_server_time: { Args: never; Returns: string }
       is_global_admin: { Args: never; Returns: boolean }
     }
@@ -937,7 +1002,11 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },
 } as const
+

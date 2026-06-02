@@ -46,7 +46,7 @@ export default function CollectorBorrowerPassbook() {
                     setPayments(p);
                 }
             } catch (error) {
-                console.error('Failed to load passbook', error);
+                console.warn('Failed to load passbook', error);
                 Alert.alert("Error", "Could not load borrower data.");
             } finally {
                 setLoading(false);

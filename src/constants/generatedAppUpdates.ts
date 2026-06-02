@@ -2,6 +2,41 @@ import type { AppUpdateEntry } from './appUpdates';
 
 export const GENERATED_APP_UPDATES: AppUpdateEntry[] = [
     {
+        "id": "450707818f67e1b960a1b37acf35ed5d7792189a",
+        "version": "4507078",
+        "versionLabel": "Commit",
+        "date": "2026-06-01",
+        "title": "Add recurring expenses, theme customization, global notifications, and fix first-of-month test flakes",
+        "category": "feature",
+        "icon": "new-releases",
+        "summary": "Add recurring expenses, theme customization, global notifications, and fix first-of-month test flakes",
+        "changes": [
+            "Add recurring expenses, theme customization, global notifications, and fix first-of-month test flakes"
+        ],
+        "codeChanges": [
+            "Updated .agents/skills/migration-infinity-v2/SKILL.md",
+            "Updated .agents/skills/migration-infinity-v2/scripts/import-dcm.mjs",
+            "Updated .github/workflows/unit-tests.yml"
+        ]
+    },
+    {
+        "id": "22b86647b1a7d976b92fcaa37cbfa2f24789e93b",
+        "version": "22b8664",
+        "versionLabel": "Commit",
+        "date": "2026-05-30",
+        "title": "Backfill changelog for audit issues (#2)",
+        "category": "data",
+        "icon": "fact-check",
+        "summary": "Document the retroactive issue backfill created for the repository bootstrap and SyncService migration tooling so the closed GitHub issues have matching release notes.",
+        "changes": [
+            "Backfill changelog for audit issues (#2)",
+            "Document the retroactive issue backfill created for the repository bootstrap and SyncService migration tooling so the closed GitHub issues have matching release notes."
+        ],
+        "codeChanges": [
+            "Updated CHANGELOG.md"
+        ]
+    },
+    {
         "id": "7b1b9b61ba90e42c95dd94de73c6a660cbe9ce3a",
         "version": "7b1b9b6",
         "versionLabel": "Commit",

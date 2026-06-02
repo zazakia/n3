@@ -10,6 +10,7 @@ import * as XLSX from 'xlsx';
 import * as FileSystem from 'expo-file-system';
 import { Platform } from 'react-native';
 import * as Sharing from 'expo-sharing';
+import { SearchBar } from '../../../src/components/SearchBar';
 
 export default function ActiveLoansReportScreen() {
     const router = useRouter();
@@ -19,6 +20,7 @@ export default function ActiveLoansReportScreen() {
     const [selectedCollector, setSelectedCollector] = useState<string | null>(null);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
 
     const collectors = useMemo(() => {
         const unique = Array.from(new Set(data.map(item => item.collectorName).filter(Boolean)));
@@ -49,9 +51,19 @@ export default function ActiveLoansReportScreen() {
                 }
             }
             
-            return matchesCollector && matchesDate;
+            let matchesSearch = true;
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                matchesSearch = (
+                    (item.clientName && item.clientName.toLowerCase().includes(query)) ||
+                    (item.collectorName && item.collectorName.toLowerCase().includes(query)) ||
+                    (item.address && item.address.toLowerCase().includes(query))
+                );
+            }
+            
+            return matchesCollector && matchesDate && matchesSearch;
         });
-    }, [data, selectedCollector, startDate, endDate]);
+    }, [data, selectedCollector, startDate, endDate, searchQuery]);
 
     const loadData = async () => {
         setLoading(true);
@@ -260,6 +272,20 @@ export default function ActiveLoansReportScreen() {
                         <Text className="text-[10px] font-bold text-gray-700 uppercase mb-1 ml-1">End Date To</Text>
                         <DatePicker value={endDate} onChange={setEndDate} placeholder="Select End Date" onClear={() => setEndDate('')} />
                     </View>
+                </View>
+
+                {/* Search Box */}
+                <View className="mb-4">
+                    <SearchBar 
+                        value={searchQuery} 
+                        onChangeText={setSearchQuery} 
+                        placeholder="Search by client name, address, or collector..." 
+                    />
+                    {searchQuery.trim().length > 0 && (
+                        <Text className="text-xs text-gray-500 mt-1 ml-2 font-medium">
+                            Showing {filteredData.length} result(s)
+                        </Text>
+                    )}
                 </View>
             </View>
 

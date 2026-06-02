@@ -101,7 +101,7 @@ export default function EditBorrowerScreen() {
                 dateOfBirth: b.dateOfBirth ? format(new Date(b.dateOfBirth), 'yyyy-MM-dd') : '',
             });
         } catch (error) {
-            console.error('Failed to load borrower data', error);
+            console.warn('Failed to load borrower data', error);
             safeBack(router, '/(admin)');
         } finally {
             setLoading(false);
@@ -354,7 +354,11 @@ export default function EditBorrowerScreen() {
                 <Text className="text-lg font-black text-gray-900 mb-4">Loan History</Text>
                 {loans.length > 0 ? (
                     loans.map((l, idx) => (
-                        <View key={l.id} className={`py-4 ${idx < loans.length - 1 ? 'border-b border-gray-50' : ''}`}>
+                        <Pressable 
+                            key={l.id} 
+                            onPress={() => router.push(`/(admin)/loans/${l.id}`)}
+                            className={`py-4 ${idx < loans.length - 1 ? 'border-b border-gray-50' : ''} active:opacity-70`}
+                        >
                             <View className="flex-row justify-between items-start mb-1">
                                 <View className="flex-1">
                                     <View className="flex-row items-center flex-wrap">
@@ -377,6 +381,9 @@ export default function EditBorrowerScreen() {
                                     <View className="flex-row items-center mt-1">
                                         <Text className="text-[10px] text-gray-700 font-bold uppercase">
                                             {format(new Date(l.releaseDate as any), 'MMM d, yyyy')} • {formatPHP(l.principalAmount)}
+                                        </Text>
+                                        <Text className="text-[10px] text-green-700 font-black uppercase ml-2">
+                                            (Net: {formatPHP(l.principalAmount - (l.deductedAmount || 0))})
                                         </Text>
                                         {l.insuranceAmount > 0 && (
                                             <Text className="text-[10px] text-orange-600 font-black uppercase ml-2">
@@ -408,7 +415,7 @@ export default function EditBorrowerScreen() {
                                     </Pressable>
                                 </View>
                             </View>
-                        </View>
+                        </Pressable>
                     ))
                 ) : (
                     <Text className="text-gray-700 text-sm font-medium italic">No loan history found.</Text>
@@ -425,7 +432,11 @@ export default function EditBorrowerScreen() {
                         const pSavings = p.amount * savingsRatio;
 
                         return (
-                            <View key={p.id} className={`flex-row justify-between items-center py-3 ${idx < recentPayments.length - 1 ? 'border-b border-gray-50' : ''}`}>
+                            <Pressable 
+                                key={p.id} 
+                                onPress={() => router.push(`/(admin)/loans/${p.loanId}`)}
+                                className={`flex-row justify-between items-center py-3 ${idx < recentPayments.length - 1 ? 'border-b border-gray-50' : ''} active:opacity-70`}
+                            >
                                 <View>
                                     <Text className="font-extrabold text-gray-900">{formatPHP(p.amount)}</Text>
                                     <View className="flex-row items-center">
@@ -451,7 +462,7 @@ export default function EditBorrowerScreen() {
                                         <MaterialIcons name="delete-outline" size={18} color="#DC2626" />
                                     </Pressable>
                                 </View>
-                            </View>
+                            </Pressable>
                         );
                     })
                 ) : (

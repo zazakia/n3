@@ -32,7 +32,16 @@ export class LoanCalculatorService {
                 case 'monthly': return Math.ceil(term / 30);
                 default: return Math.ceil(term / 30);
             }
+        } else if (termUnit === 'weeks') {
+            switch (frequency) {
+                case 'daily': return term * 7;
+                case 'weekly': return term;
+                case 'bi_monthly': return Math.ceil(term / 2);
+                case 'monthly': return Math.ceil(term / 4);
+                default: return term;
+            }
         } else {
+            // Assume months
             switch (frequency) {
                 case 'daily': return Math.round(term * 30);
                 case 'weekly': return Math.round(term * 4); // Aligned with Excel (24 weeks for 6 months)
@@ -55,16 +64,16 @@ export class LoanCalculatorService {
         termUnit: string,
         frequency: string,
         releaseDate: Date = new Date(),
-        totalDeposit: number = 0,
-        totalInsurance: number = 0
+        periodicDeposit: number = 0,
+        periodicInsurance: number = 0
     ): LoanCalcResult {
         const numPayments = this.paymentsForFrequency(term, termUnit, frequency);
         
         // Excel Logic: Interest is flat for the whole period (Rate per Term)
         const totalInterest = principal * (ratePercent / 100);
         
-        // Now treating inputs as TOTALS for the whole loan
-        const totalFees = totalDeposit + totalInsurance;
+        // Treating inputs as PER PAYMENT portions
+        const totalFees = (periodicDeposit + periodicInsurance) * numPayments;
         const totalAmount = principal + totalInterest + totalFees;
         
         const installmentAmount = totalAmount / numPayments;
@@ -114,8 +123,8 @@ export class LoanCalculatorService {
         termUnit: string,
         frequency: string,
         releaseDate: Date = new Date(),
-        totalDeposit: number = 0,
-        totalInsurance: number = 0
+        periodicDeposit: number = 0,
+        periodicInsurance: number = 0
     ): LoanCalcResult {
         const numPayments = this.paymentsForFrequency(term, termUnit, frequency);
         const termInMonths = termUnit === 'days' ? term / 30 : term;
@@ -130,9 +139,8 @@ export class LoanCalculatorService {
                 (Math.pow(1 + periodicRate, numPayments) - 1);
         }
 
-        // Divide total fees by numPayments
-        const totalFees = totalDeposit + totalInsurance;
-        const periodicFees = totalFees / numPayments;
+        const periodicFees = periodicDeposit + periodicInsurance;
+        const totalFees = periodicFees * numPayments;
         const finalInstallment = installmentAmount + periodicFees;
 
         const firstPaymentDate = this.firstPaymentDate(releaseDate, frequency);

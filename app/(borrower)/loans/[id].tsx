@@ -37,7 +37,7 @@ export default function LoanDetailsScreen() {
             const details = await BorrowerPortalService.getLoanDetail(id as string, currentProfile.id);
             setLoanDetail(details);
         } catch (error) {
-            console.error('[LoanDetailsScreen] Failed to load loan details:', error);
+            console.warn('[LoanDetailsScreen] Failed to load loan details:', error);
             router.back();
         } finally {
             setLoading(false);
