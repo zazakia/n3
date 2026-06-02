@@ -2,6 +2,26 @@ import type { AppUpdateEntry } from './appUpdates';
 
 export const GENERATED_APP_UPDATES: AppUpdateEntry[] = [
     {
+        "id": "f76ec2497478ba745ffad95fcf9e6ed2171df928",
+        "version": "f76ec24",
+        "versionLabel": "Commit",
+        "date": "2026-06-03",
+        "title": "Complete recent features and bug fixes",
+        "category": "feature",
+        "icon": "new-releases",
+        "summary": "- Added bottom margin to voucher PDF",
+        "changes": [
+            "Complete recent features and bug fixes",
+            "- Added bottom margin to voucher PDF",
+            "- Show other Borrower details in passbook"
+        ],
+        "codeChanges": [
+            "Updated .agents/skills/dcm-full-reset-migrate/SKILL.md",
+            "Updated AGENTS.md",
+            "Updated CHANGELOG.md"
+        ]
+    },
+    {
         "id": "450707818f67e1b960a1b37acf35ed5d7792189a",
         "version": "4507078",
         "versionLabel": "Commit",

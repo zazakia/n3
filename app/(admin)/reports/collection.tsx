@@ -117,6 +117,7 @@ export default function CollectionReportScreen() {
             setCollectors(collectorOptions);
 
             const payments = await database.collections.get<Payment>('payments').query(
+                Q.where('deleted_at', Q.eq(null)),
                 Q.where('payment_date', Q.between(rangeStart, rangeEnd)),
                 Q.sortBy('payment_date', Q.desc)
             ).fetch();

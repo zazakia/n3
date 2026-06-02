@@ -137,12 +137,14 @@ export default function DailyCollectionReport() {
 
             // 3. Fetch payments made TODAY (for Actual Collection column)
             const todayPayments = await database.collections.get<Payment>('payments').query(
+                Q.where('deleted_at', Q.eq(null)),
                 Q.where('payment_date', Q.between(startOfDay.getTime(), endOfDay.getTime())),
                 Q.where('loan_id', Q.oneOf(loanIds))
             ).fetch();
 
             // 4. Fetch ALL payments for these loans (to calculate Balance)
             const allActivePayments = await database.collections.get<Payment>('payments').query(
+                Q.where('deleted_at', Q.eq(null)),
                 Q.where('loan_id', Q.oneOf(loanIds))
             ).fetch();
 

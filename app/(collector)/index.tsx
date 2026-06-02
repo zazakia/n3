@@ -73,6 +73,7 @@ export default function CollectorDashboard() {
 
             const todayPayments = await database.collections.get<Payment>('payments')
                 .query(
+                    Q.where('deleted_at', Q.eq(null)),
                     Q.where('collector_id', currentCollectorId),
                     Q.where('payment_date', Q.between(start, end))
                 )

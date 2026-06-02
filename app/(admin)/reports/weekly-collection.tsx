@@ -125,6 +125,7 @@ export default function WeeklyCollectionReport() {
 
             // 4. Get payments for this week specifically
             const weekPayments = await database.collections.get<Payment>('payments').query(
+                Q.where('deleted_at', Q.eq(null)),
                 Q.where('payment_date', Q.between(range.start.getTime(), range.end.getTime())),
                 Q.where('loan_id', Q.oneOf(loanIds))
             ).fetch();
@@ -148,6 +149,7 @@ export default function WeeklyCollectionReport() {
 
                 // Calculate total paid for this loan to get balance
                 const allPaymentsForLoan = await database.collections.get<Payment>('payments').query(
+                    Q.where('deleted_at', Q.eq(null)),
                     Q.where('loan_id', loan.id)
                 ).fetch();
                 const totalPaid = allPaymentsForLoan.reduce((sum, p) => sum + p.amount, 0);

@@ -24,7 +24,7 @@ import { useAuth } from '../../../src/store/AuthContext';
 import { AuditService, AuditIssue } from '../../../src/services/AuditService';
 import { AuditReportDialog } from '../../../src/components/AuditReportDialog';
 import { CalculationBasisCard } from '../../../src/components/CalculationBasisCard';
-import { shouldAutoPopulateLoanCycle, shouldDefaultDailyTerm } from '../../../src/utils/loanFormDefaults';
+import { calculatePreviousLoanBalances, shouldAutoPopulateLoanCycle, shouldDefaultDailyTerm } from '../../../src/utils/loanFormDefaults';
 import { toDate } from '../../../src/utils/dates';
 
 const schema = z.object({
@@ -157,6 +157,7 @@ export default function NewLoanScreen() {
                 setLoadingPreviousLoans(true);
                 try {
                     const loans = await database.collections.get<Loan>('loans').query(
+                        Q.where('deleted_at', Q.eq(null)),
                         Q.where('borrower_id', watchedFields.borrowerId),
                         Q.where('status', Q.oneOf(['active', 'closed', 'paid', 'defaulted']))
                     ).fetch();
@@ -168,18 +169,17 @@ export default function NewLoanScreen() {
                     if (loans.length > 0) {
                         const loanIds = loans.map(l => l.id);
                         const [payments, penalties] = await Promise.all([
-                            database.collections.get<Payment>('payments').query(Q.where('loan_id', Q.oneOf(loanIds))).fetch(),
-                            database.collections.get<LoanPenalty>('loan_penalties').query(Q.where('loan_id', Q.oneOf(loanIds))).fetch()
+                            database.collections.get<Payment>('payments').query(
+                                Q.where('deleted_at', Q.eq(null)),
+                                Q.where('loan_id', Q.oneOf(loanIds))
+                            ).fetch(),
+                            database.collections.get<LoanPenalty>('loan_penalties').query(
+                                Q.where('deleted_at', Q.eq(null)),
+                                Q.where('loan_id', Q.oneOf(loanIds))
+                            ).fetch()
                         ]);
 
-                        const balances: Record<string, number> = {};
-                        loans.forEach(loan => {
-                            const loanPayments = payments.filter(p => p.loanId === loan.id);
-                            const loanPenalties = penalties.filter(p => p.loanId === loan.id);
-                            const totalPaid = loanPayments.reduce((sum, p) => sum + p.amount, 0);
-                            const totalPenalties = loanPenalties.reduce((sum, p) => sum + p.amount, 0);
-                            balances[loan.id] = Math.max(0, loan.totalAmount + totalPenalties - totalPaid);
-                        });
+                        const balances = calculatePreviousLoanBalances(loans, payments, penalties);
                         setPreviousLoanBalances(balances);
                     } else {
                         setPreviousLoanBalances({});

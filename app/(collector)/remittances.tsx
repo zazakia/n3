@@ -40,6 +40,7 @@ export default function CollectorRemittanceScreen() {
                 // Get today's payments to suggest remittance amount
                 const todayPayments = await database.collections.get<Payment>('payments')
                     .query(
+                        Q.where('deleted_at', Q.eq(null)),
                         Q.where('collector_id', user.id),
                         Q.where('payment_date', Q.between(start, end))
                     ).fetch();

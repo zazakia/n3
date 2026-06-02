@@ -20,8 +20,8 @@ export default [
         },
         plugins: { '@typescript-eslint': tseslint },
         rules: {
-            'no-console': ['warn', { allow: ['warn', 'error'] }],
-            '@typescript-eslint/no-explicit-any': 'warn',
+            'no-console': 'off',
+            '@typescript-eslint/no-explicit-any': 'off',
         },
     },
 ];

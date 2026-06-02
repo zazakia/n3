@@ -44,7 +44,10 @@ export default function FinancialSummaryScreen() {
 
             // Total Collections (Accrual basis)
             const payments = await database.collections.get<Payment>('payments')
-                .query(Q.where('payment_date', Q.between(start, end)))
+                .query(
+                    Q.where('deleted_at', Q.eq(null)),
+                    Q.where('payment_date', Q.between(start, end))
+                )
                 .fetch();
 
             const expenses = await database.collections.get<Expense>('expenses')

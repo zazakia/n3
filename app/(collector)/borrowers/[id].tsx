@@ -41,7 +41,11 @@ export default function CollectorBorrowerPassbook() {
                     setActiveLoan(loan);
 
                     const p = await database.collections.get<Payment>('payments')
-                        .query(Q.where('loan_id', loan.id), Q.sortBy('payment_date', Q.desc))
+                        .query(
+                            Q.where('deleted_at', Q.eq(null)),
+                            Q.where('loan_id', loan.id),
+                            Q.sortBy('payment_date', Q.desc)
+                        )
                         .fetch();
                     setPayments(p);
                 }
