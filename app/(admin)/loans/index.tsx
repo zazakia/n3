@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, Pressable, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, FlatList, Pressable, ActivityIndicator, ScrollView, Modal } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { database } from '../../../src/database';
 import { Q } from '@nozbe/watermelondb';
@@ -15,6 +15,13 @@ import ConfirmDialog from '../../../src/components/ConfirmDialog';
 import BaseModelService from '../../../src/services/BaseModelService';
 import { Alert, Platform } from 'react-native';
 import { format } from 'date-fns';
+import { PdfGenerator, VoucherPaperSize } from '../../../src/services/PdfGenerator';
+
+const PAPER_SIZE_OPTIONS: { label: string; value: VoucherPaperSize; description: string }[] = [
+    { label: 'Letter', value: 'letter', description: '8.5 x 11 in' },
+    { label: 'A4', value: 'a4', description: '210 x 297 mm' },
+    { label: 'Legal', value: 'legal', description: '8.5 x 14 in' },
+];
 
 export default function LoansListScreen() {
     const router = useRouter();
@@ -24,6 +31,9 @@ export default function LoansListScreen() {
     const [loading, setLoading] = useState(true);
     const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
     const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
+    const [isPrintOptionsVisible, setIsPrintOptionsVisible] = useState(false);
+    const [selectedPaperSize, setSelectedPaperSize] = useState<VoucherPaperSize>('letter');
+    const [printing, setPrinting] = useState(false);
     const [visibleSwipeActionId, setVisibleSwipeActionId] = useState<string | null>(null);
 
     const loadData = async () => {
@@ -99,6 +109,47 @@ export default function LoansListScreen() {
         }
     };
 
+    const handleBatchPrint = async () => {
+        if (filteredLoans.length === 0) return;
+
+        setPrinting(true);
+        try {
+            await PdfGenerator.generateVoucherBatch(
+                filteredLoans.map((loan) => ({
+                    borrower: { fullName: loan.borrowerName },
+                    loan: {
+                        loanNumber: loan.loanNumber,
+                        principalAmount: loan.principalAmount,
+                        interestRate: loan.interestRate,
+                        interestType: loan.interestType,
+                        term: loan.term,
+                        termUnit: loan.termUnit,
+                        frequency: loan.frequency,
+                        installmentAmount: loan.installmentAmount,
+                        totalAmount: loan.totalAmount,
+                        status: loan.status,
+                        deductedAmount: loan.deductedAmount,
+                        serviceChargeAmount: loan.serviceChargeAmount,
+                        loanBatch: loan.loanBatch,
+                        isReloan: loan.isReloan,
+                        releaseDate: loan.releaseDate ? new Date(loan.releaseDate as number | Date).getTime() : undefined,
+                    },
+                })),
+                { paperSize: selectedPaperSize }
+            );
+            setIsPrintOptionsVisible(false);
+        } catch (error) {
+            console.error('Failed to print vouchers:', error);
+            if (Platform.OS === 'web') {
+                window.alert('Failed to print vouchers.');
+            } else {
+                Alert.alert('Error', 'Failed to print vouchers.');
+            }
+        } finally {
+            setPrinting(false);
+        }
+    };
+
     const renderItem = ({ item }: { item: Loan & { borrowerName: string, balance: number } }) => (
         <SwipeableItem
             onActionsVisibilityChange={(isVisible) => {
@@ -159,7 +210,7 @@ export default function LoansListScreen() {
                     </View>
                     <View className="flex-1 items-end">
                         <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Net Rel.</Text>
-                        <Text className="text-sm font-extrabold text-green-700 mt-0.5">{formatPHP(item.principalAmount - (item.deductedAmount || 0))}</Text>
+                        <Text className="text-sm font-extrabold text-green-700 mt-0.5">{formatPHP(item.principalAmount - (item.deductedAmount || 0) - (item.serviceChargeAmount || 0))}</Text>
                     </View>
                 </View>
                 
@@ -196,8 +247,8 @@ export default function LoansListScreen() {
                 )}
             </View>
 
-            <View className="mb-4">
-                <ScrollView  horizontal showsHorizontalScrollIndicator={false} >
+            <View className="mb-4 flex-row items-center">
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-1">
                     {['all', 'pending', 'active', 'paid', 'defaulted'].map(status => (
                         <Pressable
                             key={status}
@@ -210,6 +261,16 @@ export default function LoansListScreen() {
                         </Pressable>
                     ))}
                 </ScrollView>
+                <Pressable
+                    className={`ml-3 px-5 py-2.5 rounded-full flex-row items-center border ${filteredLoans.length === 0 ? 'bg-gray-100 border-gray-200' : 'bg-purple-700 border-purple-700'}`}
+                    onPress={() => setIsPrintOptionsVisible(true)}
+                    disabled={filteredLoans.length === 0}
+                >
+                    <MaterialIcons name="print" size={16} color={filteredLoans.length === 0 ? '#9CA3AF' : '#FFFFFF'} className="mr-2" />
+                    <Text className={`text-xs font-black uppercase tracking-wider ${filteredLoans.length === 0 ? 'text-gray-400' : 'text-white'}`}>
+                        Batch Print
+                    </Text>
+                </Pressable>
             </View>
 
             {loading ? (
@@ -239,6 +300,61 @@ export default function LoansListScreen() {
                 onCancel={() => setIsConfirmDeleteVisible(false)}
                 isDestructive={true}
             />
+
+            <Modal
+                visible={isPrintOptionsVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setIsPrintOptionsVisible(false)}
+            >
+                <View className="flex-1 bg-black/40 justify-center px-6">
+                    <View className="bg-white rounded-2xl p-5 border border-gray-100">
+                        <View className="flex-row justify-between items-center mb-4">
+                            <View>
+                                <Text className="text-lg font-black text-gray-900">Batch Print Vouchers</Text>
+                                <Text className="text-xs font-bold text-gray-500 mt-1">
+                                    8 vouchers per page · {filteredLoans.length} selected
+                                </Text>
+                            </View>
+                            <Pressable className="p-2 bg-gray-100 rounded-full" onPress={() => setIsPrintOptionsVisible(false)}>
+                                <MaterialIcons name="close" size={18} color="#374151" />
+                            </Pressable>
+                        </View>
+
+                        <Text className="text-xs font-bold text-gray-700 uppercase tracking-widest mb-2">Paper Size</Text>
+                        {PAPER_SIZE_OPTIONS.map((option) => {
+                            const selected = selectedPaperSize === option.value;
+                            return (
+                                <Pressable
+                                    key={option.value}
+                                    className={`p-4 rounded-xl border mb-2 flex-row items-center ${selected ? 'bg-purple-50 border-purple-300' : 'bg-gray-50 border-gray-100'}`}
+                                    onPress={() => setSelectedPaperSize(option.value)}
+                                >
+                                    <MaterialIcons name={selected ? 'radio-button-checked' : 'radio-button-unchecked'} size={20} color={selected ? '#7E22CE' : '#9CA3AF'} className="mr-3" />
+                                    <View className="flex-1">
+                                        <Text className={`text-sm font-black ${selected ? 'text-purple-800' : 'text-gray-900'}`}>{option.label}</Text>
+                                        <Text className="text-xs font-medium text-gray-500 mt-0.5">{option.description}</Text>
+                                    </View>
+                                </Pressable>
+                            );
+                        })}
+
+                        <View className="flex-row justify-end mt-4">
+                            <Pressable className="px-5 py-3 mr-2" onPress={() => setIsPrintOptionsVisible(false)} disabled={printing}>
+                                <Text className="text-gray-700 font-bold">Cancel</Text>
+                            </Pressable>
+                            <Pressable
+                                className={`px-5 py-3 rounded-xl flex-row items-center ${printing ? 'bg-gray-400' : 'bg-purple-700'}`}
+                                onPress={handleBatchPrint}
+                                disabled={printing}
+                            >
+                                {printing ? <ActivityIndicator color="#fff" size="small" /> : <MaterialIcons name="print" size={16} color="#fff" className="mr-2" />}
+                                <Text className="text-white font-black ml-2">Print</Text>
+                            </Pressable>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
 
             {/* FAB */}
             {!visibleSwipeActionId && (

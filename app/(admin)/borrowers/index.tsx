@@ -88,7 +88,7 @@ export default function BorrowersListScreen() {
 
                 activeLoanBalanceMap[l.borrowerId] = (activeLoanBalanceMap[l.borrowerId] || 0) + bal;
                 
-                const netRel = l.principalAmount - (l.deductedAmount || 0);
+                const netRel = l.principalAmount - (l.deductedAmount || 0) - (l.serviceChargeAmount || 0);
                 activeLoanNetReleaseMap[l.borrowerId] = (activeLoanNetReleaseMap[l.borrowerId] || 0) + netRel;
             });
 

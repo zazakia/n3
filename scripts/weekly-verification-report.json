@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-02T03:02:59.443Z",
+  "timestamp": "2026-06-04T05:50:45.874Z",
   "summary": {
     "excelBorrowerCount": 521,
     "dbWeeklyLoanCount": 521,
@@ -12,15 +12,15 @@
   "financialTotals": {
     "excel": {
       "totalPrincipal": 2605000,
-      "totalPortfolio": 163167,
+      "totalPortfolio": 3116000,
       "totalPaid": 1035904,
-      "totalBalance": 0
+      "totalBalance": 2080096
     },
     "db": {
       "totalPrincipal": 2605000,
-      "totalPortfolio": 163167,
+      "totalPortfolio": 3116000,
       "totalPaid": 1035904,
-      "totalBalance": 0
+      "totalBalance": 2080096
     }
   },
   "discrepancies": [],

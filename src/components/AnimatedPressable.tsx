@@ -6,6 +6,7 @@ import Animated, {
     withSpring,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { cssInterop } from 'nativewind';
 
 interface AnimatedPressableProps extends PressableProps {
     children: React.ReactNode;
@@ -85,3 +86,7 @@ export function AnimatedPressable({
         </AnimatedPressableBase>
     );
 }
+
+cssInterop(AnimatedPressable, {
+    className: 'style',
+});

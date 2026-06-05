@@ -199,3 +199,71 @@ jest.mock('expo-router', () => ({
     Stack: 'Stack',
 }));
 
+// Systematically filter out expected warnings/errors/logs during tests to keep console clean
+const originalLog = console.log;
+const originalWarn = console.warn;
+const originalError = console.error;
+
+const ignoredLogPatterns = [
+    /\[🍉\]/, // WatermelonDB diagnostic outputs
+    /\[AuthContext\]/, // Expected routing trace
+    /\[Supabase\]/, // Expected Supabase client initialization
+    /\[SyncService\]/, // Expected sync status logging
+    /\[PERF\]/, // Expected performance logs
+    /\[Integration Debug\]/, // Expected integration test traces
+    /\[LoadingScreen\]/, // Expected loading screen UI renders
+    /\[Loading\]/, // Expected auth status logs
+    /\[OfflineUtils\]/, // Expected offline activity logging
+    /\[PaymentService\]/, // Expected payment processing metrics
+];
+
+const ignoredWarnPatterns = [
+    /\[🍉\]/, // WatermelonDB warnings
+    /LokiJSAdapter/, // Deprecation notices
+    /no resolved role, redirecting/, // Expected auth guard redirection
+    /RBAC Violation/, // Expected RBAC test cases
+    /Skipping malformed audit log params/, // Expected validation tests
+    /\[SyncService\]/, // Expected sync warning situations
+    /\[OfflineUtils\]/, // Expected offline warning cases
+];
+
+const ignoredErrorPatterns = [
+    /Error fetching collectors/, // Expected hook rejection checks
+    /Error fetching borrowers/,
+    /Role\/Collector ID fetch error/,
+    /Init Role Fail/, // Mock failures
+    /State Change Fail/,
+    /Network error/,
+    /DB connection lost/,
+    /Failed to log actions/, // Expected DB failure simulations
+    /Database is not initialized/,
+    /action_logs collection not found/,
+    /Failed to fetch action logs/,
+    /\[BorrowerPortalService\]/, // Expected auth or profile creation simulations
+    /\[SyncService\]/, // Expected sync push failures or partial errors
+    /CashService\./, // Expected CashService DB failure simulations
+    /\[MonthlyClosingService\]/, // Expected closing API errors
+    /\[MfiKpiService\]/, // Expected KPI summary retrieval failures
+    /\[OfflineUtils\]/, // Expected offline storage simulations
+    /Snapshot audit failed/, // Expected snapshot test cases
+];
+
+console.log = (...args: any[]) => {
+    const msg = args.join(' ');
+    if (ignoredLogPatterns.some(p => p.test(msg))) return;
+    originalLog(...args);
+};
+
+console.warn = (...args: any[]) => {
+    const msg = args.join(' ');
+    if (ignoredWarnPatterns.some(p => p.test(msg))) return;
+    originalWarn(...args);
+};
+
+console.error = (...args: any[]) => {
+    const msg = args.join(' ');
+    if (ignoredErrorPatterns.some(p => p.test(msg))) return;
+    originalError(...args);
+};
+
+

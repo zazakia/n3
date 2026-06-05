@@ -1,1 +1,1 @@
-ALTER TABLE public.app_borrowers ADD COLUMN meeting_day text;
+ALTER TABLE public.app_borrowers ADD COLUMN IF NOT EXISTS meeting_day text;

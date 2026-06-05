@@ -59,6 +59,44 @@ describe('LoanService', () => {
         expect(schedules[0].loanId).toBe(loanId);
     });
 
+    it('stores a 2% service charge for weekly loans without creating a renewal payment', async () => {
+        const { borrower, collector } = await createTestData(database);
+        const loanId = uuid.v4().toString();
+        const calcResult = LoanCalculatorService.calculate(
+            5000, 20, 6, 'months', 'flat', 'weekly', new Date(), 0, 0
+        );
+
+        await LoanService.saveLoan({
+            loanId,
+            loanNumber: 'L-WEEKLY-SERVICE',
+            borrowerId: borrower.id,
+            principalAmount: 5000,
+            interestRate: 20,
+            interestType: 'flat',
+            term: 6,
+            termUnit: 'months',
+            frequency: 'weekly',
+            calcResult,
+            depositAmount: 0,
+            insuranceAmount: 0,
+            collectorId: collector.id,
+            encodedBy: 'test-user',
+            releaseDate: new Date(),
+            status: 'active',
+            isReloan: false,
+            interestAmount: 1000,
+            isEditing: false,
+            database
+        });
+
+        const loan = await database.get<Loan>('loans').find(loanId);
+        expect(loan.deductedAmount).toBe(0);
+        expect(loan.serviceChargeAmount).toBe(100);
+
+        const payments = await database.get<Payment>('payments').query().fetch();
+        expect(payments).toHaveLength(0);
+    });
+
     it('should handle reloan and close previous loan', async () => {
         const { borrower, collector, loan: oldLoan } = await createTestData(database, {
             loanAmount: 1000,

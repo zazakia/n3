@@ -118,18 +118,21 @@ function parseWeeklyExcel() {
 
       const { full: clientName } = splitName(clientNameRaw);
       const installmentAmount = parseFloat2(row[11]);
-      const totalPortfolio = parseFloat2(row[14]); // Total Loan Payments (Portfolio) = principal+interest
+      const interestAmount = parseFloat2(row[16]); // total interest charged
+      const totalPortfolio = loanAmount > 0 ? loanAmount + interestAmount : 0; // total repayable
       const netLoan = parseFloat2(row[15]);
 
       // Sum all weekly payments from payment date columns
       let totalPaid = 0;
+      let principalPaid = 0;
       for (const map of paymentDateMap) {
+        principalPaid += parseFloat2(row[map.colStart]); // col = principal paid this week
         totalPaid += parseFloat2(row[map.colStart + 3]); // col+3 = totalPaid column
       }
 
       // Outstanding balance from Excel perspective
       const outstandingBalance = Math.max(0, totalPortfolio - totalPaid);
-      const status = (totalPaid >= totalPortfolio && totalPortfolio > 0) ? 'paid' : 'active';
+      const status = (principalPaid >= totalPortfolio && totalPortfolio > 0) ? 'paid' : 'active';
 
       excelBorrowers.push({
         name: clientName,
@@ -139,6 +142,7 @@ function parseWeeklyExcel() {
         totalPortfolio,
         netLoan,
         installmentAmount,
+        principalPaid,
         totalPaid,
         outstandingBalance,
         status,

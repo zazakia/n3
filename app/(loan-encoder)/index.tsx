@@ -112,6 +112,11 @@ export default function LoanEncoderScreen() {
     const [reloanConfirmInfo, setReloanConfirmInfo] = useState<{ balance: number; net: number } | null>(null);
 
     const watchedValues = watch();
+    const principalAmount = parseFloat(watchedValues.principal);
+    const serviceChargeAmount = LoanCalculatorService.calculateServiceCharge(
+        principalAmount,
+        watchedValues.frequency
+    );
 
     useEffect(() => {
         const fetchPreviousLoans = async () => {
@@ -207,6 +212,7 @@ export default function LoanEncoderScreen() {
         if (!calcResult) return;
         setSaving(true);
         const balanceToDeduct = (data.isReloan && data.previousLoanId === activeLoan?.id) ? activeLoanBalance : 0;
+        const serviceChargeToDeduct = LoanCalculatorService.calculateServiceCharge(parseFloat(data.principal), data.frequency);
         
         try {
             const borrower = await database.collections.get<Borrower>('borrowers').find(data.borrowerId);
@@ -233,6 +239,7 @@ export default function LoanEncoderScreen() {
                 isReloan: data.isReloan,
                 previousLoanId: data.previousLoanId,
                 deductedAmount: balanceToDeduct,
+                serviceChargeAmount: serviceChargeToDeduct,
                 interestAmount: calcResult.totalInterest,
                 isEditing: false
             });
@@ -279,11 +286,13 @@ export default function LoanEncoderScreen() {
         }
         
         const balanceToDeduct = (data.isReloan && data.previousLoanId === activeLoan?.id) ? activeLoanBalance : 0;
+        const serviceChargeToDeduct = LoanCalculatorService.calculateServiceCharge(parseFloat(data.principal), data.frequency);
         const netProceeds = LoanCalculatorService.calculateNetProceeds(
             parseFloat(data.principal), 
             parseFloat(data.deposit), 
             parseFloat(data.insurance), 
-            balanceToDeduct
+            balanceToDeduct,
+            serviceChargeToDeduct
         );
 
         setSaving(true);
@@ -291,7 +300,7 @@ export default function LoanEncoderScreen() {
             // 1. Run Auto-Audit
             const audit = new AuditService(database);
             const issues = await audit.validateLoanPreSave(
-                { ...data, deductedAmount: balanceToDeduct }, 
+                { ...data, deductedAmount: balanceToDeduct + serviceChargeToDeduct },
                 calcResult, 
                 false
             );
@@ -451,7 +460,7 @@ export default function LoanEncoderScreen() {
                                                         <Text className={`font-bold ${value === loan.id ? 'text-blue-700' : 'text-gray-900'}`}>{loan.loanNumber}</Text>
                                                         <View className="flex-row items-center">
                                                             <Text className="text-[10px] text-gray-700 font-bold uppercase">{new Date(loan.releaseDate as any).toLocaleDateString()} • {formatPHP(loan.principalAmount)}</Text>
-                                                            <Text className="text-[10px] text-green-700 font-black uppercase ml-1"> • Net: {formatPHP(loan.principalAmount - (loan.deductedAmount || 0))}</Text>
+                                                            <Text className="text-[10px] text-green-700 font-black uppercase ml-1"> • Net: {formatPHP(loan.principalAmount - (loan.deductedAmount || 0) - (loan.serviceChargeAmount || 0))}</Text>
                                                             {previousLoanBalances[loan.id] > 0 && (
                                                                 <Text className="text-[10px] text-amber-600 font-bold uppercase"> • Balance: {formatPHP(previousLoanBalances[loan.id])}</Text>
                                                             )}
@@ -559,15 +568,26 @@ export default function LoanEncoderScreen() {
                                             <Text className="text-amber-600 font-semibold text-sm">Previous Loan Balance</Text>
                                             <Text className="text-red-500 font-black">- {formatPHP(activeLoanBalance)}</Text>
                                         </View>
+                                    </>
+                                )}
+                                {serviceChargeAmount > 0 && (
+                                    <View className="flex-row justify-between mb-2">
+                                        <Text className="text-amber-600 font-semibold text-sm">2% Service Charge</Text>
+                                        <Text className="text-red-500 font-black">- {formatPHP(serviceChargeAmount)}</Text>
+                                    </View>
+                                )}
+                                {(serviceChargeAmount > 0 || (activeLoanBalance > 0 && watchedValues.isReloan && watchedValues.previousLoanId === activeLoan?.id)) && (
+                                    <>
                                         <View className="h-px bg-blue-200 my-2" />
                                         <View className="flex-row justify-between mb-2">
                                             <Text className="text-blue-800 font-black text-sm">NET CASH RELEASED</Text>
                                             <Text className="text-blue-900 font-black text-lg">
                                                 {formatPHP(LoanCalculatorService.calculateNetProceeds(
-                                                    parseFloat(watchedValues.principal),
+                                                    principalAmount,
                                                     parseFloat(watchedValues.deposit),
                                                     parseFloat(watchedValues.insurance),
-                                                    activeLoanBalance
+                                                    watchedValues.isReloan && watchedValues.previousLoanId === activeLoan?.id ? activeLoanBalance : 0,
+                                                    serviceChargeAmount
                                                 ))}
                                             </Text>
                                         </View>

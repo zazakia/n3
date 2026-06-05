@@ -34,6 +34,7 @@ jest.mock('../../src/services/LoanService', () => ({
 
 jest.mock('../../src/services/LoanCalculatorService', () => ({
     LoanCalculatorService: {
+        calculateServiceCharge: jest.fn((principal: number) => principal * 0.02),
         calculate: jest.fn(() => ({
             totalAmount: 6000,
             totalInterest: 1000,

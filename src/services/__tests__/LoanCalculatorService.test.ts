@@ -175,5 +175,18 @@ describe('LoanCalculatorService', () => {
             const net = LoanCalculatorService.calculateNetProceeds(5000, 0, 0, 0);
             expect(net).toBe(5000);
         });
+
+        it('subtracts weekly service charge from net proceeds', () => {
+            const net = LoanCalculatorService.calculateNetProceeds(5000, 0, 0, 0, 100);
+            expect(net).toBe(4900);
+        });
+    });
+
+    describe('calculateServiceCharge', () => {
+        it('charges 2% only for weekly loans', () => {
+            expect(LoanCalculatorService.calculateServiceCharge(5000, 'weekly')).toBe(100);
+            expect(LoanCalculatorService.calculateServiceCharge(5000, 'daily')).toBe(0);
+            expect(LoanCalculatorService.calculateServiceCharge(5000, 'monthly')).toBe(0);
+        });
     });
 });

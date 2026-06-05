@@ -513,6 +513,7 @@ export type Database = {
           previous_loan_id: string | null
           principal_amount: number | null
           release_date: string | null
+          service_charge_amount: number | null
           status: string | null
           term: number | null
           term_unit: string | null
@@ -544,6 +545,7 @@ export type Database = {
           previous_loan_id?: string | null
           principal_amount?: number | null
           release_date?: string | null
+          service_charge_amount?: number | null
           status?: string | null
           term?: number | null
           term_unit?: string | null
@@ -575,6 +577,7 @@ export type Database = {
           previous_loan_id?: string | null
           principal_amount?: number | null
           release_date?: string | null
+          service_charge_amount?: number | null
           status?: string | null
           term?: number | null
           term_unit?: string | null

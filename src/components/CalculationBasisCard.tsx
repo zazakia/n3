@@ -22,6 +22,7 @@ interface CalculationBasisCardProps {
     installmentAmount?: number;
     numPayments?: number;
     deductedAmount?: number;
+    serviceChargeAmount?: number;
 }
 
 export function CalculationBasisCard({ 
@@ -35,7 +36,8 @@ export function CalculationBasisCard({
     insuranceAmount,
     installmentAmount,
     numPayments,
-    deductedAmount
+    deductedAmount,
+    serviceChargeAmount
 }: CalculationBasisCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const basis = LoanCalculatorService.getFormulaBasis(interestType);
@@ -110,7 +112,7 @@ export function CalculationBasisCard({
                         formula={basis.netRelease} 
                         description="The actual cash received by the borrower after deducting upfront costs or renewal balances."
                         liveCalc={hasLiveValues ? (
-                            `${formatPHP(principalAmount)} - Upfront Deductions (${formatPHP(deductedAmount)}) = ${formatPHP(principalAmount - (deductedAmount || 0))}`
+                            `${formatPHP(principalAmount)} - Upfront Deductions (${formatPHP((deductedAmount || 0) + (serviceChargeAmount || 0))}) = ${formatPHP(principalAmount - (deductedAmount || 0) - (serviceChargeAmount || 0))}`
                         ) : undefined}
                     />
                 </View>

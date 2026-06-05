@@ -258,14 +258,18 @@ export default function CollectorBorrowerPassbook() {
                                 />
                             </View>
 
-                             <View className="flex-row gap-4">
-                                <View className={`flex-1 p-4 rounded-3xl items-center border ${sunlightMode ? 'bg-white border-4 border-black' : 'bg-emerald-50 border-emerald-100'}`}>
-                                    <Text className={`${sunlightMode ? 'text-black' : 'text-emerald-700'} text-[9px] font-black uppercase mb-1`}>Total Loan</Text>
-                                    <Text className={`${sunlightMode ? 'text-black' : 'text-slate-900'} font-black text-base`}>{formatPHP(activeLoan.totalAmount)}</Text>
+                             <View className="flex-row gap-2">
+                                <View className={`flex-1 p-3 rounded-2xl items-center border ${sunlightMode ? 'bg-white border-4 border-black' : 'bg-emerald-50 border-emerald-100'}`}>
+                                    <Text className={`${sunlightMode ? 'text-black' : 'text-emerald-700'} text-[9px] font-black uppercase mb-1`} numberOfLines={1}>Total Loan</Text>
+                                    <Text className={`${sunlightMode ? 'text-black' : 'text-slate-900'} font-black text-xs`} numberOfLines={1}>{formatPHP(activeLoan.totalAmount)}</Text>
                                 </View>
-                                <View className={`flex-1 p-4 rounded-3xl items-center border ${sunlightMode ? 'bg-white border-4 border-black' : 'bg-amber-50 border-amber-100'}`}>
-                                    <Text className={`${sunlightMode ? 'text-black' : 'text-amber-700'} text-[9px] font-black uppercase mb-1`}>Daily Due</Text>
-                                    <Text className={`${sunlightMode ? 'text-black' : 'text-slate-900'} font-black text-base`}>{formatPHP(activeLoan.installmentAmount)}</Text>
+                                <View className={`flex-1 p-3 rounded-2xl items-center border ${sunlightMode ? 'bg-white border-4 border-black' : 'bg-teal-50 border-teal-100'}`}>
+                                    <Text className={`${sunlightMode ? 'text-black' : 'text-teal-700'} text-[9px] font-black uppercase mb-1`} numberOfLines={1}>Total Paid</Text>
+                                    <Text className={`${sunlightMode ? 'text-black' : 'text-slate-900'} font-black text-xs`} numberOfLines={1}>{formatPHP(totalPaid)}</Text>
+                                </View>
+                                <View className={`flex-1 p-3 rounded-2xl items-center border ${sunlightMode ? 'bg-white border-4 border-black' : 'bg-amber-50 border-amber-100'}`}>
+                                    <Text className={`${sunlightMode ? 'text-black' : 'text-amber-700'} text-[9px] font-black uppercase mb-1`} numberOfLines={1}>Daily Due</Text>
+                                    <Text className={`${sunlightMode ? 'text-black' : 'text-slate-900'} font-black text-xs`} numberOfLines={1}>{formatPHP(activeLoan.installmentAmount)}</Text>
                                 </View>
                             </View>
                         </Animated.View>

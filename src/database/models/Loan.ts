@@ -24,6 +24,7 @@ export default class Loan extends Model {
     @field('is_reloan') isReloan: boolean;
     @field('previous_loan_id') previousLoanId: string;
     @field('deducted_amount') deductedAmount: number;
+    @field('service_charge_amount') serviceChargeAmount: number;
     @field('encoded_by') encodedBy: string;
     @relation('collectors', 'collector_id') collector: any;
     @field('collector_id') collectorId: string;

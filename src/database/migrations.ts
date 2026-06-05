@@ -284,5 +284,16 @@ export const myMigrations = schemaMigrations({
         }),
       ],
     },
+    {
+      toVersion: 29,
+      steps: [
+        addColumns({
+          table: 'loans',
+          columns: [
+            { name: 'service_charge_amount', type: 'number', isOptional: true },
+          ],
+        }),
+      ],
+    },
   ],
 })

@@ -76,8 +76,8 @@ async function getAdjustments() {
       
       if (!dbInfo) continue;
 
-      const diff = dbInfo.calculated_balance - expectedBalance;
-      if (diff > 0.02) {
+      const diff = Math.round((dbInfo.calculated_balance - expectedBalance) * 100) / 100;
+      if (Math.abs(diff) > 0.02) {
         const adjustmentAmount = diff;
         const adjId = deterministicUUID(`adjustment-may30-${l.ref_id}`);
         adjustmentsToInsert.push({
@@ -88,7 +88,7 @@ async function getAdjustments() {
           notes: 'System Auto-Adjustment to match legacy Excel balance',
           collector_id: dbInfo.collector_id,
         });
-        console.log(`⚠️ Expected adjustment for ${l.ref_id}: Excel=₱${expectedBalance}, DB=₱${dbInfo.calculated_balance} -> Payment of ₱${adjustmentAmount}`);
+        console.log(`⚠️ Expected adjustment for ${l.ref_id}: Excel=₱${expectedBalance}, DB=₱${dbInfo.calculated_balance} -> Adjustment of ₱${adjustmentAmount}`);
       }
     }
   } finally {

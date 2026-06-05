@@ -31,6 +31,7 @@ export const DAILY_REPORTS: MenuItem[] = [
     { icon: 'calendar-today', label: 'Daily Collection Sheet', route: '/(admin)/reports/daily-collection' },
     { icon: 'bar-chart', label: 'Reports Overview', route: '/(admin)/reports/dashboard' },
     { icon: 'pie-chart', label: 'Expense Breakdown', route: '/(admin)/reports/expenses' },
+    { icon: 'chat', label: 'AI Assistant', route: '/(admin)/reports/ai-assistant' },
 ];
 
 export const WEEKLY_REPORTS: MenuItem[] = [

@@ -5,7 +5,8 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- Drop existing tables to ensure a clean slate
+-- Drop local app data tables to ensure a clean slate. Keep user_profiles because
+-- Supabase Auth/profile rows may be referenced by other local schema objects.
 DROP TABLE IF EXISTS public.app_action_logs;
 DROP TABLE IF EXISTS public.app_payment_schedules;
 DROP TABLE IF EXISTS public.app_payments;
@@ -14,7 +15,6 @@ DROP TABLE IF EXISTS public.app_loans;
 DROP TABLE IF EXISTS public.collection_groups;
 DROP TABLE IF EXISTS public.app_borrowers;
 DROP TABLE IF EXISTS public.app_collectors;
-DROP TABLE IF EXISTS public.user_profiles;
 DROP TABLE IF EXISTS public.app_expenses;
 DROP TABLE IF EXISTS public.app_cash_transactions;
 DROP TABLE IF EXISTS public.app_bank_accounts;
@@ -24,9 +24,10 @@ DROP TABLE IF EXISTS public.app_financial_snapshots;
 DROP TABLE IF EXISTS public.app_remittances;
 DROP TABLE IF EXISTS public.app_savings_transactions;
 DROP TABLE IF EXISTS public.app_expense_categories;
+DROP TABLE IF EXISTS public.app_recurring_expenses;
 
 -- user_profiles
-CREATE TABLE public.user_profiles (
+CREATE TABLE IF NOT EXISTS public.user_profiles (
     id TEXT PRIMARY KEY DEFAULT (uuid_generate_v4())::text,
     full_name TEXT NOT NULL,
     role TEXT NOT NULL,
@@ -67,6 +68,7 @@ CREATE TABLE public.app_borrowers (
     latitude NUMERIC,
     longitude NUMERIC,
     "group" TEXT,
+    meeting_day TEXT,
     co_maker_name TEXT,
     business TEXT,
     created_at TIMESTAMPTZ DEFAULT now(),
@@ -98,6 +100,7 @@ CREATE TABLE public.app_loans (
     deposit_amount NUMERIC,
     insurance_amount NUMERIC,
     deducted_amount NUMERIC DEFAULT 0,
+    service_charge_amount NUMERIC DEFAULT 0,
     batch INTEGER,
     cycle INTEGER,
     notes TEXT,
@@ -276,6 +279,31 @@ CREATE TABLE public.app_expense_categories (
     deleted_at TIMESTAMPTZ
 );
 
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS full_name TEXT;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS role TEXT;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ;
+
+-- app_recurring_expenses
+CREATE TABLE public.app_recurring_expenses (
+    id TEXT PRIMARY KEY DEFAULT (gen_random_uuid())::text,
+    category TEXT NOT NULL,
+    description TEXT,
+    amount NUMERIC NOT NULL,
+    frequency TEXT NOT NULL,
+    next_due_date TIMESTAMPTZ NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    reminders_enabled BOOLEAN DEFAULT false,
+    reminder_time TEXT,
+    encoded_by TEXT,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    deleted_at TIMESTAMPTZ
+);
+
 -- collection_groups
 CREATE TABLE public.collection_groups (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -321,6 +349,7 @@ ALTER TABLE public.app_financial_snapshots ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.app_remittances ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.app_savings_transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.app_expense_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.app_recurring_expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.collection_groups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.app_action_logs ENABLE ROW LEVEL SECURITY;
 
@@ -334,7 +363,7 @@ DECLARE
         'app_expenses', 'app_cash_transactions', 'app_bank_accounts', 
         'app_bank_transactions', 'app_collection_logs', 'app_financial_snapshots', 
         'app_remittances', 'app_savings_transactions', 'app_expense_categories', 
-        'collection_groups', 'app_action_logs'
+        'app_recurring_expenses', 'collection_groups', 'app_action_logs'
     ];
 BEGIN
     FOREACH tbl IN ARRAY all_tables LOOP

@@ -28,6 +28,7 @@ interface LoanInfo {
     totalAmount: number;
     status: string;
     deductedAmount?: number;
+    serviceChargeAmount?: number;
     loanBatch?: number | string;
     isReloan?: boolean;
 }
@@ -41,6 +42,23 @@ interface PaymentRow {
     runningBalance: number;
     notes?: string;
 }
+
+export type VoucherPaperSize = 'letter' | 'a4' | 'legal';
+
+export interface VoucherPrintOptions {
+    paperSize?: VoucherPaperSize;
+}
+
+interface VoucherData {
+    borrower: BorrowerInfo;
+    loan: LoanInfo;
+}
+
+const VOUCHER_PAPER_SIZES: Record<VoucherPaperSize, string> = {
+    letter: '8.5in 11in',
+    a4: '210mm 297mm',
+    legal: '8.5in 14in',
+};
 
 export class PdfGenerator {
     static async generateStatementOfAccount(
@@ -199,105 +217,159 @@ export class PdfGenerator {
         }
     }
 
-    static async generateVoucher(
-        borrower: BorrowerInfo,
-        loan: LoanInfo
-    ): Promise<void> {
+    private static buildVoucherCardHtml(borrower: BorrowerInfo, loan: LoanInfo): string {
         const generatedDate = loan.releaseDate ? formatDate(new Date(loan.releaseDate)) : formatDate(new Date());
-        
         let batchText = loan.loanBatch ? loan.loanBatch.toString() : '';
         if (loan.isReloan && !batchText.toLowerCase().includes('reloan')) {
              batchText += ' (RELOAN)';
         }
 
-        // Formatted Values
-        const formattedAmount = formatPHP(loan.principalAmount);
-        const isReloanFormat = !!loan.isReloan;
-        const deduction = loan.deductedAmount || 0;
-        const formattedBalance = isReloanFormat ? formatPHP(deduction) : '';
-        const netAmount = loan.principalAmount - (isReloanFormat ? deduction : 0);
-        const formattedNetAmount = formatPHP(netAmount);
+        const previousLoanDeduction = loan.deductedAmount || 0;
+        const serviceCharge = loan.serviceChargeAmount || 0;
+        const totalDeductions = previousLoanDeduction + serviceCharge;
+        const netAmount = loan.principalAmount - previousLoanDeduction - serviceCharge;
+        const remarks = [
+            loan.loanNumber,
+            batchText ? `Batch ${batchText}` : '',
+            loan.isReloan ? 'Reloan' : '',
+        ].filter(Boolean).join(' • ');
+        const stripCurrency = (value: string) => value.replace('₱', '').trim();
 
-        const html = `
+        return `
+          <section class="voucher-card">
+            <div class="receipt-header">
+              <div class="receipt-mark">IF</div>
+              <div class="receipt-title">CASH RECEIPT</div>
+            </div>
+
+            <div class="top-fields">
+              <div class="field received">
+                <span>RECEIVED FROM:</span>
+                <b>${borrower.fullName}</b>
+              </div>
+              <div class="field date">
+                <b>${generatedDate}</b>
+                <small>DATE</small>
+              </div>
+            </div>
+
+            <div class="field amount-received">
+              <span>AMOUNT RECEIVED:</span>
+              <b>${stripCurrency(formatPHP(netAmount))}</b>
+            </div>
+            <div class="field remarks">
+              <span>REMARKS:</span>
+              <b>${remarks || '&nbsp;'}</b>
+            </div>
+
+            <div class="salary-lines">
+              <div class="money-line">
+                <strong>${stripCurrency(formatPHP(loan.principalAmount))}</strong>
+                <span>amt. of salary / pension</span>
+              </div>
+              <div class="money-line">
+                <strong>${stripCurrency(formatPHP(totalDeductions))}</strong>
+                <span>amt. due on</span>
+                <em>${generatedDate}</em>
+              </div>
+              <div class="money-line">
+                <strong>${stripCurrency(formatPHP(netAmount))}</strong>
+                <span>amt. remaining</span>
+              </div>
+            </div>
+
+            <div class="deductions">
+              <h3>DEDUCTIONS:</h3>
+              <div>${previousLoanDeduction > 0 ? `${stripCurrency(formatPHP(previousLoanDeduction))} - Previous Loan Balance` : '&nbsp;'}</div>
+              <div>${serviceCharge > 0 ? `${stripCurrency(formatPHP(serviceCharge))} - Service Fee` : '&nbsp;'}</div>
+            </div>
+
+            <div class="receipt-footer">
+              <div class="signature-name">${borrower.fullName}</div>
+              <div class="signature-label">SIGNATURE OVER PRINTED NAME</div>
+              <div class="recipient-label">RECIPIENT</div>
+            </div>
+          </section>
+        `;
+    }
+
+    private static buildVoucherHtml(vouchers: VoucherData[], options: VoucherPrintOptions = {}): string {
+        const paperSize = options.paperSize || 'letter';
+        const pageSize = VOUCHER_PAPER_SIZES[paperSize] || VOUCHER_PAPER_SIZES.letter;
+        const cards = vouchers.map(({ borrower, loan }) => this.buildVoucherCardHtml(borrower, loan)).join('');
+
+        return `
         <!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8"/>
           <style>
-            @page { size: 8.5in 5.5in; margin: 0; }
-            body { font-family: Arial, sans-serif; margin: 0.5in; margin-bottom: 0.6in; color: #222; font-size: 14px; box-sizing: border-box; }
-            .header-info { display: flex; flex-direction: column; margin-bottom: 15px; font-weight: bold; }
-            .header-info div { margin-bottom: 3px; }
-            .title { text-align: center; font-size: 36px; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 8px; margin-bottom: 20px; letter-spacing: 2px; }
-            
-            .row { display: flex; justify-content: space-between; margin-bottom: 10px; }
-            
-            .table-container { width: 100%; display: flex; justify-content: center; margin-bottom: 25px; }
-            table { width: 80%; border-collapse: collapse; text-align: center; }
-            th { font-weight: bold; color: #555; padding-bottom: 8px; font-size: 14px; }
-            td { font-weight: bold; font-size: 16px; padding: 8px 0; }
-            
-            .series { text-align: right; margin-right: 10%; margin-top: 15px; font-weight: bold; font-size: 12px; color: #555;}
-            
-            .signatures { display: flex; justify-content: space-between; margin-top: 45px; text-align: center; font-size: 12px; font-weight: bold; }
-            .sig-block { width: 30%; }
-            .sig-line { border-bottom: 1px solid #000; margin-bottom: 5px; height: 30px; }
-            .sig-label { color: #555; font-weight: normal; margin-top: 5px; }
+            @page { size: ${pageSize}; margin: 0.22in; }
+            * { box-sizing: border-box; }
+            body { font-family: Arial, sans-serif; margin: 0; color: #173d3a; font-size: 8.5px; }
+            .sheet {
+              display: grid;
+              grid-template-columns: repeat(2, 1fr);
+              grid-auto-rows: calc((100vh - 0.01px) / 4);
+              gap: 0;
+              width: 100%;
+              min-height: 100vh;
+            }
+            .voucher-card {
+              break-inside: avoid;
+              page-break-inside: avoid;
+              border: 1.5px solid #2f5d55;
+              padding: 0.08in 0.1in;
+              display: flex;
+              flex-direction: column;
+              overflow: hidden;
+              background: #fbfaf2;
+            }
+            .voucher-card:nth-child(8n) { break-after: page; page-break-after: always; }
+            .receipt-header { display: flex; align-items: center; justify-content: center; gap: 7px; border-bottom: 1px solid #2f5d55; padding-bottom: 2px; margin-bottom: 5px; }
+            .receipt-mark { width: 18px; height: 18px; border: 2px solid #2e8b83; color: #2e8b83; transform: rotate(45deg); display: flex; align-items: center; justify-content: center; font-size: 6px; font-weight: 900; }
+            .receipt-mark::first-letter { transform: rotate(-45deg); }
+            .receipt-title { color: #222; font-size: 18px; font-weight: 900; letter-spacing: 0.5px; }
+            .top-fields { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+            .field { display: flex; align-items: baseline; gap: 4px; color: #1f4f49; font-weight: 900; line-height: 1.1; }
+            .field span { color: #222; font-size: 8.5px; white-space: nowrap; }
+            .field b { color: #111; font-size: 9.5px; border-bottom: 1px solid #333; min-height: 12px; flex: 1; padding: 0 3px; }
+            .received { flex: 1; min-width: 0; }
+            .date { width: 30%; flex-direction: column; align-items: center; gap: 0; }
+            .date b { width: 100%; text-align: center; flex: none; }
+            .date small { color: #333; font-size: 6.5px; font-weight: 900; }
+            .amount-received, .remarks { margin-top: 3px; }
+            .amount-received b, .remarks b { max-width: 72%; }
+            .salary-lines { margin-top: 8px; }
+            .money-line { display: flex; align-items: baseline; gap: 6px; margin-bottom: 2px; color: #2f7770; font-weight: 900; }
+            .money-line::before { content: "P"; color: #0f6d69; font-size: 10px; font-weight: 900; }
+            .money-line strong { color: #111; font-size: 11px; min-width: 55px; border-bottom: 1px solid #333; text-align: center; }
+            .money-line span { color: #2f7770; font-size: 10px; }
+            .money-line em { color: #111; font-size: 9px; border-bottom: 1px solid #333; min-width: 50px; text-align: center; font-style: normal; }
+            .deductions { margin-top: 5px; color: #111; font-weight: 800; min-height: 34px; }
+            .deductions h3 { color: #1f4f49; font-size: 10px; margin: 0 0 3px; letter-spacing: 0.5px; }
+            .deductions div { margin-left: 26px; font-size: 9.5px; line-height: 1.25; }
+            .receipt-footer { margin-top: auto; align-self: flex-end; width: 50%; text-align: center; color: #222; }
+            .signature-name { border-bottom: 1px solid #333; min-height: 14px; font-size: 9px; font-weight: 900; text-transform: uppercase; }
+            .signature-label, .recipient-label { font-size: 6.8px; font-weight: 900; line-height: 1.05; }
+            @media print {
+              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            }
           </style>
         </head>
         <body>
-          <div class="header-info">
-            <div>DATE: ${generatedDate}</div>
-            <div>Batch #: ${batchText}</div>
-          </div>
-          
-          <div class="title">Voucher</div>
-
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Client name</th>
-                  ${isReloanFormat ? '<th>Loan Balance</th>' : ''}
-                  <th>Amount</th>
-                  ${isReloanFormat ? '<th>Net Amount</th>' : ''}
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>${borrower.fullName}</td>
-                  ${isReloanFormat ? `<td>${formattedBalance.replace('₱', '').trim()}</td>` : ''}
-                  <td>${formattedAmount.replace('₱', '').trim()}</td>
-                  ${isReloanFormat ? `<td>${formattedNetAmount.replace('₱', '').trim()}</td>` : ''}
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="series">
-            Series N0.${loan.loanNumber.slice(-4) /* Using last 4 chars as rough series proxy or just the loan number */}
-          </div>
-
-          <div class="signatures">
-             <div class="sig-block" style="text-align: left; width: 40%;">
-                <div class="sig-line"></div>
-                <div>Signature over Printed Name</div>
-             </div>
-          </div>
-
-          <div class="signatures" style="margin-top: 25px;">
-             <div class="sig-block" style="text-align: left;">
-                <div class="sig-label" style="font-weight: bold; color: #000;">Noted By: ____________________</div>
-                <div style="margin-left: 65px;">Account Officer</div>
-             </div>
-             <div class="sig-block" style="text-align: right;">
-                <div class="sig-label" style="font-weight: bold; color: #000;">Approve By: ____________________</div>
-                <div style="margin-right: 25px;">OIC</div>
-             </div>
-          </div>
+          <main class="sheet">${cards}</main>
         </body>
         </html>
         `;
+    }
+
+    static async generateVoucher(
+        borrower: BorrowerInfo,
+        loan: LoanInfo,
+        options: VoucherPrintOptions = {}
+    ): Promise<void> {
+        const html = this.buildVoucherHtml([{ borrower, loan }], options);
 
         if (Platform.OS === 'web') {
             const printWindow = window.open('', '_blank');
@@ -321,6 +393,40 @@ export class PdfGenerator {
             await Sharing.shareAsync(uri, {
                 mimeType: 'application/pdf',
                 dialogTitle: `Voucher — ${borrower.fullName}`,
+            });
+        }
+    }
+
+    static async generateVoucherBatch(
+        vouchers: VoucherData[],
+        options: VoucherPrintOptions = {}
+    ): Promise<void> {
+        if (vouchers.length === 0) return;
+
+        const html = this.buildVoucherHtml(vouchers, options);
+
+        if (Platform.OS === 'web') {
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.write(html);
+                printWindow.document.close();
+                printWindow.focus();
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 250);
+            } else {
+                await Print.printAsync({ html });
+            }
+            return;
+        }
+
+        const { uri } = await Print.printToFileAsync({ html });
+        const canShare = await Sharing.isAvailableAsync();
+        if (canShare) {
+            await Sharing.shareAsync(uri, {
+                mimeType: 'application/pdf',
+                dialogTitle: `Vouchers — ${vouchers.length} loan${vouchers.length === 1 ? '' : 's'}`,
             });
         }
     }

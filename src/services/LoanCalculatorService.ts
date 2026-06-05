@@ -23,6 +23,16 @@ export interface LoanCalcResult {
 }
 
 export class LoanCalculatorService {
+    static readonly WEEKLY_SERVICE_CHARGE_RATE = 0.02;
+
+    static calculateServiceCharge(principal: number, frequency: string): number {
+        if (frequency !== 'weekly' || !Number.isFinite(principal) || principal <= 0) {
+            return 0;
+        }
+
+        return Math.round(principal * this.WEEKLY_SERVICE_CHARGE_RATE * 100) / 100;
+    }
+
     static paymentsForFrequency(term: number, termUnit: string, frequency: string): number {
         if (termUnit === 'days') {
             switch (frequency) {
@@ -200,8 +210,14 @@ export class LoanCalculatorService {
         return this.calculateFlat(principal, ratePercent, term, termUnit, frequency, releaseDate, totalDeposit, totalInsurance);
     }
 
-    static calculateNetProceeds(principal: number, deposit: number, insurance: number, previousBalance: number): number {
-        return Math.max(0, principal - (previousBalance || 0));
+    static calculateNetProceeds(
+        principal: number,
+        deposit: number,
+        insurance: number,
+        previousBalance: number,
+        serviceCharge: number = 0
+    ): number {
+        return Math.max(0, principal - (previousBalance || 0) - (serviceCharge || 0));
     }
 
     static generateLoanNumber(): string {
@@ -216,7 +232,7 @@ export class LoanCalculatorService {
                 : 'Reducing Balance Calculation based on Annual Rate',
             totalLoan: 'Principal + Total Interest + Total Savings + Total Insurance',
             installment: 'Total Loan / Number of Payments',
-            netRelease: 'Principal - Previous Loan Balance (if renewal)',
+            netRelease: 'Principal - Previous Loan Balance (if renewal) - 2% Service Charge (weekly loans only)',
             savings: 'Allocated portion of total savings per payment',
             insurance: 'Allocated portion of total insurance per payment'
         };

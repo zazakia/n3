@@ -92,6 +92,12 @@ export default function NewLoanScreen() {
     const isEditMode = !!editingLoanId;
 
     const watchedFields = watch();
+    const principalAmount = parseFloat(watchedFields.principal);
+    const serviceChargeAmount = LoanCalculatorService.calculateServiceCharge(
+        principalAmount,
+        watchedFields.frequency
+    );
+    const totalUpfrontDeductions = previousLoanBalance + serviceChargeAmount;
 
     useEffect(() => {
         if (editLoanId) {
@@ -268,6 +274,7 @@ export default function NewLoanScreen() {
                 isReloan: data.isReloan,
                 previousLoanId: data.previousLoanId,
                 deductedAmount: previousLoanBalance,
+                serviceChargeAmount: LoanCalculatorService.calculateServiceCharge(parseFloat(data.principal), data.frequency),
                 loanBatch: data.loanBatch ? parseInt(data.loanBatch, 10) : null,
                 loanCycle: data.loanCycle ? parseInt(data.loanCycle, 10) : null,
                 interestAmount: calcResult.totalInterest,
@@ -313,8 +320,9 @@ export default function NewLoanScreen() {
         try {
             // 1. Run Auto-Audit
             const audit = new AuditService(database);
+            const auditServiceCharge = LoanCalculatorService.calculateServiceCharge(parseFloat(data.principal), data.frequency);
             const issues = await audit.validateLoanPreSave(
-                { ...data, deductedAmount: previousLoanBalance }, 
+                { ...data, deductedAmount: previousLoanBalance + auditServiceCharge },
                 calcResult, 
                 isEditing
             );
@@ -685,11 +693,17 @@ export default function NewLoanScreen() {
                                 <Text className="font-bold text-red-600">-{formatPHP(previousLoanBalance)}</Text>
                             </View>
                         )}
+                        {serviceChargeAmount > 0 && (
+                            <View className="flex-row justify-between mt-2 pt-2 border-t border-gray-100">
+                                <Text className="text-red-600 font-bold">2% Service Charge</Text>
+                                <Text className="font-bold text-red-600">-{formatPHP(serviceChargeAmount)}</Text>
+                            </View>
+                        )}
 
                         <View className="flex-row justify-between mt-4 pt-4 border-t-2 border-gray-100">
                             <Text className="text-lg font-black text-gray-900">Net Release (Disbursement)</Text>
                             <Text className="text-lg font-black text-green-700">
-                                {formatPHP(Math.max(0, parseFloat(watchedFields.principal) - previousLoanBalance))}
+                                {formatPHP(Math.max(0, principalAmount - totalUpfrontDeductions))}
                             </Text>
                         </View>
                     </View>

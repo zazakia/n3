@@ -134,7 +134,7 @@ export default function ClientPassbookScreen() {
     const grossTotalLoan = selectedLoan?.totalAmount || 1;
     const grossBalance = Math.max(0, grossTotalLoan - totalPaid);
 
-    const netLoanReleased = selectedLoan ? selectedLoan.principalAmount - (selectedLoan.deductedAmount || 0) : 0;
+    const netLoanReleased = selectedLoan ? selectedLoan.principalAmount - (selectedLoan.deductedAmount || 0) - (selectedLoan.serviceChargeAmount || 0) : 0;
     const numTerms = selectedLoan ? LoanCalculatorService.paymentsForFrequency(selectedLoan.term, selectedLoan.termUnit, selectedLoan.frequency) : 1;
 
     const periodicDeposit = depositAmount;
@@ -235,6 +235,7 @@ export default function ClientPassbookScreen() {
                     totalAmount: selectedLoan.totalAmount,
                     status: selectedLoan.status,
                     deductedAmount: selectedLoan.deductedAmount,
+                    serviceChargeAmount: selectedLoan.serviceChargeAmount,
                     loanBatch: selectedLoan.loanBatch,
                     isReloan: selectedLoan.isReloan,
                     releaseDate: selectedLoan.releaseDate ? new Date(selectedLoan.releaseDate as number | Date).getTime() : undefined,
@@ -397,11 +398,15 @@ export default function ClientPassbookScreen() {
                                 </View>
                             </View>
 
-                            {(selectedLoan.isReloan || (selectedLoan.deductedAmount || 0) > 0) && (
+                            {(selectedLoan.isReloan || (selectedLoan.deductedAmount || 0) > 0 || (selectedLoan.serviceChargeAmount || 0) > 0) && (
                                 <View className="flex-row border-t border-gray-100 pt-4 mt-4">
                                     <View className="flex-1 items-center border-r border-gray-100">
                                         <Text className="text-[10px] font-bold text-red-700 uppercase tracking-widest mb-1 text-center">Upfront Deduction (Prev. Bal)</Text>
                                         <Text className="text-base font-extrabold text-red-600">-{formatPHP(selectedLoan.deductedAmount || 0)}</Text>
+                                    </View>
+                                    <View className="flex-1 items-center border-r border-gray-100">
+                                        <Text className="text-[10px] font-bold text-red-700 uppercase tracking-widest mb-1 text-center">2% Service Charge</Text>
+                                        <Text className="text-base font-extrabold text-red-600">-{formatPHP(selectedLoan.serviceChargeAmount || 0)}</Text>
                                     </View>
                                     <View className="flex-1 items-center">
                                         <Text className="text-[10px] font-bold text-green-700 uppercase tracking-widest mb-1 text-center">Net Loan Release</Text>
@@ -447,13 +452,13 @@ export default function ClientPassbookScreen() {
                                 <SpecItem label="Net Loan Released" value={formatPHP(netLoanReleased)} highlight />
                             </View>
 
-                            {selectedLoan.deductedAmount > 0 && (
+                            {((selectedLoan.deductedAmount || 0) > 0 || (selectedLoan.serviceChargeAmount || 0) > 0) && (
                                 <View className="mt-4 p-3 bg-red-50 rounded-xl border border-red-100 flex-row justify-between items-center">
                                     <View className="flex-row items-center">
                                         <MaterialIcons name="history" size={16} color="#D32F2F" className="mr-2" />
                                         <Text className="text-[10px] font-bold text-red-700 uppercase">Upfront Deductions</Text>
                                     </View>
-                                    <Text className="text-sm font-black text-red-700">{formatPHP(selectedLoan.deductedAmount)}</Text>
+                                    <Text className="text-sm font-black text-red-700">{formatPHP((selectedLoan.deductedAmount || 0) + (selectedLoan.serviceChargeAmount || 0))}</Text>
                                 </View>
                             )}
                         </View>
@@ -470,6 +475,7 @@ export default function ClientPassbookScreen() {
                             installmentAmount={selectedLoan.installmentAmount}
                             numPayments={numTerms}
                             deductedAmount={selectedLoan.deductedAmount || 0}
+                            serviceChargeAmount={selectedLoan.serviceChargeAmount || 0}
                         />
                     </View>
                 ) : (

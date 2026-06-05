@@ -2,6 +2,26 @@ import type { AppUpdateEntry } from './appUpdates';
 
 export const GENERATED_APP_UPDATES: AppUpdateEntry[] = [
     {
+        "id": "ec9d4c7a6d4fc40bfa89a9e7cbecdfa3b8114638",
+        "version": "ec9d4c7",
+        "versionLabel": "Commit",
+        "date": "2026-06-03",
+        "title": "Prevent soft-deleted payments from skewing balances",
+        "category": "fix",
+        "icon": "build-circle",
+        "summary": "Renewal selection and collection reporting were including soft-deleted rows in a few screen-level queries, which could make previous-loan balances too low and collection totals too high.",
+        "changes": [
+            "Prevent soft-deleted payments from skewing balances",
+            "Renewal selection and collection reporting were including soft-deleted rows in a few screen-level queries, which could make previous-loan balances too low and collection totals too high.",
+            "Centralized previous-loan balance calculation and filtered active payment/penalty queries consistently across affected flows."
+        ],
+        "codeChanges": [
+            "Updated app/(admin)/loans/new.tsx",
+            "Updated app/(admin)/reports/collection.tsx",
+            "Updated app/(admin)/reports/daily-collection.tsx"
+        ]
+    },
+    {
         "id": "f76ec2497478ba745ffad95fcf9e6ed2171df928",
         "version": "f76ec24",
         "versionLabel": "Commit",

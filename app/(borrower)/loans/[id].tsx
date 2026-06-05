@@ -169,13 +169,17 @@ export default function LoanDetailsScreen() {
                 </View>
 
                 <View className="flex-row justify-between">
-                    <View className="flex-1 pr-3">
-                        <Text className="text-gray-700 text-[10px] font-bold uppercase mb-1">Total Loan</Text>
-                        <Text className="text-lg font-black text-gray-900">{formatPHP(loanDetail.totalAmount)}</Text>
+                    <View className="flex-1 pr-2">
+                        <Text className="text-gray-700 text-[9px] font-bold uppercase mb-1" numberOfLines={1}>Total Loan</Text>
+                        <Text className="text-sm font-black text-gray-900" numberOfLines={1}>{formatPHP(loanDetail.totalAmount)}</Text>
                     </View>
-                    <View className="items-end flex-1 pl-3">
-                        <Text className="text-gray-700 text-[10px] font-bold uppercase mb-1">Remaining</Text>
-                        <Text className="text-lg font-black text-blue-700">{formatPHP(loanDetail.balance)}</Text>
+                    <View className="flex-1 items-center px-1">
+                        <Text className="text-gray-700 text-[9px] font-bold uppercase mb-1" numberOfLines={1}>Total Payments</Text>
+                        <Text className="text-sm font-black text-green-700" numberOfLines={1}>{formatPHP(loanDetail.totalPaid)}</Text>
+                    </View>
+                    <View className="flex-1 items-end pl-2">
+                        <Text className="text-gray-700 text-[9px] font-bold uppercase mb-1" numberOfLines={1}>Remaining</Text>
+                        <Text className="text-sm font-black text-blue-700" numberOfLines={1}>{formatPHP(loanDetail.balance)}</Text>
                     </View>
                 </View>
             </Animated.View>

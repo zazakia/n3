@@ -25,6 +25,7 @@ jest.mock('../../utils/currency', () => ({
 describe('PdfGenerator', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (Sharing.isAvailableAsync as jest.Mock).mockResolvedValue(true);
   });
 
   it('generates and shares a statement of account', async () => {
@@ -90,6 +91,92 @@ describe('PdfGenerator', () => {
     
     expect(Print.printToFileAsync).toHaveBeenCalled();
     expect(Sharing.shareAsync).not.toHaveBeenCalled();
+  });
+
+  it('renders cash receipt voucher with service fee and remaining amount', async () => {
+    await PdfGenerator.generateVoucher(
+      { fullName: 'Rica Jane Sarco' } as any,
+      {
+        loanNumber: 'LN-0569',
+        principalAmount: 5000,
+        interestRate: 20,
+        interestType: 'flat',
+        term: 6,
+        termUnit: 'months',
+        frequency: 'weekly',
+        installmentAmount: 250,
+        totalAmount: 6000,
+        status: 'active',
+        serviceChargeAmount: 100,
+      } as any
+    );
+
+    expect(Print.printToFileAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        html: expect.stringContaining('CASH RECEIPT')
+      })
+    );
+    const html = (Print.printToFileAsync as jest.Mock).mock.calls[0][0].html;
+    expect(html).toContain('RECEIVED FROM:');
+    expect(html).toContain('AMOUNT RECEIVED:');
+    expect(html).toContain('amt. of salary / pension');
+    expect(html).toContain('amt. remaining');
+    expect(html).toContain('DEDUCTIONS:');
+    expect(html).toContain('Service Fee');
+    expect(html).toContain('PHP 100');
+    expect(html).toContain('PHP 4900');
+    expect(html).toContain('grid-template-columns: repeat(2, 1fr)');
+    expect(html).toContain('grid-auto-rows: calc((100vh - 0.01px) / 4)');
+  });
+
+  it('prints voucher batches with selected paper size', async () => {
+    await PdfGenerator.generateVoucherBatch(
+      [
+        {
+          borrower: { fullName: 'Client One' },
+          loan: {
+            loanNumber: 'LN-1001',
+            principalAmount: 3000,
+            interestRate: 20,
+            interestType: 'flat',
+            term: 6,
+            termUnit: 'months',
+            frequency: 'weekly',
+            installmentAmount: 150,
+            totalAmount: 3600,
+            status: 'active',
+            loanBatch: 4,
+          } as any,
+        },
+        {
+          borrower: { fullName: 'Client Two' },
+          loan: {
+            loanNumber: 'LN-1002',
+            principalAmount: 5000,
+            interestRate: 20,
+            interestType: 'flat',
+            term: 6,
+            termUnit: 'months',
+            frequency: 'weekly',
+            installmentAmount: 250,
+            totalAmount: 6000,
+            status: 'active',
+            serviceChargeAmount: 100,
+          } as any,
+        },
+      ],
+      { paperSize: 'a4' }
+    );
+
+    const html = (Print.printToFileAsync as jest.Mock).mock.calls[0][0].html;
+    expect(html).toContain('@page { size: 210mm 297mm; margin: 0.22in; }');
+    expect(html).toContain('Client One');
+    expect(html).toContain('Client Two');
+    expect(html).toContain('CASH RECEIPT');
+    expect(html).toContain('Service Fee');
+    expect(Sharing.shareAsync).toHaveBeenCalledWith('mock-uri', expect.objectContaining({
+      dialogTitle: expect.stringContaining('2 loans')
+    }));
   });
 
   it('uses printAsync on web platform', async () => {

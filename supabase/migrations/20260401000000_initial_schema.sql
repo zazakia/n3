@@ -98,6 +98,7 @@ CREATE TABLE public.app_loans (
     deposit_amount NUMERIC,
     insurance_amount NUMERIC,
     deducted_amount NUMERIC DEFAULT 0,
+    service_charge_amount NUMERIC DEFAULT 0,
     batch INTEGER,
     cycle INTEGER,
     notes TEXT,

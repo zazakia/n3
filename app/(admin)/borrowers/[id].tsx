@@ -383,7 +383,7 @@ export default function EditBorrowerScreen() {
                                             {format(new Date(l.releaseDate as any), 'MMM d, yyyy')} • {formatPHP(l.principalAmount)}
                                         </Text>
                                         <Text className="text-[10px] text-green-700 font-black uppercase ml-2">
-                                            (Net: {formatPHP(l.principalAmount - (l.deductedAmount || 0))})
+                                            (Net: {formatPHP(l.principalAmount - (l.deductedAmount || 0) - (l.serviceChargeAmount || 0))})
                                         </Text>
                                         {l.insuranceAmount > 0 && (
                                             <Text className="text-[10px] text-orange-600 font-black uppercase ml-2">

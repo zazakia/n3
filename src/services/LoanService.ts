@@ -2,7 +2,7 @@ import { database } from '../database';
 import Loan from '../database/models/Loan';
 import Payment from '../database/models/Payment';
 import PaymentSchedule from '../database/models/PaymentSchedule';
-import { LoanCalcResult } from './LoanCalculatorService';
+import { LoanCalculatorService, LoanCalcResult } from './LoanCalculatorService';
 import uuid from 'react-native-uuid';
 import { Database, Q } from '@nozbe/watermelondb';
 import ActionLogService from './ActionLogService';
@@ -34,6 +34,7 @@ export class LoanService {
         isReloan: boolean;
         previousLoanId?: string;
         deductedAmount?: number;
+        serviceChargeAmount?: number;
         loanBatch?: number | null;
         loanCycle?: number | null;
         interestAmount: number;
@@ -105,6 +106,7 @@ export class LoanService {
                 loan.isReloan = isReloan;
                 loan.previousLoanId = isReloan ? (previousLoanId || '') : '';
                 loan.deductedAmount = isReloan ? (deductedAmount || 0) : 0;
+                loan.serviceChargeAmount = LoanCalculatorService.calculateServiceCharge(principalAmount, frequency);
                 loan.loanBatch = loanBatch || null;
                 loan.loanCycle = loanCycle || null;
                 loan.interestAmount = interestAmount;

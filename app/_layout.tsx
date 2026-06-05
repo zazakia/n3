@@ -11,7 +11,29 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { cssInterop } from 'nativewind';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { areRequiredIconFontsLoaded, loadRequiredIconFonts } from '../src/utils/iconFonts';
+import { LogBox } from 'react-native';
 import '../global.css';
+
+LogBox.ignoreLogs([
+    'AuthApiError: Invalid Refresh Token: Refresh Token Not Found',
+    'Unknown event handler property `onStartShouldSetResponder`',
+    'Unknown event handler property `onResponderTerminationRequest`'
+]);
+
+// Suppress specific React DOM and Supabase errors in the console
+const originalConsoleError = console.error;
+console.error = (...args) => {
+    if (typeof args[0] === 'string') {
+        if (
+            args[0].includes('Unknown event handler property') ||
+            args[0].includes('AuthApiError: Invalid Refresh Token') ||
+            args[0].includes('Failed to load resource: the server responded with a status of 400')
+        ) {
+            return;
+        }
+    }
+    originalConsoleError(...args);
+};
 
 cssInterop(MaterialIcons, {
     className: 'style',

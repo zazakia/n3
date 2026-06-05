@@ -1,7 +1,7 @@
 import { appSchema, tableSchema } from '@nozbe/watermelondb'
 
 export const mySchema = appSchema({
-    version: 28,
+    version: 29,
     tables: [
         tableSchema({
             name: 'loan_penalties',
@@ -87,6 +87,7 @@ export const mySchema = appSchema({
                 { name: 'is_reloan', type: 'boolean', isOptional: true },
                 { name: 'previous_loan_id', type: 'string', isOptional: true },
                 { name: 'deducted_amount', type: 'number', isOptional: true },
+                { name: 'service_charge_amount', type: 'number', isOptional: true },
                 { name: 'encoded_by', type: 'string', isOptional: true },
                 { name: 'collector_id', type: 'string', isOptional: true, isIndexed: true },
                 { name: 'batch', type: 'number', isOptional: true },

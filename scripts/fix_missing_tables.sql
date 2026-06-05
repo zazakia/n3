@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS public.app_loans (
     is_reloan BOOLEAN DEFAULT FALSE,
     previous_loan_id TEXT,
     deducted_amount NUMERIC,
+    service_charge_amount NUMERIC DEFAULT 0,
     encoded_by TEXT,
     collector_id TEXT,
     created_at TIMESTAMPTZ DEFAULT now(),

@@ -113,6 +113,7 @@ export default function LoanDetailsScreen() {
                 isReloan: loan.isReloan,
                 previousLoanId: loan.previousLoanId || undefined,
                 deductedAmount: loan.deductedAmount || 0,
+                serviceChargeAmount: loan.serviceChargeAmount || 0,
                 loanBatch: loan.loanBatch,
                 loanCycle: loan.loanCycle,
                 interestAmount: loan.interestAmount || 0,
@@ -209,6 +210,7 @@ export default function LoanDetailsScreen() {
                     totalAmount: loan.totalAmount,
                     status: loan.status,
                     deductedAmount: loan.deductedAmount,
+                    serviceChargeAmount: loan.serviceChargeAmount,
                     loanBatch: loan.loanBatch,
                     isReloan: loan.isReloan,
                     releaseDate: loan.releaseDate ? new Date(loan.releaseDate).getTime() : undefined,
@@ -230,6 +232,8 @@ export default function LoanDetailsScreen() {
 
     const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
     const balance = Math.max(0, loan.totalAmount - totalPaid);
+    const upfrontDeductions = (loan.deductedAmount || 0) + (loan.serviceChargeAmount || 0);
+    const netCashReleased = loan.principalAmount - upfrontDeductions;
 
     return (
         <View className="flex-1 bg-gray-50">
@@ -325,9 +329,13 @@ export default function LoanDetailsScreen() {
                     <View className="absolute -right-10 -bottom-10 bg-white/10 w-40 h-40 rounded-full" />
 
                     <View className="flex-row justify-between items-end mb-6">
-                        <View>
-                            <Text className="text-indigo-200 text-xs font-bold uppercase tracking-widest mb-1">Outstanding Balance</Text>
-                            <Text className="text-4xl font-extrabold text-white">{formatPHP(balance)}</Text>
+                        <View className="flex-1 pr-2">
+                            <Text className="text-indigo-200 text-[10px] font-bold uppercase tracking-widest mb-1">Outstanding Balance</Text>
+                            <Text className="text-3xl font-extrabold text-white" numberOfLines={1}>{formatPHP(balance)}</Text>
+                        </View>
+                        <View className="items-end pl-2">
+                            <Text className="text-indigo-200 text-[10px] font-bold uppercase tracking-widest mb-1">Total Payments</Text>
+                            <Text className="text-2xl font-extrabold text-white" numberOfLines={1}>{formatPHP(totalPaid)}</Text>
                         </View>
                     </View>
 
@@ -352,7 +360,7 @@ export default function LoanDetailsScreen() {
                         </View>
                     </View>
 
-                    {(loan.deductedAmount > 0 || loan.depositAmount > 0 || loan.insuranceAmount > 0) && (
+                    {(upfrontDeductions > 0 || loan.depositAmount > 0 || loan.insuranceAmount > 0) && (
                         <View className="mt-6 pt-6 border-t border-indigo-400 border-opacity-30">
                             <View className="flex-row justify-between mb-2">
                                 <Text className="text-indigo-200 text-[10px] font-bold uppercase tracking-wide">Loan Amount (Principal)</Text>
@@ -364,10 +372,16 @@ export default function LoanDetailsScreen() {
                                     <Text className="text-sm font-bold text-red-300">-{formatPHP(loan.deductedAmount)}</Text>
                                 </View>
                             )}
+                            {(loan.serviceChargeAmount || 0) > 0 && (
+                                <View className="flex-row justify-between mb-2">
+                                    <Text className="text-indigo-200 text-[10px] font-bold uppercase tracking-wide">2% Service Charge</Text>
+                                    <Text className="text-sm font-bold text-red-300">-{formatPHP(loan.serviceChargeAmount)}</Text>
+                                </View>
+                            )}
                             <View className="flex-row justify-between mt-2 pt-2 border-t border-indigo-400 border-opacity-30">
                                 <Text className="text-indigo-100 text-xs font-black uppercase tracking-widest">Net Cash Released (Disbursement)</Text>
                                 <Text className="text-lg font-black text-green-400">
-                                    {formatPHP(loan.principalAmount - (loan.deductedAmount || 0))}
+                                    {formatPHP(netCashReleased)}
                                 </Text>
                             </View>
 
@@ -398,6 +412,7 @@ export default function LoanDetailsScreen() {
                     installmentAmount={loan.installmentAmount}
                     numPayments={LoanCalculatorService.paymentsForFrequency(loan.term, loan.termUnit, loan.frequency)}
                     deductedAmount={loan.deductedAmount || 0}
+                    serviceChargeAmount={loan.serviceChargeAmount || 0}
                 />
 
                 {/* Loan Terms */}

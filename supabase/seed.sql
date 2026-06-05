@@ -42,7 +42,7 @@ BEGIN
        OR lower(email) = 'encoder@loanbrick.com';
 
     DELETE FROM public.user_profiles
-    WHERE id IN (SELECT id::text FROM seed_login_users)
+    WHERE id::text IN (SELECT id::text FROM seed_login_users)
        OR lower(email) IN (SELECT lower(email) FROM seed_login_users)
        OR lower(email) = 'encoder@loanbrick.com';
 
@@ -110,7 +110,20 @@ BEGIN
         now()
     FROM seed_login_users;
 
-    INSERT INTO public.user_profiles (id, full_name, email, role, is_active, created_at, updated_at)
-    SELECT id::text, full_name, email, app_role, true, now(), now()
-    FROM seed_login_users;
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'user_profiles'
+          AND column_name = 'id'
+          AND udt_name = 'uuid'
+    ) THEN
+        INSERT INTO public.user_profiles (id, full_name, email, role, is_active, created_at, updated_at)
+        SELECT id, full_name, email, app_role, true, now(), now()
+        FROM seed_login_users;
+    ELSE
+        INSERT INTO public.user_profiles (id, full_name, email, role, is_active, created_at, updated_at)
+        SELECT id::text, full_name, email, app_role, true, now(), now()
+        FROM seed_login_users;
+    END IF;
 END $$;

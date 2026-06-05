@@ -622,12 +622,12 @@ async function autoAdjustBalances(client, loans, loanIdMap) {
     const row = sumMap[id];
     if (!row) continue;
     const balance = Number(row.total_amount) - Number(row.paid);
-    const diff = balance - expected;
-    if (diff > 0.02) {
+    const diff = Math.round((balance - expected) * 100) / 100;
+    if (Math.abs(diff) > 0.02) {
       adjustments.push({
         id:            uuid(`adj-may30-${l.ref_id}`),
         loan_id:       id,
-        amount:        diff,  // payment reduces balance; diff > 0 means DB balance was too high -> positive payment to reduce it
+        amount:        diff,  // positive reduces DB balance; negative restores overcounted payments
         payment_date:  '2026-05-30',
         notes:         'System Auto-Adjustment to match legacy Excel balance',
         collector_id:  row.collector_id,
