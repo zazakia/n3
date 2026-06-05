@@ -369,6 +369,16 @@ export class MfiKpiService {
                 Q.where('status', Q.oneOf(['active', 'paid', 'defaulted']))
             ).fetch();
 
+            const loansReleasedInPeriod = await this.db.collections.get<Loan>('loans')
+                .query(Q.where('deleted_at', null), 
+                    Q.where('release_date', Q.between(startDate, endDate))
+                ).fetch();
+
+            const penalties = await this.db.collections.get<LoanPenalty>('loan_penalties')
+                .query(Q.where('deleted_at', null),
+                    Q.where('penalty_date', Q.between(startDate, endDate))
+                ).fetch();
+
             const opExBreakdown: any = {};
             let totalOperatingExpenses = 0;
             expenses.forEach(e => {
@@ -377,7 +387,11 @@ export class MfiKpiService {
                 totalOperatingExpenses += e.amount;
             });
 
-            const totalOperatingRevenue = KpiCalculator.computeInterestIncome(payments, loans);
+            const earnedInterestIncome = KpiCalculator.computeInterestIncome(payments, loans);
+            const upfrontFeeIncome = loansReleasedInPeriod.reduce((s, l) => s + (l.deductedAmount || 0), 0);
+            const penaltyIncome = penalties.reduce((s, p) => s + p.amount, 0);
+            
+            const totalGrossIncome = earnedInterestIncome + upfrontFeeIncome + penaltyIncome;
 
             const remittances = await this.db.collections.get<Remittance>('remittances')
                 .query(Q.where('deleted_at', null), 
@@ -403,17 +417,47 @@ export class MfiKpiService {
             const financialCosts = baseFinancialCosts + savingsInterestExpense;
             const loanLossProvisions = snapshots.reduce((s, snap) => s + snap.loanLossReserve, 0);
 
-            const netIncome = totalOperatingRevenue - totalOperatingExpenses - financialCosts - loanLossProvisions;
+            const netIncome = totalGrossIncome - totalOperatingExpenses - financialCosts - loanLossProvisions;
+
+            // Portfolio Health Metrics
+            const activeLoans = loans.filter(l => l.status === 'active' || l.status === 'defaulted');
+            const glp = activeLoans.reduce((s, l) => s + (l.principalAmount || 0), 0);
+
+            let totalExpectedInterest = 0;
+            activeLoans.forEach(loan => {
+                const totalReceivable = loan.totalAmount || 0;
+                if (totalReceivable <= 0) return;
+                const explicitInterest = (loan as any).interestAmount || 0;
+                const derivedInterest = Math.max(
+                    0,
+                    totalReceivable - (loan.principalAmount || 0) - ((loan as any).depositAmount || 0) - ((loan as any).insuranceAmount || 0)
+                );
+                totalExpectedInterest += explicitInterest > 0 ? explicitInterest : derivedInterest;
+            });
+
+            const paymentsForActiveLoans = await this.db.collections.get<Payment>('payments')
+                .query(Q.where('deleted_at', null), 
+                    Q.where('loan_id', Q.oneOf(activeLoans.map(l => l.id)))
+                ).fetch();
+            
+            const earnedInterestOnActive = KpiCalculator.computeInterestIncome(paymentsForActiveLoans, activeLoans);
+            const unearnedInterestPipeline = Math.max(0, totalExpectedInterest - earnedInterestOnActive);
 
             return {
-                operatingRevenue: totalOperatingRevenue,
+                operatingRevenue: totalGrossIncome, // Kept for backwards compatibility
+                earnedInterestIncome,
+                upfrontFeeIncome,
+                penaltyIncome,
+                totalGrossIncome,
                 remittedRevenue: totalRemittedInPeriod,
                 operatingExpenses: totalOperatingExpenses,
                 opExBreakdown,
                 financialCosts,
                 loanLossProvisions,
                 netIncome,
-                savingsInterestExpense
+                savingsInterestExpense,
+                glp,
+                unearnedInterestPipeline
             };
         } catch (e) {
             console.error('[MfiKpiService] Error generating income statement:', e);

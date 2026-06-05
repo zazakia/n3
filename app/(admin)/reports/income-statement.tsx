@@ -94,12 +94,20 @@ export default function IncomeStatementScreen() {
                         {/* Operating Revenue */}
                         <Text className="text-blue-600 font-black tracking-widest text-xs uppercase mb-4">Operating Revenue</Text>
                         <View className="flex-row justify-between items-center mb-2 pl-2">
-                            <Text className="text-gray-700 font-bold">Gross Collections</Text>
-                            <Text className="text-gray-900 font-black">{formatPHP(data.operatingRevenue)}</Text>
+                            <Text className="text-gray-700">Earned Interest Income</Text>
+                            <Text className="text-gray-900 font-bold">{formatPHP(data.earnedInterestIncome || 0)}</Text>
                         </View>
-                        <View className="flex-row justify-between items-center mb-6 pl-2">
-                            <Text className="text-gray-700 text-xs italic">Physically Remitted</Text>
-                            <Text className="text-blue-600 font-bold text-xs">{formatPHP(data.remittedRevenue)}</Text>
+                        <View className="flex-row justify-between items-center mb-2 pl-2">
+                            <Text className="text-gray-700">Upfront Fee Income</Text>
+                            <Text className="text-gray-900 font-bold">{formatPHP(data.upfrontFeeIncome || 0)}</Text>
+                        </View>
+                        <View className="flex-row justify-between items-center mb-3 pl-2">
+                            <Text className="text-gray-700">Penalty Income</Text>
+                            <Text className="text-gray-900 font-bold">{formatPHP(data.penaltyIncome || 0)}</Text>
+                        </View>
+                        <View className="flex-row justify-between items-center mt-2 mb-6 pl-2 bg-blue-50 p-2 rounded-lg">
+                            <Text className="text-gray-900 font-bold">Total Gross Income</Text>
+                            <Text className="text-blue-600 font-black">{formatPHP(data.totalGrossIncome || data.operatingRevenue)}</Text>
                         </View>
                         <View className="h-px bg-gray-100 mb-6" />
 
@@ -130,11 +138,23 @@ export default function IncomeStatementScreen() {
                         <View className="h-0.5 bg-gray-200 mb-4" />
 
                         {/* Net Income */}
-                        <View className="flex-row justify-between items-center bg-blue-50 p-4 rounded-2xl">
+                        <View className="flex-row justify-between items-center bg-blue-50 p-4 rounded-2xl mb-8">
                             <Text className="text-blue-900 font-black text-lg uppercase tracking-wide">Net Income</Text>
                             <Text className={`text-2xl font-black ${data.netIncome >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                 {formatPHP(data.netIncome)}
                             </Text>
+                        </View>
+
+                        {/* Future Outlook / Portfolio Health */}
+                        <Text className="text-indigo-600 font-black tracking-widest text-xs uppercase mb-4">Future Outlook / Portfolio Health</Text>
+                        <Text className="text-gray-500 text-xs mb-4 pl-2">This section represents future expected value and currently active loans, not actual cash received in this period.</Text>
+                        <View className="flex-row justify-between items-center mb-3 pl-2">
+                            <Text className="text-gray-700">Unearned Interest Pipeline</Text>
+                            <Text className="text-indigo-900 font-bold">{formatPHP(data.unearnedInterestPipeline || 0)}</Text>
+                        </View>
+                        <View className="flex-row justify-between items-center mb-2 pl-2">
+                            <Text className="text-gray-700">Total Principal on Street (GLP)</Text>
+                            <Text className="text-indigo-900 font-bold">{formatPHP(data.glp || 0)}</Text>
                         </View>
 
                     </Animated.View>

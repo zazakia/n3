@@ -583,6 +583,12 @@ describe('MfiKpiService', () => {
 
             expect(statement).toMatchObject({
                 operatingRevenue: 100,
+                earnedInterestIncome: 100,
+                upfrontFeeIncome: 0,
+                penaltyIncome: 0,
+                totalGrossIncome: 100,
+                glp: 1000,
+                unearnedInterestPipeline: 100,
                 remittedRevenue: 80,
                 operatingExpenses: 150,
                 opExBreakdown: { Rent: 100, Other: 50 },
