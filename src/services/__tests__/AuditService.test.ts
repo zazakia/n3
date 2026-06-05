@@ -139,6 +139,41 @@ describe('AuditService Integration', () => {
             expect(report.issues.some(i => i.id.startsWith('recon_renewed_not_paid'))).toBe(true);
         });
 
+        it('identifies migrated May 30 renewals with deductions after the previous loan is fully paid', async () => {
+            await database.write(async () => {
+                const borrower = await database.get('borrowers').create((record: any) => {
+                    record.fullName = 'Jerome W. Dominguito';
+                });
+                const previousLoan = await database.get('loans').create((loan: any) => {
+                    loan.borrowerId = borrower.id;
+                    loan.loanNumber = 'LN-2025-MAY30-0084';
+                    loan.totalAmount = 6200;
+                    loan.status = 'paid';
+                    loan.isReloan = false;
+                    loan.deductedAmount = 0;
+                });
+                await database.get('payments').create((payment: any) => {
+                    payment.loanId = previousLoan.id;
+                    payment.amount = 6200;
+                });
+                await database.get('loans').create((loan: any) => {
+                    loan.borrowerId = borrower.id;
+                    loan.loanNumber = 'LN-2025-MAY30-0312';
+                    loan.totalAmount = 6200;
+                    loan.status = 'active';
+                    loan.isReloan = true;
+                    loan.previousLoanId = previousLoan.id;
+                    loan.deductedAmount = 6200;
+                });
+            });
+
+            const report = await service.runFullAudit();
+            const issue = report.issues.find(i => i.id.startsWith('recon_migrated_upfront_deduction'));
+            expect(issue).toBeDefined();
+            expect(issue?.category).toBe('Critical');
+            expect(issue?.message).toContain('previous loan LN-2025-MAY30-0084 is already fully paid');
+        });
+
         it('identifies schedule status mismatches (complex branches)', async () => {
             await database.write(async () => {
                 const b = await database.get('borrowers').create((r: any) => { r.fullName = 'B1'; });

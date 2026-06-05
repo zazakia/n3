@@ -28,6 +28,9 @@ export interface AuditReport {
     issues: AuditIssue[];
 }
 
+const MIGRATED_DAILY_LOAN_NUMBER_PREFIX = 'LN-2025-MAY30-';
+const MONEY_TOLERANCE = 1;
+
 export class AuditService {
     private db: Database;
 
@@ -435,10 +438,16 @@ export class AuditService {
         const payments = await this.db.get<Payment>('payments').query(Q.where('deleted_at', null)).fetch();
         const schedules = await this.db.get<PaymentSchedule>('payment_schedules').query(Q.where('deleted_at', null)).fetch();
         const penalties = await this.db.get<LoanPenalty>('loan_penalties').query(Q.where('deleted_at', null)).fetch();
+        const loanById = new Map(loans.map(loan => [loan.id, loan]));
+        const paymentsByLoanId = new Map<string, number>();
+
+        for (const payment of payments) {
+            paymentsByLoanId.set(payment.loanId, (paymentsByLoanId.get(payment.loanId) || 0) + (payment.amount || 0));
+        }
 
         for (const loan of loans) {
             const loanPayments = payments.filter(p => p.loanId === loan.id);
-            const totalPaid = loanPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+            const totalPaid = paymentsByLoanId.get(loan.id) || 0;
             
             const loanSchedules = schedules.filter(s => s.loanId === loan.id);
             const scheduledTotal = loanSchedules.reduce((sum, s) => sum + (s.scheduledAmount || 0), 0);
@@ -450,6 +459,38 @@ export class AuditService {
             const wasRenewed = loans.some(l => l.isReloan && l.previousLoanId === loan.id);
             
             const totalExpected = (loan.totalAmount || 0) + penaltyTotal;
+
+            const isMigratedMay30Renewal =
+                loan.isReloan &&
+                loan.previousLoanId &&
+                loan.loanNumber?.startsWith(MIGRATED_DAILY_LOAN_NUMBER_PREFIX);
+            if (isMigratedMay30Renewal && (loan.deductedAmount || 0) > MONEY_TOLERANCE) {
+                const previousLoan = loanById.get(loan.previousLoanId);
+                const previousPaid = previousLoan ? paymentsByLoanId.get(previousLoan.id) || 0 : 0;
+                const previousBalance = previousLoan ? (previousLoan.totalAmount || 0) - previousPaid : null;
+                const previousLoanIsFullyPaid =
+                    !!previousLoan &&
+                    previousLoan.status === 'paid' &&
+                    previousBalance !== null &&
+                    Math.abs(previousBalance) <= MONEY_TOLERANCE;
+
+                const deductionEqualsPaidPreviousLoan =
+                    !!previousLoan &&
+                    Math.abs((loan.deductedAmount || 0) - (previousLoan.totalAmount || 0)) <= MONEY_TOLERANCE;
+                const netLoanRelease = (loan.principalAmount || 0) - (loan.deductedAmount || 0);
+
+                if (previousLoanIsFullyPaid && previousLoan && (deductionEqualsPaidPreviousLoan || netLoanRelease <= 0)) {
+                    issues.push({
+                        id: `recon_migrated_upfront_deduction_${loan.id}`,
+                        category: 'Critical',
+                        entityType: 'Loan',
+                        entityId: loan.id,
+                        entityName: loan.loanNumber,
+                        message: `Migrated May 30 renewal has a stale upfront deduction of PHP ${(loan.deductedAmount || 0).toFixed(2)}, producing Net Loan Release PHP ${netLoanRelease.toFixed(2)}, while previous loan ${previousLoan.loanNumber} is already fully paid.`,
+                        suggestedFix: 'Recalculate deducted amount from Excel Net Loan: deducted amount = principal amount - Excel Net Loan.'
+                    });
+                }
+            }
 
             if (loanSchedules.length === 0 && (loan.status === 'active' || loan.status === 'paid')) {
                 issues.push({
