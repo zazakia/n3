@@ -1,0 +1,606 @@
+{
+  "production_url": "https://qtkdnpbbukjamqgvbaeh.supabase.co",
+  "production_db_host_inferred": "db.qtkdnpbbukjamqgvbaeh.supabase.co",
+  "production_db_connection_string_redacted": "postgresql://postgres:<PASSWORD>@db.qtkdnpbbukjamqgvbaeh.supabase.co:5432/postgres",
+  "counts": {
+    "excel_may30_loans": 671,
+    "production_all_visible_loans": 1192,
+    "production_may30_loans": 671,
+    "production_may30_matched_to_excel": 671,
+    "production_may30_missing_from_prod": 0,
+    "production_may30_nonzero_deducted_amount": 446,
+    "production_may30_duplicate_loan_numbers": 0,
+    "production_payments_visible": 20946
+  },
+  "deduction_summary": {
+    "expected_for_migrated_may30_loans": 0,
+    "actual_nonzero_count": 446,
+    "actual_nonzero_total": 4039095,
+    "count_where_deduction_equals_excel_interest_plus_insurance": 0,
+    "count_where_deduction_equals_previous_loan_total_amount": 418,
+    "count_where_previous_loan_is_paid": 446,
+    "count_where_previous_loan_paid_sum_equals_previous_total": 446
+  },
+  "field_match_summary": {
+    "checked_fields": [
+      "principal_amount",
+      "total_amount",
+      "insurance_amount",
+      "release_date",
+      "maturity_date"
+    ],
+    "total_field_mismatches": 443,
+    "mismatch_counts_by_field": {
+      "maturity_date": 443
+    }
+  },
+  "jerome_w_dominguito": [
+    {
+      "loan_number": "LN-2025-MAY30-0084",
+      "status": "paid",
+      "release_date": "2025-10-01",
+      "principal": 5000,
+      "total_amount": 6200,
+      "total_paid": 6200,
+      "balance_by_db_payments": 0,
+      "app_deducted_amount": 0,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 1200,
+      "excel_insurance": 0,
+      "excel_net_loan": 5000,
+      "previous_loan_number": null,
+      "previous_status": null,
+      "previous_total_amount": null,
+      "previous_total_paid": null
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0312",
+      "status": "active",
+      "release_date": "2025-12-27",
+      "principal": 5000,
+      "total_amount": 6200,
+      "total_paid": 5100,
+      "balance_by_db_payments": 1100,
+      "app_deducted_amount": 6200,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 1200,
+      "excel_insurance": 0,
+      "excel_net_loan": 5000,
+      "previous_loan_number": "LN-2025-MAY30-0084",
+      "previous_status": "paid",
+      "previous_total_amount": 6200,
+      "previous_total_paid": 6200
+    }
+  ],
+  "top_deduction_mismatches": [
+    {
+      "loan_number": "LN-2025-MAY30-0600",
+      "borrower": "Maria Lourdes D. Patricio",
+      "actual_deducted_amount": 31200,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 6000,
+      "excel_insurance": 0,
+      "excel_interest_plus_insurance": 6000,
+      "excel_net_loan": 23180,
+      "previous_loan_number": "LN-2025-MAY30-0483",
+      "previous_loan_total_amount": 31200,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 31200
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0483",
+      "borrower": "Maria Lourdes D. Patricio",
+      "actual_deducted_amount": 24800,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 6000,
+      "excel_insurance": 200,
+      "excel_interest_plus_insurance": 6200,
+      "excel_net_loan": 22710,
+      "previous_loan_number": "LN-2025-MAY30-0363",
+      "previous_loan_total_amount": 24800,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 24800
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0632",
+      "borrower": "Rosanna T. Germano",
+      "actual_deducted_amount": 22520,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 4320,
+      "excel_insurance": 0,
+      "excel_interest_plus_insurance": 4320,
+      "excel_net_loan": 16378,
+      "previous_loan_number": "LN-2025-MAY30-0555",
+      "previous_loan_total_amount": 22520,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 22520
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0555",
+      "borrower": "Rosanna T. Germano",
+      "actual_deducted_amount": 21080,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 4320,
+      "excel_insurance": 200,
+      "excel_interest_plus_insurance": 4520,
+      "excel_net_loan": 16149,
+      "previous_loan_number": "LN-2025-MAY30-0462",
+      "previous_loan_total_amount": 21080,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 21080
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0579",
+      "borrower": "Noime D. Matuguina",
+      "actual_deducted_amount": 21080,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 4800,
+      "excel_insurance": 200,
+      "excel_interest_plus_insurance": 5000,
+      "excel_net_loan": 18934,
+      "previous_loan_number": "LN-2025-MAY30-0451",
+      "previous_loan_total_amount": 21080,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 21080
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0582",
+      "borrower": "Stephanie G. Cuan",
+      "actual_deducted_amount": 21080,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 3600,
+      "excel_insurance": 200,
+      "excel_interest_plus_insurance": 3800,
+      "excel_net_loan": 13872,
+      "previous_loan_number": "LN-2025-MAY30-0467",
+      "previous_loan_total_amount": 21080,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 21080
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0666",
+      "borrower": "Asuncion M. Nabre",
+      "actual_deducted_amount": 21080,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 4080,
+      "excel_insurance": 0,
+      "excel_interest_plus_insurance": 4080,
+      "excel_net_loan": 15468,
+      "previous_loan_number": "LN-2025-MAY30-0604",
+      "previous_loan_total_amount": 21080,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 21080
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0583",
+      "borrower": "Teresita C. Competente",
+      "actual_deducted_amount": 18800,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 3600,
+      "excel_insurance": 200,
+      "excel_interest_plus_insurance": 3800,
+      "excel_net_loan": 13200,
+      "previous_loan_number": "LN-2025-MAY30-0476",
+      "previous_loan_total_amount": 18800,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 18800
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0604",
+      "borrower": "Asuncion M. Nabre",
+      "actual_deducted_amount": 18800,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 4080,
+      "excel_insurance": 0,
+      "excel_interest_plus_insurance": 4080,
+      "excel_net_loan": 15910,
+      "previous_loan_number": "LN-2025-MAY30-0509",
+      "previous_loan_total_amount": 18800,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 18800
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0618",
+      "borrower": "Margarita B. Cayanong",
+      "actual_deducted_amount": 18800,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 3600,
+      "excel_insurance": 0,
+      "excel_interest_plus_insurance": 3600,
+      "excel_net_loan": 14404,
+      "previous_loan_number": "LN-2025-MAY30-0533",
+      "previous_loan_total_amount": 18800,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 18800
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0445",
+      "borrower": "Maribel R. Barabad",
+      "actual_deducted_amount": 18600,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 3600,
+      "excel_insurance": 0,
+      "excel_interest_plus_insurance": 3600,
+      "excel_net_loan": 13500,
+      "previous_loan_number": "LN-2025-MAY30-0243",
+      "previous_loan_total_amount": 18600,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 18600
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0451",
+      "borrower": "Noime D. Matuguina",
+      "actual_deducted_amount": 18600,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 4080,
+      "excel_insurance": 0,
+      "excel_interest_plus_insurance": 4080,
+      "excel_net_loan": 15635,
+      "previous_loan_number": "LN-2025-MAY30-0288",
+      "previous_loan_total_amount": 18600,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 18600
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0455",
+      "borrower": "Helen B. Bacalso",
+      "actual_deducted_amount": 18600,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 3600,
+      "excel_insurance": 0,
+      "excel_interest_plus_insurance": 3600,
+      "excel_net_loan": 13100,
+      "previous_loan_number": "LN-2025-MAY30-0294",
+      "previous_loan_total_amount": 18600,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 18600
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0462",
+      "borrower": "Rosanna T. Germano",
+      "actual_deducted_amount": 18600,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 4080,
+      "excel_insurance": 0,
+      "excel_interest_plus_insurance": 4080,
+      "excel_net_loan": 13920,
+      "previous_loan_number": "LN-2025-MAY30-0340",
+      "previous_loan_total_amount": 18600,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 18600
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0476",
+      "borrower": "Teresita C. Competente",
+      "actual_deducted_amount": 18600,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 3600,
+      "excel_insurance": 200,
+      "excel_interest_plus_insurance": 3800,
+      "excel_net_loan": 14000,
+      "previous_loan_number": "LN-2025-MAY30-0342",
+      "previous_loan_total_amount": 18600,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 18600
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0533",
+      "borrower": "Margarita B. Cayanong",
+      "actual_deducted_amount": 18600,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 3600,
+      "excel_insurance": 200,
+      "excel_interest_plus_insurance": 3800,
+      "excel_net_loan": 13175,
+      "previous_loan_number": "LN-2025-MAY30-0414",
+      "previous_loan_total_amount": 18600,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 18600
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0568",
+      "borrower": "Isabel J. Roncal",
+      "actual_deducted_amount": 18600,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 3600,
+      "excel_insurance": 200,
+      "excel_interest_plus_insurance": 3800,
+      "excel_net_loan": 13870,
+      "previous_loan_number": "LN-2025-MAY30-0453",
+      "previous_loan_total_amount": 18600,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 18600
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0580",
+      "borrower": "Helen B. Bacalso",
+      "actual_deducted_amount": 18600,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 3600,
+      "excel_insurance": 200,
+      "excel_interest_plus_insurance": 3800,
+      "excel_net_loan": 13290,
+      "previous_loan_number": "LN-2025-MAY30-0455",
+      "previous_loan_total_amount": 18600,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 18600
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0653",
+      "borrower": "Socorro H. Cuan",
+      "actual_deducted_amount": 17560,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 3360,
+      "excel_insurance": 0,
+      "excel_interest_plus_insurance": 3360,
+      "excel_net_loan": 12497,
+      "previous_loan_number": "LN-2025-MAY30-0570",
+      "previous_loan_total_amount": 17560,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 17560
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0363",
+      "borrower": "Maria Lourdes D. Patricio",
+      "actual_deducted_amount": 17360,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 4800,
+      "excel_insurance": 0,
+      "excel_interest_plus_insurance": 4800,
+      "excel_net_loan": 18000,
+      "previous_loan_number": "LN-2025-MAY30-0211",
+      "previous_loan_total_amount": 17360,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 17360
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0467",
+      "borrower": "Stephanie G. Cuan",
+      "actual_deducted_amount": 17360,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 4080,
+      "excel_insurance": 0,
+      "excel_interest_plus_insurance": 4080,
+      "excel_net_loan": 14168,
+      "previous_loan_number": "LN-2025-MAY30-0364",
+      "previous_loan_total_amount": 17360,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 17360
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0605",
+      "borrower": "Maria Fe A. Gencianos",
+      "actual_deducted_amount": 15080,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 3600,
+      "excel_insurance": 0,
+      "excel_interest_plus_insurance": 3600,
+      "excel_net_loan": 13607,
+      "previous_loan_number": "LN-2025-MAY30-0510",
+      "previous_loan_total_amount": 15080,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 15080
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0606",
+      "borrower": "Maria Fel M. Ariño",
+      "actual_deducted_amount": 15080,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 3600,
+      "excel_insurance": 0,
+      "excel_interest_plus_insurance": 3600,
+      "excel_net_loan": 13791,
+      "previous_loan_number": "LN-2025-MAY30-0511",
+      "previous_loan_total_amount": 15080,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 15080
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0629",
+      "borrower": "Cleofe Sasing",
+      "actual_deducted_amount": 15080,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 3600,
+      "excel_insurance": 0,
+      "excel_interest_plus_insurance": 3600,
+      "excel_net_loan": 13809,
+      "previous_loan_number": "LN-2025-MAY30-0543",
+      "previous_loan_total_amount": 15080,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 15080
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0630",
+      "borrower": "Cindy A. Pastoril",
+      "actual_deducted_amount": 15080,
+      "expected_migrated_deducted_amount": 0,
+      "excel_interest": 2880,
+      "excel_insurance": 0,
+      "excel_interest_plus_insurance": 2880,
+      "excel_net_loan": 10298,
+      "previous_loan_number": "LN-2025-MAY30-0552",
+      "previous_loan_total_amount": 15080,
+      "previous_loan_status": "paid",
+      "previous_loan_paid_sum": 15080
+    }
+  ],
+  "first_field_mismatches": [
+    {
+      "loan_number": "LN-2025-MAY30-0021",
+      "borrower": "Teresita P. Samson",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0022",
+      "borrower": "Maria Camila Lahoylahoy",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0023",
+      "borrower": "Maribel R. Barabad",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0024",
+      "borrower": "Geralien Benitez",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0025",
+      "borrower": "Leonora P. Trigosa",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0026",
+      "borrower": "Ma. Liza Librea",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0027",
+      "borrower": "Ronald Trigosa",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0028",
+      "borrower": "Celerina R. Decio",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0029",
+      "borrower": "Jessica P. Mague",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0030",
+      "borrower": "Mario R. lisondra",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0031",
+      "borrower": "Socorro H. Cuan",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0032",
+      "borrower": "Rachel W. Dalanon",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0033",
+      "borrower": "Florenda N. Cimene",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0034",
+      "borrower": "Rosanna T. Germano",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0035",
+      "borrower": "Emma J. Dela Pena",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0036",
+      "borrower": "Warlito R. Decio",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0037",
+      "borrower": "Marilu B. Bande",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-07-18"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0038",
+      "borrower": "Arcelene B. Castro",
+      "field": "maturity_date",
+      "actual": "2025-07-12",
+      "expected": "2025-12-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0039",
+      "borrower": "Susan B. Guevarra",
+      "field": "maturity_date",
+      "actual": "2025-09-11",
+      "expected": "2025-11-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0040",
+      "borrower": "Helen Omega",
+      "field": "maturity_date",
+      "actual": "2025-09-11",
+      "expected": "2025-11-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0041",
+      "borrower": "Rosalinda P. Hinuguin",
+      "field": "maturity_date",
+      "actual": "2025-09-11",
+      "expected": "2025-11-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0042",
+      "borrower": "Anita D. Pepito",
+      "field": "maturity_date",
+      "actual": "2025-09-11",
+      "expected": "2025-11-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0043",
+      "borrower": "Glenn Erick B. Dejano",
+      "field": "maturity_date",
+      "actual": "2025-09-11",
+      "expected": "2025-11-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0044",
+      "borrower": "Veneranda L.Gutierrez",
+      "field": "maturity_date",
+      "actual": "2025-09-11",
+      "expected": "2025-11-08"
+    },
+    {
+      "loan_number": "LN-2025-MAY30-0045",
+      "borrower": "Maria Lourdes D. Patricio",
+      "field": "maturity_date",
+      "actual": "2025-09-11",
+      "expected": "2025-11-08"
+    }
+  ],
+  "missing_in_production_sample": [],
+  "duplicate_may30_loan_numbers": []
+}

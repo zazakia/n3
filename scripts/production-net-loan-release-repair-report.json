@@ -1,0 +1,28 @@
+{
+  "mode": "dry-run",
+  "generatedAt": "2026-06-04T04:14:59.933Z",
+  "source": {
+    "excelData": "D:\\GitHub\\n3\\scripts\\migration-data\\loans.json",
+    "productionDb": "db.qtkdnpbbukjamqgvbaeh.supabase.co"
+  },
+  "rule": "deducted_amount = Excel Loan Amount - Excel Net Loan; app Net Loan Release = principal_amount - deducted_amount",
+  "counts": {
+    "excelLoans": 671,
+    "productionMay30Loans": 671,
+    "missingProductionLoans": 0,
+    "preRepairChangesNeeded": 0,
+    "preRepairVerificationFailures": 0,
+    "postRepairNetLoanMismatches": 0
+  },
+  "totals": {
+    "oldDeductedAmount": 0,
+    "newDeductedAmount": 0
+  },
+  "samples": {
+    "jerome": [],
+    "firstChanges": [],
+    "postRepairNetMismatches": [],
+    "missing": [],
+    "verificationFailures": []
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "timestamp": "2026-06-02T19:13:37.918Z",
+  "source": "https://qtkdnpbbukjamqgvbaeh.supabase.co",
+  "daily": {
+    "excel": {
+      "count": 671,
+      "principal": 5266000,
+      "total": 6537080,
+      "paid": 5398220,
+      "principalPaid": 0,
+      "balance": 1105856
+    },
+    "app": {
+      "count": 671,
+      "principal": 5266000,
+      "total": 6537080,
+      "paid": 5431224,
+      "principalPaid": 0,
+      "balance": 1105856
+    },
+    "difference": {
+      "count": 0,
+      "principal": 0,
+      "total": 0,
+      "paid": -33004,
+      "balance": 0
+    }
+  },
+  "weekly": {
+    "excel": {
+      "count": 521,
+      "principal": 2605000,
+      "total": 3116000,
+      "paid": 1035904,
+      "principalPaid": 820000,
+      "balance": 2080096
+    },
+    "app": {
+      "count": 521,
+      "principal": 2605000,
+      "total": 3116000,
+      "paid": 1035904,
+      "principalPaid": 0,
+      "balance": 2080096
+    },
+    "difference": {
+      "count": 0,
+      "principal": 0,
+      "total": 0,
+      "paid": 0,
+      "balance": 0
+    }
+  }
+}
