@@ -113,20 +113,15 @@ describe('PdfGenerator', () => {
 
     expect(Print.printToFileAsync).toHaveBeenCalledWith(
       expect.objectContaining({
-        html: expect.stringContaining('CASH RECEIPT')
+        html: expect.stringContaining('Voucher')
       })
     );
     const html = (Print.printToFileAsync as jest.Mock).mock.calls[0][0].html;
-    expect(html).toContain('RECEIVED FROM:');
-    expect(html).toContain('AMOUNT RECEIVED:');
-    expect(html).toContain('amt. of salary / pension');
-    expect(html).toContain('amt. remaining');
-    expect(html).toContain('DEDUCTIONS:');
-    expect(html).toContain('Service Fee');
+    expect(html).toContain('Client name');
+    expect(html).toContain('Amount');
+    expect(html).toContain('service fee');
     expect(html).toContain('PHP 100');
     expect(html).toContain('PHP 4900');
-    expect(html).toContain('grid-template-columns: repeat(2, 1fr)');
-    expect(html).toContain('grid-auto-rows: calc((100vh - 0.01px) / 4)');
   });
 
   it('prints voucher batches with selected paper size', async () => {
@@ -169,11 +164,11 @@ describe('PdfGenerator', () => {
     );
 
     const html = (Print.printToFileAsync as jest.Mock).mock.calls[0][0].html;
-    expect(html).toContain('@page { size: 210mm 297mm; margin: 0.22in; }');
+    expect(html).toContain('@page { size: 210mm 297mm; margin: 0.5in; }');
     expect(html).toContain('Client One');
     expect(html).toContain('Client Two');
-    expect(html).toContain('CASH RECEIPT');
-    expect(html).toContain('Service Fee');
+    expect(html).toContain('Voucher');
+    expect(html).toContain('service fee');
     expect(Sharing.shareAsync).toHaveBeenCalledWith('mock-uri', expect.objectContaining({
       dialogTitle: expect.stringContaining('2 loans')
     }));

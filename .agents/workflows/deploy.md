@@ -6,11 +6,16 @@ description: How to build and deploy InfinityFinance to Android and Web
 
 ## Pre-Deploy Checks
 
-### 1. Run Full Test Suite
-// turbo
-Run: `npx jest --coverage`
+### 1. Check and Update Schema
+Run: `npx supabase db push`
+Ensure all pending database migrations in `supabase/migrations` are pushed to the production database before deployment.
 
-Ensure all tests pass and coverage meets thresholds.
+### 2. Run Pre-Deploy Test Suite
+Run the pre-deploy test skill before proceeding:
+Read the skill instructions: `.agents/skills/pre-deploy-test/SKILL.md`
+This includes linting, testing, e2e, and a dry-run web export.
+
+Ensure all checks pass.
 
 ### 2. Verify Production Env
 Check `.env.production` has correct production Supabase credentials:

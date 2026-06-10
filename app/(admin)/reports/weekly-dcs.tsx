@@ -572,6 +572,21 @@ export default function WeeklyDcsReport() {
                             </View>
                         ))
                     )}
+                    {sections.length > 0 && (
+                        <View className="bg-white rounded-2xl border border-gray-100 overflow-hidden mb-4 mt-2">
+                            <ScrollView horizontal showsHorizontalScrollIndicator>
+                                <View className="flex-row bg-emerald-50 border-t-2 border-emerald-400">
+                                    <BodyCell width={600} bold>GRAND TOTAL</BodyCell>
+                                    <BodyCell width={90} right bold>{money(totals.cbu)}</BodyCell>
+                                    <BodyCell width={110} right bold>{money(totals.balance)}</BodyCell>
+                                    <BodyCell width={90} right bold>{money(totals.principal)}</BodyCell>
+                                    <BodyCell width={90} right bold>{money(totals.deposit)}</BodyCell>
+                                    <BodyCell width={120} right bold>{money(totals.due)}</BodyCell>
+                                    <BodyCell width={120}>{''}</BodyCell>
+                                </View>
+                            </ScrollView>
+                        </View>
+                    )}
                 </ScrollView>
             )}
         </View>
