@@ -56,6 +56,10 @@ export class LoanService {
         const releaseTimestamp = (parsedReleaseDate || new Date()).getTime();
 
         return await db.write(async () => {
+            if (isEditing && !existingLoan) {
+                throw new Error("existingLoan must be provided when isEditing is true");
+            }
+
             const ops: any[] = [];
             const logParams: any[] = [];
 
@@ -159,7 +163,8 @@ export class LoanService {
             // A renewal should close the referenced previous loan even when the
             // previous balance is already zero; otherwise borrowers can retain
             // parallel active loans after a renewal.
-            if (status === 'active' && isReloan && previousLoanId) {
+            // Only perform closure upon initial activation to prevent duplicate deduction payments on edit.
+            if (status === 'active' && isReloan && previousLoanId && (!isEditing || existingLoan?.status !== 'active')) {
                 const oldLoan = await db.get<Loan>('loans').find(previousLoanId);
 
                 logParams.push({
