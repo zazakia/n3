@@ -148,4 +148,36 @@ export class KpiCalculator {
             return sum + Math.min(interestReceivable, Math.max(0, recognizedInterest));
         }, 0);
     }
+
+    /**
+     * Cash basis interest income: sums the interest-portion of each cash payment
+     * received in the period without the accrual "min-cap" — pure cash-in view.
+     * Under this approach, interest income = interest share of cash actually received
+     * during the reporting window.
+     */
+    static computeCashBasisInterestIncome(payments: Payment[], loans: Loan[]): number {
+        const loanMap = new Map(loans.map(l => [l.id, l]));
+
+        return payments.reduce((sum, payment) => {
+            const loan = loanMap.get(payment.loanId);
+            if (!loan) return sum;
+
+            const totalReceivable = loan.totalAmount || 0;
+            if (totalReceivable <= 0) return sum;
+
+            const explicitInterest = (loan as any).interestAmount || 0;
+            const derivedInterest = Math.max(
+                0,
+                totalReceivable - (loan.principalAmount || 0) - ((loan as any).depositAmount || 0) - ((loan as any).insuranceAmount || 0)
+            );
+            const interestReceivable = explicitInterest > 0 ? explicitInterest : derivedInterest;
+
+            // Cash basis: recognize the interest proportion of this specific payment
+            const interestShare = totalReceivable > 0
+                ? payment.amount * (interestReceivable / totalReceivable)
+                : 0;
+
+            return sum + Math.max(0, interestShare);
+        }, 0);
+    }
 }

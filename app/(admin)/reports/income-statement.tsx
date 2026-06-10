@@ -6,6 +6,8 @@ import { formatPHP } from '../../../src/utils/currency';
 import { startOfMonth, endOfMonth, addMonths, subMonths, format } from 'date-fns';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { AccountingBasisToggle } from '../../../src/components/AccountingBasisToggle';
+import { useAppStore } from '../../../src/store/useAppStore';
 
 export default function IncomeStatementScreen() {
     const [loading, setLoading] = useState(true);
@@ -13,13 +15,15 @@ export default function IncomeStatementScreen() {
     const [data, setData] = useState<any>(null);
     const [currentMonth, setCurrentMonth] = useState(new Date());
 
+    const { accountingBasis } = useAppStore();
+
     const startDate = startOfMonth(currentMonth).getTime();
     const endDate = endOfMonth(currentMonth).getTime();
 
     const loadData = async () => {
         setLoading(true);
         try {
-            const result = await MfiKpiService.getIncomeStatement(startDate, endDate);
+            const result = await MfiKpiService.getIncomeStatement(startDate, endDate, accountingBasis);
             setData(result);
         } catch (error) {
             console.error('Failed to load income statement:', error);
@@ -28,7 +32,7 @@ export default function IncomeStatementScreen() {
         }
     };
 
-    useFocusEffect(useCallback(() => { loadData(); }, [currentMonth]));
+    useFocusEffect(useCallback(() => { loadData(); }, [currentMonth, accountingBasis]));
 
     const onRefresh = async () => {
         setRefreshing(true);
@@ -51,11 +55,52 @@ export default function IncomeStatementScreen() {
         );
     }
 
+    const isCashBasis = accountingBasis === 'cash';
+
     return (
         <View className="flex-1 bg-gray-50">
             {/* ── Top controls (Static) ── */}
-            <View className="p-6 pb-2 bg-gray-50 border-b border-gray-100">
-                <Text className="text-2xl font-black text-gray-900 mb-4">Income Statement</Text>
+            <View className="p-6 pb-3 bg-gray-50 border-b border-gray-100">
+                <View className="flex-row items-center justify-between mb-4">
+                    <Text className="text-2xl font-black text-gray-900">Income Statement</Text>
+                </View>
+
+                {/* Accounting Basis Toggle */}
+                <View className="flex-row items-center justify-between mb-4">
+                    <View>
+                        <Text className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">
+                            Accounting Basis
+                        </Text>
+                        <Text className="text-[11px] text-gray-400">
+                            {isCashBasis ? 'Showing cash-received interest income' : 'Showing proportional accrual interest income'}
+                        </Text>
+                    </View>
+                    <AccountingBasisToggle compact />
+                </View>
+
+                {/* Basis badge */}
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        backgroundColor: isCashBasis ? '#ECFDF5' : '#EEF2FF',
+                        borderRadius: 10,
+                        paddingHorizontal: 10,
+                        paddingVertical: 6,
+                        marginBottom: 12,
+                        alignSelf: 'flex-start',
+                    }}
+                >
+                    <MaterialIcons
+                        name={isCashBasis ? 'payments' : 'trending-up'}
+                        size={13}
+                        color={isCashBasis ? '#059669' : '#4338CA'}
+                        style={{ marginRight: 5 }}
+                    />
+                    <Text style={{ fontSize: 11, fontWeight: '700', color: isCashBasis ? '#065F46' : '#3730A3' }}>
+                        {isCashBasis ? 'Cash Basis — interest recognized when cash received' : 'Accrual Basis — interest allocated proportionally (MFI standard)'}
+                    </Text>
+                </View>
 
                 {/* Month Navigator */}
                 <View className="flex-row items-center justify-between bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3">
@@ -94,7 +139,12 @@ export default function IncomeStatementScreen() {
                         {/* Operating Revenue */}
                         <Text className="text-blue-600 font-black tracking-widest text-xs uppercase mb-4">Operating Revenue</Text>
                         <View className="flex-row justify-between items-center mb-2 pl-2">
-                            <Text className="text-gray-700">Earned Interest Income</Text>
+                            <View>
+                                <Text className="text-gray-700">Earned Interest Income</Text>
+                                {isCashBasis && (
+                                    <Text className="text-[10px] text-emerald-600 font-semibold">Cash-received portion only</Text>
+                                )}
+                            </View>
                             <Text className="text-gray-900 font-bold">{formatPHP(data.earnedInterestIncome || 0)}</Text>
                         </View>
                         <View className="flex-row justify-between items-center mb-2 pl-2">
@@ -139,23 +189,53 @@ export default function IncomeStatementScreen() {
 
                         {/* Net Income */}
                         <View className="flex-row justify-between items-center bg-blue-50 p-4 rounded-2xl mb-8">
-                            <Text className="text-blue-900 font-black text-lg uppercase tracking-wide">Net Income</Text>
+                            <View>
+                                <Text className="text-blue-900 font-black text-lg uppercase tracking-wide">Net Income</Text>
+                                {isCashBasis && (
+                                    <Text className="text-[10px] text-emerald-600 font-semibold mt-0.5">Cash Basis</Text>
+                                )}
+                            </View>
                             <Text className={`text-2xl font-black ${data.netIncome >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                                 {formatPHP(data.netIncome)}
                             </Text>
                         </View>
 
-                        {/* Future Outlook / Portfolio Health */}
-                        <Text className="text-indigo-600 font-black tracking-widest text-xs uppercase mb-4">Future Outlook / Portfolio Health</Text>
-                        <Text className="text-gray-500 text-xs mb-4 pl-2">This section represents future expected value and currently active loans, not actual cash received in this period.</Text>
-                        <View className="flex-row justify-between items-center mb-3 pl-2">
-                            <Text className="text-gray-700">Unearned Interest Pipeline</Text>
-                            <Text className="text-indigo-900 font-bold">{formatPHP(data.unearnedInterestPipeline || 0)}</Text>
-                        </View>
-                        <View className="flex-row justify-between items-center mb-2 pl-2">
-                            <Text className="text-gray-700">Total Principal on Street (GLP)</Text>
-                            <Text className="text-indigo-900 font-bold">{formatPHP(data.glp || 0)}</Text>
-                        </View>
+                        {/* Future Outlook / Portfolio Health — Accrual only */}
+                        {!isCashBasis && data.unearnedInterestPipeline !== null && (
+                            <>
+                                <Text className="text-indigo-600 font-black tracking-widest text-xs uppercase mb-4">Future Outlook / Portfolio Health</Text>
+                                <Text className="text-gray-500 text-xs mb-4 pl-2">
+                                    This section represents future expected value and currently active loans, not actual cash received in this period.
+                                </Text>
+                                <View className="flex-row justify-between items-center mb-3 pl-2">
+                                    <Text className="text-gray-700">Unearned Interest Pipeline</Text>
+                                    <Text className="text-indigo-900 font-bold">{formatPHP(data.unearnedInterestPipeline || 0)}</Text>
+                                </View>
+                                <View className="flex-row justify-between items-center mb-2 pl-2">
+                                    <Text className="text-gray-700">Total Principal on Street (GLP)</Text>
+                                    <Text className="text-indigo-900 font-bold">{formatPHP(data.glp || 0)}</Text>
+                                </View>
+                            </>
+                        )}
+
+                        {/* Cash basis note: show GLP only without unearned interest */}
+                        {isCashBasis && (
+                            <View style={{ backgroundColor: '#F0FDF4', borderRadius: 16, padding: 16 }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                                    <MaterialIcons name="info-outline" size={14} color="#059669" style={{ marginRight: 6 }} />
+                                    <Text style={{ fontSize: 11, fontWeight: '800', color: '#065F46', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                                        Cash Basis Note
+                                    </Text>
+                                </View>
+                                <Text style={{ fontSize: 12, color: '#166534', lineHeight: 18 }}>
+                                    Unearned interest pipeline is not shown in Cash Basis mode — only cash actually received is recognized as income. Switch to Accrual to see the future interest outlook.
+                                </Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+                                    <Text style={{ color: '#374151', fontSize: 13 }}>Total Principal on Street (GLP)</Text>
+                                    <Text style={{ color: '#065F46', fontWeight: '800', fontSize: 13 }}>{formatPHP(data.glp || 0)}</Text>
+                                </View>
+                            </View>
+                        )}
 
                     </Animated.View>
                 ) : (

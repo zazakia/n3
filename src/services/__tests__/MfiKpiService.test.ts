@@ -198,7 +198,7 @@ describe('MfiKpiService', () => {
 
             const spy6 = jest.spyOn(service, 'getIncomeStatement').mockResolvedValue({});
             await MfiKpiService.getIncomeStatement(0, 1);
-            expect(spy6).toHaveBeenCalledWith(0, 1);
+            expect(spy6).toHaveBeenCalledWith(0, 1, 'accrual');
 
             const spy7 = jest.spyOn(service, 'getBalanceSheet').mockResolvedValue({});
             await MfiKpiService.getBalanceSheet();

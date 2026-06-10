@@ -6,12 +6,17 @@ import { MfiKpiService, MfiKpiData } from '../../../src/services/MfiKpiService';
 import { formatPHP } from '../../../src/utils/currency';
 import { StatCard } from '../../../src/components/StatCard';
 import { ReportInfoModal, InfoModalContent } from '../../../src/components/ReportInfoModal';
+import { AccountingBasisToggle } from '../../../src/components/AccountingBasisToggle';
+import { useAppStore } from '../../../src/store/useAppStore';
 
 export default function ReportsDashboardScreen() {
     const router = useRouter();
     const [kpis, setKpis] = useState<MfiKpiData | null>(null);
     const [loading, setLoading] = useState(true);
     const [infoContent, setInfoContent] = useState<InfoModalContent | null>(null);
+
+    const { accountingBasis } = useAppStore();
+    const isCashBasis = accountingBasis === 'cash';
 
     const loadData = async () => {
         try {
@@ -33,10 +38,46 @@ export default function ReportsDashboardScreen() {
     }
 
     return (
-        <ScrollView  className="flex-1 bg-gray-50"  contentContainerStyle={{ padding: 16 }}>
-            <View className="mb-8">
-                <Text className="text-2xl font-black text-gray-900">Standard Reports</Text>
-                <Text className="text-gray-700 font-medium">Performance and risk analytics</Text>
+        <ScrollView className="flex-1 bg-gray-50" contentContainerStyle={{ padding: 16 }}>
+            {/* Header + Global Accounting Basis Toggle */}
+            <View className="mb-6">
+                <View className="flex-row items-center justify-between mb-1">
+                    <Text className="text-2xl font-black text-gray-900">Standard Reports</Text>
+                </View>
+                <Text className="text-gray-700 font-medium mb-3">Performance and risk analytics</Text>
+
+                {/* Global Accounting Basis Toggle — sets mode for Income Statement & Financial Summary */}
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        backgroundColor: isCashBasis ? '#ECFDF5' : '#EEF2FF',
+                        borderRadius: 16,
+                        padding: 12,
+                        borderWidth: 1,
+                        borderColor: isCashBasis ? '#A7F3D0' : '#C7D2FE',
+                    }}
+                >
+                    <View style={{ flex: 1, marginRight: 10 }}>
+                        <Text style={{
+                            fontSize: 10,
+                            fontWeight: '800',
+                            color: isCashBasis ? '#065F46' : '#3730A3',
+                            textTransform: 'uppercase',
+                            letterSpacing: 0.6,
+                            marginBottom: 2,
+                        }}>
+                            Reporting Basis
+                        </Text>
+                        <Text style={{ fontSize: 11, color: isCashBasis ? '#059669' : '#4338CA', fontWeight: '600' }}>
+                            {isCashBasis
+                                ? 'Income Statement & Financial Summary using Cash Basis'
+                                : 'Income Statement & Financial Summary using Accrual Basis (Default)'}
+                        </Text>
+                    </View>
+                    <AccountingBasisToggle compact />
+                </View>
             </View>
 
             {/* Top Row Metrics */}
@@ -121,12 +162,18 @@ export default function ReportsDashboardScreen() {
                 icon="event-note" color="#1A237E"
                 onPress={() => router.push('/(admin)/reports/collection')}
             />
+            <ReportLink
+                title="Weekly DCS Area Sheet"
+                desc="Excel-style weekly area sheet with collector and group filters"
+                icon="table-chart" color="#059669"
+                onPress={() => router.push('/(admin)/reports/weekly-dcs')}
+            />
 
             {/* Monthly */}
             <Text className="text-[10px] font-black text-gray-700 uppercase tracking-[2px] mb-4 mt-6 ml-2">Monthly Performance</Text>
             <ReportLink
                 title="Financial Summary"
-                desc="Net monthly performance and cash flow status"
+                desc={`Net monthly performance and cash flow status · ${isCashBasis ? 'Cash Basis' : 'Accrual Basis'}`}
                 icon="assessment" color="#059669"
                 onPress={() => router.push('/(admin)/reports/financial-summary')}
             />
@@ -150,7 +197,7 @@ export default function ReportsDashboardScreen() {
             />
             <ReportLink
                 title="Income Statement"
-                desc="Revenue, Expenses, and Net Income tracking"
+                desc={`Revenue, Expenses, and Net Income · ${isCashBasis ? 'Cash Basis' : 'Accrual Basis'}`}
                 icon="receipt" color="#00838F"
                 onPress={() => router.push('/(admin)/reports/income-statement')}
             />
@@ -169,7 +216,7 @@ export default function ReportsDashboardScreen() {
 
             <View className="h-20" />
 
-            <ReportInfoModal 
+            <ReportInfoModal
                 visible={!!infoContent}
                 content={infoContent}
                 onClose={() => setInfoContent(null)}

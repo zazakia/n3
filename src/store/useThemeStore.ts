@@ -28,15 +28,21 @@ interface ThemeState {
   colors: ThemeColors;
   setColors: (colors: Partial<ThemeColors>) => void;
   resetColors: () => void;
+  setDarkMode: (isDark: boolean) => void;
+  toggleDarkMode: () => void;
+  isDarkMode: boolean;
 }
 
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set) => ({
       colors: defaultColors,
+      isDarkMode: false,
       setColors: (newColors) =>
         set((state) => ({ colors: { ...state.colors, ...newColors } })),
       resetColors: () => set({ colors: defaultColors }),
+      setDarkMode: (isDark) => set({ isDarkMode: isDark }),
+      toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
     }),
     {
       name: 'theme-storage',

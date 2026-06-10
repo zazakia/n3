@@ -224,72 +224,108 @@ export class PdfGenerator {
              batchText += ' (RELOAN)';
         }
 
+        let batchLine = batchText ? `Batch #: ${batchText}` : '&nbsp;';
+        if (batchText.toLowerCase().startsWith('center:')) {
+            batchLine = batchText;
+        } else if (batchText.toLowerCase().includes('zone')) {
+            batchLine = `Center: ${batchText}`;
+        }
+
         const previousLoanDeduction = loan.deductedAmount || 0;
         const serviceCharge = loan.serviceChargeAmount || 0;
-        const totalDeductions = previousLoanDeduction + serviceCharge;
         const netAmount = loan.principalAmount - previousLoanDeduction - serviceCharge;
-        const remarks = [
-            loan.loanNumber,
-            batchText ? `Batch ${batchText}` : '',
-            loan.isReloan ? 'Reloan' : '',
-        ].filter(Boolean).join(' • ');
         const stripCurrency = (value: string) => value.replace('₱', '').trim();
 
+        let rightColumnContent = '';
+
+        if (previousLoanDeduction > 0) {
+            rightColumnContent = `
+                <table style="width: 100%; text-align: center; font-weight: bold; font-size: 14px;">
+                    <tr>
+                        <td style="padding-bottom: 10px;">Loan Balance</td>
+                        <td style="padding-bottom: 10px;">Amount</td>
+                        <td style="padding-bottom: 10px;">Net Amount</td>
+                    </tr>
+                    <tr>
+                        <td>${stripCurrency(formatPHP(previousLoanDeduction))}</td>
+                        <td>${stripCurrency(formatPHP(loan.principalAmount))}</td>
+                        <td>${stripCurrency(formatPHP(netAmount))}</td>
+                    </tr>
+                </table>
+            `;
+        } else if (serviceCharge > 0) {
+            const feePercentage = Math.round((serviceCharge / loan.principalAmount) * 100);
+            rightColumnContent = `
+                <div style="text-align: center; font-weight: bold; font-size: 14px;">
+                    <div style="margin-bottom: 10px;">Amount</div>
+                    <div style="margin-bottom: 10px;">${feePercentage}% service fee: ${stripCurrency(formatPHP(serviceCharge))}</div>
+                    <div style="margin-bottom: 10px;">Net Amount: ${stripCurrency(formatPHP(netAmount))}</div>
+                </div>
+            `;
+        } else {
+            rightColumnContent = `
+                <table style="width: 100%; text-align: center; font-weight: bold; font-size: 14px;">
+                    <tr>
+                        <td style="padding-bottom: 10px;">Amount</td>
+                    </tr>
+                    <tr>
+                        <td>${stripCurrency(formatPHP(loan.principalAmount))}</td>
+                    </tr>
+                </table>
+            `;
+        }
+
+        rightColumnContent += `
+            <div style="margin-top: 20px; font-weight: bold; font-size: 14px;">
+                Series No. ${loan.loanNumber || ''}
+            </div>
+        `;
+
         return `
-          <section class="voucher-card">
-            <div class="receipt-header">
-              <div class="receipt-mark">IF</div>
-              <div class="receipt-title">CASH RECEIPT</div>
+          <div class="voucher-card" style="margin-bottom: 0.6in; page-break-inside: avoid; font-family: Arial, sans-serif; color: #000;">
+            <div style="font-weight: bold; font-size: 12px; margin-bottom: 20px;">
+              DATE: ${generatedDate}<br/>
+              ${batchLine}
             </div>
 
-            <div class="top-fields">
-              <div class="field received">
-                <span>RECEIVED FROM:</span>
-                <b>${borrower.fullName}</b>
-              </div>
-              <div class="field date">
-                <b>${generatedDate}</b>
-                <small>DATE</small>
-              </div>
-            </div>
+            <h1 style="text-align: center; font-size: 36px; margin: 0; padding: 0;">Voucher</h1>
+            <hr style="border: 0; border-top: 1px solid #000; margin-top: 10px; margin-bottom: 25px;" />
 
-            <div class="field amount-received">
-              <span>AMOUNT RECEIVED:</span>
-              <b>${stripCurrency(formatPHP(netAmount))}</b>
-            </div>
-            <div class="field remarks">
-              <span>REMARKS:</span>
-              <b>${remarks || '&nbsp;'}</b>
-            </div>
-
-            <div class="salary-lines">
-              <div class="money-line">
-                <strong>${stripCurrency(formatPHP(loan.principalAmount))}</strong>
-                <span>amt. of salary / pension</span>
+            <div style="display: flex; justify-content: space-between;">
+              <div style="width: 50%; text-align: center;">
+                <div style="font-weight: bold; margin-bottom: 10px; font-size: 12px;">Client name</div>
+                <div style="font-weight: bold; font-size: 14px;">${borrower.fullName}</div>
+                
+                <div style="margin-top: 45px;">
+                  <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto; padding-top: 5px; font-size: 12px; font-weight: bold;">
+                    Signature over Printed Name
+                  </div>
+                </div>
+                
+                <div style="margin-top: 25px; font-size: 12px; font-weight: bold; display: flex; flex-direction: column; align-items: center;">
+                  <div>
+                    <span style="font-weight: normal;">Checked By / Noted By:</span> _____________________
+                  </div>
+                  <div style="margin-top: 2px;">
+                    Account Officer / Marketing
+                  </div>
+                </div>
               </div>
-              <div class="money-line">
-                <strong>${stripCurrency(formatPHP(totalDeductions))}</strong>
-                <span>amt. due on</span>
-                <em>${generatedDate}</em>
-              </div>
-              <div class="money-line">
-                <strong>${stripCurrency(formatPHP(netAmount))}</strong>
-                <span>amt. remaining</span>
-              </div>
-            </div>
 
-            <div class="deductions">
-              <h3>DEDUCTIONS:</h3>
-              <div>${previousLoanDeduction > 0 ? `${stripCurrency(formatPHP(previousLoanDeduction))} - Previous Loan Balance` : '&nbsp;'}</div>
-              <div>${serviceCharge > 0 ? `${stripCurrency(formatPHP(serviceCharge))} - Service Fee` : '&nbsp;'}</div>
+              <div style="width: 50%; text-align: center;">
+                ${rightColumnContent}
+                
+                <div style="margin-top: 45px; font-size: 12px; font-weight: bold; display: flex; flex-direction: column; align-items: center;">
+                  <div>
+                    <span style="font-weight: normal;">Approve By:</span> _____________________
+                  </div>
+                  <div style="margin-top: 2px;">
+                    OIC / OM
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <div class="receipt-footer">
-              <div class="signature-name">${borrower.fullName}</div>
-              <div class="signature-label">SIGNATURE OVER PRINTED NAME</div>
-              <div class="recipient-label">RECIPIENT</div>
-            </div>
-          </section>
+          </div>
         `;
     }
 
@@ -304,61 +340,16 @@ export class PdfGenerator {
         <head>
           <meta charset="utf-8"/>
           <style>
-            @page { size: ${pageSize}; margin: 0.22in; }
+            @page { size: ${pageSize}; margin: 0.5in; }
             * { box-sizing: border-box; }
-            body { font-family: Arial, sans-serif; margin: 0; color: #173d3a; font-size: 8.5px; }
-            .sheet {
-              display: grid;
-              grid-template-columns: repeat(2, 1fr);
-              grid-auto-rows: calc((100vh - 0.01px) / 4);
-              gap: 0;
-              width: 100%;
-              min-height: 100vh;
-            }
-            .voucher-card {
-              break-inside: avoid;
-              page-break-inside: avoid;
-              border: 1.5px solid #2f5d55;
-              padding: 0.08in 0.1in;
-              display: flex;
-              flex-direction: column;
-              overflow: hidden;
-              background: #fbfaf2;
-            }
-            .voucher-card:nth-child(8n) { break-after: page; page-break-after: always; }
-            .receipt-header { display: flex; align-items: center; justify-content: center; gap: 7px; border-bottom: 1px solid #2f5d55; padding-bottom: 2px; margin-bottom: 5px; }
-            .receipt-mark { width: 18px; height: 18px; border: 2px solid #2e8b83; color: #2e8b83; transform: rotate(45deg); display: flex; align-items: center; justify-content: center; font-size: 6px; font-weight: 900; }
-            .receipt-mark::first-letter { transform: rotate(-45deg); }
-            .receipt-title { color: #222; font-size: 18px; font-weight: 900; letter-spacing: 0.5px; }
-            .top-fields { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-            .field { display: flex; align-items: baseline; gap: 4px; color: #1f4f49; font-weight: 900; line-height: 1.1; }
-            .field span { color: #222; font-size: 8.5px; white-space: nowrap; }
-            .field b { color: #111; font-size: 9.5px; border-bottom: 1px solid #333; min-height: 12px; flex: 1; padding: 0 3px; }
-            .received { flex: 1; min-width: 0; }
-            .date { width: 30%; flex-direction: column; align-items: center; gap: 0; }
-            .date b { width: 100%; text-align: center; flex: none; }
-            .date small { color: #333; font-size: 6.5px; font-weight: 900; }
-            .amount-received, .remarks { margin-top: 3px; }
-            .amount-received b, .remarks b { max-width: 72%; }
-            .salary-lines { margin-top: 8px; }
-            .money-line { display: flex; align-items: baseline; gap: 6px; margin-bottom: 2px; color: #2f7770; font-weight: 900; }
-            .money-line::before { content: "P"; color: #0f6d69; font-size: 10px; font-weight: 900; }
-            .money-line strong { color: #111; font-size: 11px; min-width: 55px; border-bottom: 1px solid #333; text-align: center; }
-            .money-line span { color: #2f7770; font-size: 10px; }
-            .money-line em { color: #111; font-size: 9px; border-bottom: 1px solid #333; min-width: 50px; text-align: center; font-style: normal; }
-            .deductions { margin-top: 5px; color: #111; font-weight: 800; min-height: 34px; }
-            .deductions h3 { color: #1f4f49; font-size: 10px; margin: 0 0 3px; letter-spacing: 0.5px; }
-            .deductions div { margin-left: 26px; font-size: 9.5px; line-height: 1.25; }
-            .receipt-footer { margin-top: auto; align-self: flex-end; width: 50%; text-align: center; color: #222; }
-            .signature-name { border-bottom: 1px solid #333; min-height: 14px; font-size: 9px; font-weight: 900; text-transform: uppercase; }
-            .signature-label, .recipient-label { font-size: 6.8px; font-weight: 900; line-height: 1.05; }
+            body { font-family: Arial, sans-serif; margin: 0; color: #000; }
             @media print {
               body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             }
           </style>
         </head>
         <body>
-          <main class="sheet">${cards}</main>
+          <main>${cards}</main>
         </body>
         </html>
         `;

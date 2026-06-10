@@ -37,6 +37,7 @@ export const DAILY_REPORTS: MenuItem[] = [
 export const WEEKLY_REPORTS: MenuItem[] = [
     { icon: 'list-alt', label: 'Collection Report', route: '/(admin)/reports/collection' },
     { icon: 'view-list', label: 'Weekly Collection Sheet', route: '/(admin)/reports/weekly-collection' },
+    { icon: 'table-chart', label: 'Weekly DCS Area Sheet', route: '/(admin)/reports/weekly-dcs' },
     { icon: 'assignment-ind', label: 'Active Loans Collection', route: '/(admin)/reports/active-loans' },
 ];
 

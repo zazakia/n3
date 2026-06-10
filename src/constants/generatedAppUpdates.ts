@@ -2,6 +2,128 @@ import type { AppUpdateEntry } from './appUpdates';
 
 export const GENERATED_APP_UPDATES: AppUpdateEntry[] = [
     {
+        "id": "5083e309b3acae9a6deee4a095b2cf79e5d3d6c6",
+        "version": "5083e30",
+        "versionLabel": "Commit",
+        "date": "2026-06-05",
+        "title": "Update CHANGELOG.md for issues #9 to #16",
+        "category": "technical",
+        "icon": "code",
+        "summary": "Update CHANGELOG.md for issues #9 to #16",
+        "changes": [
+            "Update CHANGELOG.md for issues #9 to #16"
+        ],
+        "codeChanges": [
+            "Updated CHANGELOG.md"
+        ]
+    },
+    {
+        "id": "3264331c44ddf91c16490e4dc2192b7cfa1f9db0",
+        "version": "3264331",
+        "versionLabel": "Commit",
+        "date": "2026-06-05",
+        "title": "Add production upfront deduction audit and net loan release repair scripts (#16)",
+        "category": "data",
+        "icon": "fact-check",
+        "summary": "Add production upfront deduction audit and net loan release repair scripts (#16)",
+        "changes": [
+            "Add production upfront deduction audit and net loan release repair scripts (#16)"
+        ],
+        "codeChanges": [
+            "Updated .agents/skills/playwright-e2e/SKILL.md",
+            "Updated scripts/audit-production-upfront-deductions.mjs",
+            "Updated scripts/deployed-app-excel-verification-report.json"
+        ]
+    },
+    {
+        "id": "7b68f73c50f9bf08a15a323dbf540f0aa9f2e87d",
+        "version": "7b68f73",
+        "versionLabel": "Commit",
+        "date": "2026-06-05",
+        "title": "Client-side forecasting algorithms and secure SQL sandboxing (#15)",
+        "category": "feature",
+        "icon": "new-releases",
+        "summary": "Client-side forecasting algorithms and secure SQL sandboxing (#15)",
+        "changes": [
+            "Client-side forecasting algorithms and secure SQL sandboxing (#15)"
+        ],
+        "codeChanges": [
+            "Updated .agents/skills/ai-analytics/SKILL.md",
+            "Updated app/(admin)/reports/ai-assistant.tsx",
+            "Updated src/utils/__tests__/forecasting.test.ts"
+        ]
+    },
+    {
+        "id": "5ee079723126d9193729c48144e68c0a0366d3cc",
+        "version": "5ee0797",
+        "versionLabel": "Commit",
+        "date": "2026-06-05",
+        "title": "Implement 2% Service Charge on weekly loans and batch printing (#11)",
+        "category": "feature",
+        "icon": "new-releases",
+        "summary": "Implement 2% Service Charge on weekly loans and batch printing (#11)",
+        "changes": [
+            "Implement 2% Service Charge on weekly loans and batch printing (#11)"
+        ],
+        "codeChanges": [
+            "Updated app/(admin)/borrowers/[id].tsx",
+            "Updated app/(admin)/borrowers/[id]/passbook.tsx",
+            "Updated app/(admin)/borrowers/index.tsx"
+        ]
+    },
+    {
+        "id": "574242189d49d2ac0b89b70e4a04c244850cb5e7",
+        "version": "5742421",
+        "versionLabel": "Commit",
+        "date": "2026-06-05",
+        "title": "Implement Income Statement metrics for GLP and interest pipeline (#14)",
+        "category": "feature",
+        "icon": "new-releases",
+        "summary": "Implement Income Statement metrics for GLP and interest pipeline (#14)",
+        "changes": [
+            "Implement Income Statement metrics for GLP and interest pipeline (#14)"
+        ],
+        "codeChanges": [
+            "Updated app/(admin)/reports/income-statement.tsx",
+            "Updated src/services/MfiKpiService.ts",
+            "Updated src/services/__tests__/MfiKpiService.test.ts"
+        ]
+    },
+    {
+        "id": "452207412f64c6a41a293ad6716b7193ec39b8c8",
+        "version": "4522074",
+        "versionLabel": "Commit",
+        "date": "2026-06-05",
+        "title": "Add AuditService stale upfront deduction verification (#13)",
+        "category": "data",
+        "icon": "fact-check",
+        "summary": "Add AuditService stale upfront deduction verification (#13)",
+        "changes": [
+            "Add AuditService stale upfront deduction verification (#13)"
+        ],
+        "codeChanges": [
+            "Updated src/services/AuditService.ts",
+            "Updated src/services/__tests__/AuditService.test.ts"
+        ]
+    },
+    {
+        "id": "ade1cc15bdf23067d7633006c8d0797262700f5b",
+        "version": "ade1cc1",
+        "versionLabel": "Commit",
+        "date": "2026-06-05",
+        "title": "Enhancement: add ActionLogService payload sanitization and serialization constraints (#12)",
+        "category": "feature",
+        "icon": "new-releases",
+        "summary": "Enhancement: add ActionLogService payload sanitization and serialization constraints (#12)",
+        "changes": [
+            "Enhancement: add ActionLogService payload sanitization and serialization constraints (#12)"
+        ],
+        "codeChanges": [
+            "Updated src/services/ActionLogService.ts",
+            "Updated src/services/__tests__/ActionLogService.test.ts"
+        ]
+    },
+    {
         "id": "ec9d4c7a6d4fc40bfa89a9e7cbecdfa3b8114638",
         "version": "ec9d4c7",
         "versionLabel": "Commit",

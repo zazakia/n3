@@ -6,6 +6,7 @@ import { formatPHP } from '../../../src/utils/currency';
 import { format } from 'date-fns';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { AccountingBasisToggle } from '../../../src/components/AccountingBasisToggle';
 
 export default function BalanceSheetScreen() {
     const [loading, setLoading] = useState(true);
@@ -49,9 +50,33 @@ export default function BalanceSheetScreen() {
                         <MaterialIcons name="refresh" size={20} color="#2563EB" />
                     </Pressable>
                 </View>
-                <Text className="text-gray-700 font-bold uppercase tracking-widest text-[10px]">
+                <Text className="text-gray-700 font-bold uppercase tracking-widest text-[10px] mb-3">
                     As of {data ? format(data.asOf, 'MMM d, yyyy') : 'Now'}
                 </Text>
+
+                {/* Accounting Basis Toggle — with note that it doesn't change Balance Sheet */}
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        backgroundColor: '#F8FAFC',
+                        borderRadius: 14,
+                        padding: 10,
+                        borderWidth: 1,
+                        borderColor: '#E2E8F0',
+                    }}
+                >
+                    <View style={{ flex: 1, marginRight: 10 }}>
+                        <Text style={{ fontSize: 10, fontWeight: '800', color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 }}>
+                            Accounting Basis
+                        </Text>
+                        <Text style={{ fontSize: 10, color: '#94A3B8', lineHeight: 14 }}>
+                            Balance sheet is the same under both bases
+                        </Text>
+                    </View>
+                    <AccountingBasisToggle compact />
+                </View>
             </View>
 
             <ScrollView 

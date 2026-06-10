@@ -8,6 +8,7 @@ import { SidebarContent, MAIN_MENU, ADMIN_MENU, DAILY_REPORTS, WEEKLY_REPORTS, M
 import { SyncStatusBadge } from '../../src/components/SyncStatusBadge';
 import { AuthGateLoading } from '../../src/components/AuthGateLoading';
 import { ROLE_HOME_ROUTES, UserRole } from '../../src/constants/roles';
+import { useThemeStore } from '../../src/store/useThemeStore';
 
 export default function AdminShellLayout() {
     const { width } = useWindowDimensions();
@@ -16,6 +17,7 @@ export default function AdminShellLayout() {
     const pathname = usePathname();
     const { user, role, roleResolved, initialized } = useAuth();
     const router = useRouter();
+    const { colors } = useThemeStore();
 
     useEffect(() => {
         if (!initialized || !roleResolved) return;
@@ -103,7 +105,7 @@ export default function AdminShellLayout() {
                                 <MaterialIcons
                                     name={item.icon}
                                     size={24}
-                                    color={isActive ? '#1A237E' : '#9CA3AF'}
+                                    color={isActive ? colors.primary : '#9CA3AF'}
                                     className="mb-1"
                                 />
                                 <Text className={`text-[10px] font-medium ${isActive ? 'text-primary' : 'text-gray-700'}`}>

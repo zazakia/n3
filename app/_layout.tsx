@@ -54,7 +54,10 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout() {
     const [fontsReady, setFontsReady] = useState(() => areRequiredIconFontsLoaded());
-    const { colors } = require('../src/store/useThemeStore').useThemeStore(); // using require to avoid import ordering issues
+    const { colors, isDarkMode } = require('../src/store/useThemeStore').useThemeStore();
+    const palette = isDarkMode
+        ? require('../src/constants/colors').DarkColors
+        : require('../src/constants/colors').Colors;
 
     useEffect(() => {
         let isMounted = true;
@@ -88,7 +91,7 @@ export default function RootLayout() {
 
     console.log('[RootLayout] Rendering RootLayout');
     return (
-        <View style={{ flex: 1, '--color-primary': colors.primary, '--color-secondary': colors.secondary } as any}>
+        <View style={{ flex: 1, '--color-primary': colors.primary || palette.primary, '--color-secondary': colors.secondary || palette.secondary, backgroundColor: palette.background } as any}>
             <GlobalErrorBoundary>
                 <GestureHandlerRootView style={{ flex: 1 }}>
                     <AuthProvider>

@@ -21,6 +21,7 @@ interface CollectionRow {
     borrowerName: string;
     address: string;
     collectorName: string;
+    collectorId: string;
     loanAmount: number;
     target: number;
     balance: number;
@@ -62,21 +63,18 @@ export default function WeeklyCollectionReport() {
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredRows = React.useMemo(() => {
-        if (!searchQuery) return reportRows;
+        let result = reportRows;
+        if (selectedCollectorId !== 'all') {
+            result = result.filter(r => r.collectorId === selectedCollectorId);
+        }
+        if (!searchQuery) return result;
         const query = searchQuery.toLowerCase();
-        return reportRows.filter(row => 
+        return result.filter(row => 
             (row.borrowerName && row.borrowerName.toLowerCase().includes(query)) ||
             (row.collectorName && row.collectorName.toLowerCase().includes(query)) ||
             (row.address && row.address.toLowerCase().includes(query))
         );
-    }, [reportRows, searchQuery]);
-
-    const loadCollectors = async () => {
-        const allCollectors = await database.collections.get<Collector>('collectors').query(
-            Q.where('is_active', true)
-        ).fetch();
-        setCollectors(allCollectors);
-    };
+    }, [reportRows, searchQuery, selectedCollectorId]);
 
     const loadData = async () => {
         setLoading(true);
@@ -84,46 +82,48 @@ export default function WeeklyCollectionReport() {
             const range = getWeekRange(weekOffset);
             setWeekRange(range);
 
-            // 1. Get schedules due this week
-            let schedulesQuery = database.collections.get<PaymentSchedule>('payment_schedules').query(
-                Q.where('due_date', Q.between(range.start.getTime(), range.end.getTime()))
-            );
-            const schedules = await schedulesQuery.fetch();
-            
-            // 2. Get loans for these schedules
-            const loanIds = [...new Set(schedules.map(s => s.loanId))];
-            if (loanIds.length === 0) {
+            // 1. Fetch active weekly loans first. Migrated weekly loans may not
+            // have a schedule row for the current calendar week.
+            const activeWeeklyLoans = await database.collections.get<Loan>('loans').query(
+                Q.where('status', 'active'),
+                Q.where('frequency', 'weekly')
+            ).fetch();
+
+            if (activeWeeklyLoans.length === 0) {
                 setReportRows([]);
+                setCollectors([]);
                 return;
             }
 
-            let loansQuery = selectedCollectorId !== 'all'
-                ? database.collections.get<Loan>('loans').query(
-                    Q.where('id', Q.oneOf(loanIds)),
-                    Q.where('status', 'active'),
-                    Q.where('frequency', 'weekly'),
-                    Q.where('collector_id', selectedCollectorId)
-                )
-                : database.collections.get<Loan>('loans').query(
-                    Q.where('id', Q.oneOf(loanIds)),
-                    Q.where('status', 'active'),
-                    Q.where('frequency', 'weekly')
-                );
-            const loans = await loansQuery.fetch();
-            const loanMap = new Map(loans.map(l => [l.id, l]));
-
-            // 3. Get borrowers
-            const borrowerIds = [...new Set(loans.map(l => l.borrowerId))];
+            // 2. Get borrowers
+            const borrowerIds = [...new Set(activeWeeklyLoans.map(l => l.borrowerId))];
             const borrowers = await database.collections.get<Borrower>('borrowers').query(
                 Q.where('id', Q.oneOf(borrowerIds))
             ).fetch();
             const borrowerMap = new Map(borrowers.map(b => [b.id, b]));
 
-            // 3.5 Fetch all collectors for name resolution
-            const allCollectorsRaw = await database.collections.get<Collector>('collectors').query().fetch();
+            const loans = activeWeeklyLoans;
+
+            if (loans.length === 0) {
+                setReportRows([]);
+                setCollectors([]);
+                return;
+            }
+
+            const loanIds = loans.map(l => l.id);
+
+            // 3.5 Fetch all active collectors for name resolution
+            const allCollectorsRaw = await database.collections.get<Collector>('collectors').query(
+                Q.where('is_active', Q.notEq(false))
+            ).fetch();
             const collectorMap = new Map(allCollectorsRaw.map(c => [c.id, c]));
 
-            // 4. Get payments for this week specifically
+            // 4. Get schedules and payments for this week specifically
+            const schedules = await database.collections.get<PaymentSchedule>('payment_schedules').query(
+                Q.where('loan_id', Q.oneOf(loanIds)),
+                Q.where('due_date', Q.between(range.start.getTime(), range.end.getTime()))
+            ).fetch();
+
             const weekPayments = await database.collections.get<Payment>('payments').query(
                 Q.where('deleted_at', Q.eq(null)),
                 Q.where('payment_date', Q.between(range.start.getTime(), range.end.getTime())),
@@ -138,14 +138,18 @@ export default function WeeklyCollectionReport() {
                 loanSchedulesMap.set(schedule.loanId, current + schedule.scheduledAmount);
             }
 
-            for (const [loanId, targetSum] of loanSchedulesMap.entries()) {
-                const loan = loanMap.get(loanId);
-                if (!loan) continue;
+            const activeCollectorIds = new Set<string>();
 
+            for (const loan of loans) {
                 const borrower = borrowerMap.get(loan.borrowerId);
                 if (!borrower) continue;
 
-                const collector = collectorMap.get(loan.collectorId);
+                const resolvedCollectorId = loan.collectorId || borrower.collectorId;
+                const collector = resolvedCollectorId ? collectorMap.get(resolvedCollectorId) : null;
+                
+                if (resolvedCollectorId && collector) {
+                    activeCollectorIds.add(resolvedCollectorId);
+                }
 
                 // Calculate total paid for this loan to get balance
                 const allPaymentsForLoan = await database.collections.get<Payment>('payments').query(
@@ -164,15 +168,21 @@ export default function WeeklyCollectionReport() {
                     borrowerName: borrower.fullName,
                     address: borrower.address || '',
                     collectorName: collector?.fullName || 'Unassigned',
+                    collectorId: resolvedCollectorId || 'unassigned',
                     loanAmount: loan.principalAmount,
-                    target: targetSum,
+                    target: loanSchedulesMap.get(loan.id) || loan.installmentAmount || 0,
                     balance: balance,
                     actual: actualWeek,
                     borrowerId: borrower.id,
                 });
             }
 
+            rows.sort((a, b) => a.borrowerName.localeCompare(b.borrowerName));
+
             setReportRows(rows);
+            
+            const activeCollectors = allCollectorsRaw.filter(c => activeCollectorIds.has(c.id));
+            setCollectors(activeCollectors);
         } catch (error) {
             console.error('Failed to load weekly collection report:', error);
         } finally {
@@ -181,21 +191,21 @@ export default function WeeklyCollectionReport() {
     };
 
     useFocusEffect(useCallback(() => {
-        loadCollectors().then(() => loadData());
-    }, [selectedCollectorId, weekOffset]));
+        loadData();
+    }, [weekOffset]));
 
     // ─── Excel Export ───────────────────────────────────────────────────────────
     const exportToExcel = async () => {
         try {
             const BOM = '\uFEFF';
             const headers = ['Name Of Client', 'Address', 'Collector', 'Loan Amount', 'Target Collection', 'Total Loan Balance', 'Actual Collection'];
-            const totalTarget = reportRows.reduce((sum, r) => sum + r.target, 0);
-            const totalBalance = reportRows.reduce((sum, r) => sum + r.balance, 0);
-            const totalActual = reportRows.reduce((sum, r) => sum + r.actual, 0);
+            const totalTarget = filteredRows.reduce((sum, r) => sum + r.target, 0);
+            const totalBalance = filteredRows.reduce((sum, r) => sum + r.balance, 0);
+            const totalActual = filteredRows.reduce((sum, r) => sum + r.actual, 0);
 
             const csvRows = [
                 headers.join(','),
-                ...reportRows.map(row => [
+                ...filteredRows.map(row => [
                     `"${row.borrowerName.replace(/"/g, '""')}"`,
                     `"${row.address.replace(/"/g, '""')}"`,
                     `"${row.collectorName.replace(/"/g, '""')}"`,
@@ -239,7 +249,7 @@ export default function WeeklyCollectionReport() {
             ? 'All Collectors'
             : collectors.find(c => c.id === selectedCollectorId)?.fullName ?? '';
 
-        const rowsHtml = reportRows.map((row, i) => `
+        const rowsHtml = filteredRows.map((row, i) => `
             <tr style="background:${i % 2 === 0 ? '#ffffff' : '#f9f9f9'}">
                 <td>${row.borrowerName}</td>
                 <td>${row.address}</td>
@@ -251,9 +261,9 @@ export default function WeeklyCollectionReport() {
             </tr>
         `).join('');
 
-        const totalTarget = reportRows.reduce((s, r) => s + r.target, 0);
-        const totalBalance = reportRows.reduce((s, r) => s + r.balance, 0);
-        const totalActual = reportRows.reduce((s, r) => s + r.actual, 0);
+        const totalTarget = filteredRows.reduce((s, r) => s + r.target, 0);
+        const totalBalance = filteredRows.reduce((s, r) => s + r.balance, 0);
+        const totalActual = filteredRows.reduce((s, r) => s + r.actual, 0);
 
         const html = `<!DOCTYPE html>
 <html>
@@ -328,7 +338,7 @@ export default function WeeklyCollectionReport() {
     <tbody>
       ${rowsHtml}
       <tr class="totals-row">
-        <td colspan="3">TOTAL (${reportRows.length} clients)</td>
+        <td colspan="3">TOTAL (${filteredRows.length} clients)</td>
         <td class="num"></td>
         <td class="num">${totalTarget.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
         <td class="num">${totalBalance.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>

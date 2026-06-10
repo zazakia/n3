@@ -108,7 +108,8 @@ export class SyncService {
         'encoded_at',
         'remittance_date',
         'date',
-        'timestamp'
+        'timestamp',
+        'next_due_date'
     ];
 
     /**
@@ -116,7 +117,8 @@ export class SyncService {
      * These should NOT be converted to ISO strings.
      */
     private static readonly BIGINT_DATE_FIELDS = [
-        'penalty_date'
+        'penalty_date',
+        'next_due_date'
     ];
 
     /**
@@ -125,7 +127,7 @@ export class SyncService {
      */
     private static readonly UUID_FK_FIELDS = [
         'collector_id', 'auth_id', 'created_by', 'encoded_by', 'borrower_id',
-        'loan_id', 'schedule_id', 'previous_loan_id', 'bank_account_id'
+        'loan_id', 'schedule_id', 'previous_loan_id', 'bank_account_id', 'recurring_expense_id'
     ];
 
     private static readonly UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

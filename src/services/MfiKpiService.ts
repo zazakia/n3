@@ -49,8 +49,8 @@ export class MfiKpiService {
         return this.defaultInstance.getCollectorEfficiency();
     }
 
-    static async getIncomeStatement(startDate: number, endDate: number): Promise<any> {
-        return this.defaultInstance.getIncomeStatement(startDate, endDate);
+    static async getIncomeStatement(startDate: number, endDate: number, basis: 'accrual' | 'cash' = 'accrual'): Promise<any> {
+        return this.defaultInstance.getIncomeStatement(startDate, endDate, basis);
     }
 
     static async getBalanceSheet(): Promise<any> {
@@ -353,7 +353,7 @@ export class MfiKpiService {
         }
     }
 
-    async getIncomeStatement(startDate: number, endDate: number): Promise<any> {
+    async getIncomeStatement(startDate: number, endDate: number, basis: 'accrual' | 'cash' = 'accrual'): Promise<any> {
         try {
             const expenses = await this.db.collections.get<Expense>('expenses')
                 .query(Q.where('deleted_at', null), 
@@ -387,7 +387,13 @@ export class MfiKpiService {
                 totalOperatingExpenses += e.amount;
             });
 
-            const earnedInterestIncome = KpiCalculator.computeInterestIncome(payments, loans);
+            // Interest income varies by accounting basis:
+            // - Accrual: proportional interest allocation (GAAP/MFI-standard, required for OSS/FSS)
+            // - Cash: interest-portion of cash actually received in this period
+            const earnedInterestIncome = basis === 'cash'
+                ? KpiCalculator.computeCashBasisInterestIncome(payments, loans)
+                : KpiCalculator.computeInterestIncome(payments, loans);
+
             const upfrontFeeIncome = loansReleasedInPeriod.reduce((s, l) => s + (l.deductedAmount || 0), 0);
             const penaltyIncome = penalties.reduce((s, p) => s + p.amount, 0);
             
@@ -457,7 +463,10 @@ export class MfiKpiService {
                 netIncome,
                 savingsInterestExpense,
                 glp,
-                unearnedInterestPipeline
+                // Unearned interest pipeline is only meaningful under accrual basis.
+                // Under cash basis we report null so the UI can hide this section.
+                unearnedInterestPipeline: basis === 'cash' ? null : unearnedInterestPipeline,
+                accountingBasis: basis,
             };
         } catch (e) {
             console.error('[MfiKpiService] Error generating income statement:', e);

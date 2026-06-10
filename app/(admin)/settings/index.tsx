@@ -11,6 +11,7 @@ import { SKIP_NEXT_AUTO_SYNC_KEY } from '../../../src/store/AuthContext';
 import Toast from '../../../src/components/AppToast';
 import { AnimatedPressable } from '../../../src/components/AnimatedPressable';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useThemeStore } from '../../../src/store/useThemeStore';
 
 export default function SettingsScreen() {
     const { user, signOut } = useAuth();
@@ -21,6 +22,7 @@ export default function SettingsScreen() {
     const [cloudBackupLoading, setCloudBackupLoading] = useState(false);
     const [cloudRestoreProgress, setCloudRestoreProgress] = useState<string | null>(null);
     const [restoreModalVisible, setRestoreModalVisible] = useState(false);
+    const { colors } = useThemeStore();
 
     useEffect(() => {
         setLastSync(new Date().toLocaleString());
@@ -221,7 +223,7 @@ export default function SettingsScreen() {
                             <Text className="text-gray-900 font-bold text-base">Instant Sync</Text>
                             <Text className="text-gray-700 text-xs mt-1">Push changes automatically</Text>
                         </View>
-                        <Switch value={true} trackColor={{ true: '#1A237E' }} />
+                        <Switch value={true} trackColor={{ true: colors.primary }} />
                     </View>
 
                     <View className="bg-gray-50 p-4 rounded-2xl mb-6">
@@ -235,9 +237,9 @@ export default function SettingsScreen() {
                         className="w-full"
                     >
                         <View className={`py-4 rounded-xl items-center flex-row justify-center ${syncing ? 'bg-gray-200' : 'bg-white border border-primary'}`}>
-                            {syncing ? <ActivityIndicator color="#1A237E" /> : (
+                            {syncing ? <ActivityIndicator color={colors.primary} /> : (
                                 <>
-                                    <MaterialIcons name="sync" size={20} color="#1A237E" style={{ marginRight: 8 }} />
+                                    <MaterialIcons name="sync" size={20} color={colors.primary} style={{ marginRight: 8 }} />
                                     <Text className="text-primary font-bold uppercase tracking-wider">Sync Now</Text>
                                 </>
                             )}
@@ -262,7 +264,7 @@ export default function SettingsScreen() {
                         onPress={handleBackup}
                         className="w-full"
                     >
-                        <View style={{ backgroundColor: '#1A237E' }} className="py-4 rounded-xl items-center flex-row justify-center">
+                        <View style={{ backgroundColor: colors.primary }} className="py-4 rounded-xl items-center flex-row justify-center">
                             <MaterialIcons name="backup" size={20} color="white" style={{ marginRight: 8 }} />
                             <Text style={{ color: 'white' }} className="font-bold uppercase tracking-wider">Manual Backup (Export)</Text>
                         </View>
@@ -343,13 +345,13 @@ export default function SettingsScreen() {
                     <SettingsItem
                         icon="palette"
                         label="Theme Customization"
-                        color="#1A237E"
+                        color={colors.primary}
                         onPress={() => router.push('/(admin)/settings/theme')}
                     />
                     <SettingsItem
                         icon="campaign"
                         label="Updates & Changes"
-                        color="#1A237E"
+                        color={colors.primary}
                         onPress={() => router.push('/(admin)/settings/updates')}
                     />
                     <SettingsItem
@@ -376,13 +378,13 @@ export default function SettingsScreen() {
                     <SettingsItem
                         icon="history"
                         label="Audit Trail"
-                        color="#1A237E"
+                        color={colors.primary}
                         onPress={() => router.push('/(admin)/settings/audit-trail')}
                     />
                     <SettingsItem
                         icon="verified-user"
                         label="Data Integrity Audit"
-                        color="#1A237E"
+                        color={colors.primary}
                         onPress={() => router.push('/(admin)/settings/audit')}
                     />
                     <SettingsItem
@@ -421,7 +423,7 @@ export default function SettingsScreen() {
                         >
                             <MaterialIcons name="close" size={20} color="#4B5563" />
                         </Pressable>
-                        <MaterialIcons name="settings-backup-restore" size={40} color="#1A237E" className="mb-4" />
+                        <MaterialIcons name="settings-backup-restore" size={40} color={colors.primary} className="mb-4" />
                         <Text className="text-xl font-bold text-gray-900 mb-2">Restore Data</Text>
                         <Text className="text-sm text-gray-600 mb-6 leading-5">
                             Choose how you want to restore the data. <Text className="font-bold text-red-600">Wipe & Restore</Text> will clear all current local data first.

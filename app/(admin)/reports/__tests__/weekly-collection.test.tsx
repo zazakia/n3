@@ -56,7 +56,9 @@ describe('WeeklyCollectionReport', () => {
         jest.clearAllMocks();
     });
 
-    const seedData = async () => {
+    const seedData = async (options: { includeCurrentWeekSchedule?: boolean } = {}) => {
+        const { includeCurrentWeekSchedule = true } = options;
+
         await testDb.write(async () => {
             const collector = await testDb.collections.get('collectors').create((c: any) => {
                 c.fullName = 'Test Collector';
@@ -66,6 +68,7 @@ describe('WeeklyCollectionReport', () => {
             const borrower = await testDb.collections.get('borrowers').create((b: any) => {
                 b.fullName = 'Test Borrower';
                 b.address = 'Test Address';
+                b.collectorId = collector.id;
             });
 
             const loan = await testDb.collections.get('loans').create((l: any) => {
@@ -73,6 +76,7 @@ describe('WeeklyCollectionReport', () => {
                 l.collectorId = collector.id;
                 l.principalAmount = 10000;
                 l.totalAmount = 11000;
+                l.installmentAmount = 500;
                 l.status = 'active';
                 l.frequency = 'weekly';
             });
@@ -83,12 +87,14 @@ describe('WeeklyCollectionReport', () => {
             monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
             monday.setHours(12, 0, 0, 0);
 
-            await testDb.collections.get('payment_schedules').create((s: any) => {
-                s.loanId = loan.id;
-                s.dueDate = monday.getTime();
-                s.scheduledAmount = 500;
-                s.status = 'pending';
-            });
+            if (includeCurrentWeekSchedule) {
+                await testDb.collections.get('payment_schedules').create((s: any) => {
+                    s.loanId = loan.id;
+                    s.dueDate = monday.getTime();
+                    s.scheduledAmount = 500;
+                    s.status = 'pending';
+                });
+            }
 
             await testDb.collections.get('payments').create((p: any) => {
                 p.loanId = loan.id;
@@ -110,6 +116,20 @@ describe('WeeklyCollectionReport', () => {
         expect(screen.getByText('Test Address')).toBeTruthy();
         const collectors = screen.getAllByText('Test Collector');
         expect(collectors.length).toBeGreaterThanOrEqual(1);
+        const amounts = screen.getAllByText('500.00');
+        expect(amounts.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('shows active weekly loans in All even without a current-week schedule', async () => {
+        await seedData({ includeCurrentWeekSchedule: false });
+
+        render(<WeeklyCollectionReport />);
+
+        await waitFor(() => {
+            expect(screen.getByText('Test Borrower')).toBeTruthy();
+        }, { timeout: 8000 });
+
+        expect(screen.getByText('Test Address')).toBeTruthy();
         const amounts = screen.getAllByText('500.00');
         expect(amounts.length).toBeGreaterThanOrEqual(1);
     });

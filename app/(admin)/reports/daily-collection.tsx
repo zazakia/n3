@@ -21,6 +21,7 @@ interface CollectionRow {
     borrowerName: string;
     address: string;
     collectorName: string;
+    collectorId: string;
     loanAmount: number;
     totalLoan: number;
     target: number;
@@ -52,40 +53,18 @@ export default function DailyCollectionReport() {
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredRows = React.useMemo(() => {
-        if (!searchQuery) return reportRows;
+        let result = reportRows;
+        if (selectedCollectorId !== 'all') {
+            result = result.filter(r => r.collectorId === selectedCollectorId);
+        }
+        if (!searchQuery) return result;
         const query = searchQuery.toLowerCase();
-        return reportRows.filter(row => 
+        return result.filter(row => 
             (row.borrowerName && row.borrowerName.toLowerCase().includes(query)) ||
             (row.collectorName && row.collectorName.toLowerCase().includes(query)) ||
             (row.address && row.address.toLowerCase().includes(query))
         );
-    }, [reportRows, searchQuery]);
-
-    const loadCollectors = async () => {
-        const allCollectors = await database.collections.get<Collector>('collectors').query(
-            Q.where('is_active', Q.notEq(false))
-        ).fetch();
-
-        // Deduplicate by normalized name and filter junk
-        const seen = new Map<string, Collector>();
-        for (const c of allCollectors) {
-            const name = (c.fullName || '').trim();
-            const normalized = name.toLowerCase().replace(/\s+/g, ' ');
-            if (!normalized ||
-                normalized.includes('test') ||
-                normalized.includes('fix') ||
-                normalized.includes('diagnostic') ||
-                normalized.includes('mock') ||
-                /^collector\s*\d*$/.test(normalized) ||
-                /^gera\s+gerald$/i.test(name)) {
-                continue;
-            }
-            if (!seen.has(normalized) || (c.isActive && !seen.get(normalized)!.isActive)) {
-                seen.set(normalized, c);
-            }
-        }
-        setCollectors(Array.from(seen.values()));
-    };
+    }, [reportRows, searchQuery, selectedCollectorId]);
 
     const loadData = async () => {
         setLoading(true);
@@ -95,30 +74,15 @@ export default function DailyCollectionReport() {
             const endOfDay = new Date(selectedDate);
             endOfDay.setHours(23, 59, 59, 999);
 
-            // 1. Fetch ALL active loans
-            let baseQuery = database.collections.get<Loan>('loans').query(
-                Q.where('status', 'active')
-            );
-            if (selectedCollectorId !== 'all') {
-                // Find borrowers for selected collector
-                const borrowerIdsForCollector = await database.collections.get<Borrower>('borrowers')
-                    .query(Q.where('collector_id', selectedCollectorId))
-                    .fetchIds();
-
-                if (borrowerIdsForCollector.length === 0) {
-                    setReportRows([]);
-                    return;
-                }
-
-                baseQuery = database.collections.get<Loan>('loans').query(
-                    Q.where('status', 'active'),
-                    Q.where('borrower_id', Q.oneOf(borrowerIdsForCollector))
-                );
-            }
-            const activeLoans = await baseQuery.fetch();
+            // 1. Fetch ALL active DAILY loans
+            const activeLoans = await database.collections.get<Loan>('loans').query(
+                Q.where('status', 'active'),
+                Q.where('frequency', 'daily')
+            ).fetch();
 
             if (activeLoans.length === 0) {
                 setReportRows([]);
+                setCollectors([]);
                 return;
             }
 
@@ -132,8 +96,12 @@ export default function DailyCollectionReport() {
             const borrowerMap = new Map(borrowers.map(b => [b.id, b]));
 
             // 2.5 Fetch all collectors for name resolution
-            const allCollectorsRaw = await database.collections.get<Collector>('collectors').query().fetch();
+            const allCollectorsRaw = await database.collections.get<Collector>('collectors').query(
+                Q.where('is_active', Q.notEq(false))
+            ).fetch();
             const collectorMap = new Map(allCollectorsRaw.map(c => [c.id, c]));
+
+            const activeCollectorIds = new Set<string>();
 
             // 3. Fetch payments made TODAY (for Actual Collection column)
             const todayPayments = await database.collections.get<Payment>('payments').query(
@@ -160,7 +128,12 @@ export default function DailyCollectionReport() {
                 const borrower = borrowerMap.get(loan.borrowerId);
                 if (!borrower) continue;
 
-                const collector = collectorMap.get(borrower.collectorId);
+                const resolvedCollectorId = loan.collectorId || borrower.collectorId;
+                const collector = resolvedCollectorId ? collectorMap.get(resolvedCollectorId) : null;
+                
+                if (resolvedCollectorId && collector) {
+                    activeCollectorIds.add(resolvedCollectorId);
+                }
 
                 // Calculate cumulative balance using the grouped map
                 const totalPaid = paymentsByLoan.get(loan.id) || 0;
@@ -175,6 +148,7 @@ export default function DailyCollectionReport() {
                     borrowerName: borrower.fullName,
                     address: borrower.address || '',
                     collectorName: collector?.fullName || 'Unassigned',
+                    collectorId: resolvedCollectorId || 'unassigned',
                     loanAmount: loan.principalAmount,
                     totalLoan: loan.totalAmount,
                     target: loan.installmentAmount || 0,
@@ -189,6 +163,28 @@ export default function DailyCollectionReport() {
             rows.sort((a, b) => a.borrowerName.localeCompare(b.borrowerName));
 
             setReportRows(rows);
+
+            // Deduplicate by normalized name and filter junk for the derived collectors
+            const activeCollectorsRaw = allCollectorsRaw.filter(c => activeCollectorIds.has(c.id));
+            const seen = new Map<string, Collector>();
+            for (const c of activeCollectorsRaw) {
+                const name = (c.fullName || '').trim();
+                const normalized = name.toLowerCase().replace(/\s+/g, ' ');
+                if (!normalized ||
+                    normalized.includes('test') ||
+                    normalized.includes('fix') ||
+                    normalized.includes('diagnostic') ||
+                    normalized.includes('mock') ||
+                    /^collector\s*\d*$/.test(normalized) ||
+                    /^gera\s+gerald$/i.test(name)) {
+                    continue;
+                }
+                if (!seen.has(normalized) || (c.isActive && !seen.get(normalized)!.isActive)) {
+                    seen.set(normalized, c);
+                }
+            }
+            setCollectors(Array.from(seen.values()));
+            
         } catch (error) {
             console.error('Failed to load daily collection report:', error);
         } finally {
@@ -197,24 +193,24 @@ export default function DailyCollectionReport() {
     };
 
     useFocusEffect(useCallback(() => {
-        loadCollectors().then(() => loadData());
-    }, [selectedCollectorId, selectedDate]));
+        loadData();
+    }, [selectedDate]));
 
     // ─── Excel Export ───────────────────────────────────────────────────────────
     const exportToExcel = async () => {
         try {
             const BOM = '\uFEFF';
             const headers = ['Client Name', 'Address', 'Collector', 'Loan Amount', 'Total Loan (P+I)', 'Target', 'Total Payments', 'Total Balance', 'Actual'];
-            const totalLoanAmount = reportRows.reduce((sum, r) => sum + r.loanAmount, 0);
-            const totalPPlusI = reportRows.reduce((sum, r) => sum + r.totalLoan, 0);
-            const totalTarget = reportRows.reduce((sum, r) => sum + r.target, 0);
-            const totalPayments = reportRows.reduce((sum, r) => sum + r.totalPayments, 0);
-            const totalBalance = reportRows.reduce((sum, r) => sum + r.balance, 0);
-            const totalActual = reportRows.reduce((sum, r) => sum + r.actual, 0);
+            const totalLoanAmount = filteredRows.reduce((sum, r) => sum + r.loanAmount, 0);
+            const totalPPlusI = filteredRows.reduce((sum, r) => sum + r.totalLoan, 0);
+            const totalTarget = filteredRows.reduce((sum, r) => sum + r.target, 0);
+            const totalPayments = filteredRows.reduce((sum, r) => sum + r.totalPayments, 0);
+            const totalBalance = filteredRows.reduce((sum, r) => sum + r.balance, 0);
+            const totalActual = filteredRows.reduce((sum, r) => sum + r.actual, 0);
 
             const csvRows = [
                 headers.join(','),
-                ...reportRows.map(row => [
+                ...filteredRows.map(row => [
                     `"${row.borrowerName.replace(/"/g, '""')}"`,
                     `"${row.address.replace(/"/g, '""')}"`,
                     `"${row.collectorName.replace(/"/g, '""')}"`,
@@ -260,7 +256,7 @@ export default function DailyCollectionReport() {
             ? 'All Collectors'
             : collectors.find(c => c.id === selectedCollectorId)?.fullName ?? '';
 
-        const rowsHtml = reportRows.map((row, i) => `
+        const rowsHtml = filteredRows.map((row, i) => `
             <tr style="background:${i % 2 === 0 ? '#ffffff' : '#f9f9f9'}">
                 <td>${row.borrowerName}</td>
                 <td>${row.address}</td>
@@ -274,12 +270,12 @@ export default function DailyCollectionReport() {
             </tr>
         `).join('');
 
-        const totalLoanAmount = reportRows.reduce((s, r) => s + r.loanAmount, 0);
-        const totalPPlusI = reportRows.reduce((s, r) => s + r.totalLoan, 0);
-        const totalTarget = reportRows.reduce((s, r) => s + r.target, 0);
-        const totalPayments = reportRows.reduce((s, r) => s + r.totalPayments, 0);
-        const totalBalance = reportRows.reduce((s, r) => s + r.balance, 0);
-        const totalActual = reportRows.reduce((s, r) => s + r.actual, 0);
+        const totalLoanAmount = filteredRows.reduce((s, r) => s + r.loanAmount, 0);
+        const totalPPlusI = filteredRows.reduce((s, r) => s + r.totalLoan, 0);
+        const totalTarget = filteredRows.reduce((s, r) => s + r.target, 0);
+        const totalPayments = filteredRows.reduce((s, r) => s + r.totalPayments, 0);
+        const totalBalance = filteredRows.reduce((s, r) => s + r.balance, 0);
+        const totalActual = filteredRows.reduce((s, r) => s + r.actual, 0);
 
         const html = `<!DOCTYPE html>
 <html>
@@ -358,7 +354,7 @@ export default function DailyCollectionReport() {
     <tbody>
       ${rowsHtml}
       <tr class="totals-row">
-        <td colspan="3">TOTAL (${reportRows.length} clients)</td>
+        <td colspan="3">TOTAL (${filteredRows.length} clients)</td>
         <td class="num">${totalLoanAmount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
         <td class="num">${totalPPlusI.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
         <td class="num">${totalTarget.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</td>
