@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, FlatList, Pressable, ActivityIndicator } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { database } from '../../../src/database';
@@ -21,6 +21,45 @@ type EnrichedPayment = {
     loanNumber: string;
     borrowerId?: string;
 };
+
+const MemoizedPaymentItem = React.memo(({ item, onPressBorrower, onEdit, onDelete, onActionsVisibilityChange }: {
+    item: EnrichedPayment,
+    onPressBorrower: () => void,
+    onEdit: () => void,
+    onDelete: () => void,
+    onActionsVisibilityChange: (isVisible: boolean) => void
+}) => (
+    <SwipeableItem
+        onActionsVisibilityChange={onActionsVisibilityChange}
+        onEdit={onEdit}
+        onDelete={onDelete}
+    >
+        <View className="bg-white p-4 rounded-2xl mb-3 border border-gray-100 shadow-sm flex-row items-center">
+            <View className="w-12 h-12 rounded-full bg-green-50 items-center justify-center mr-4">
+                <MaterialIcons name="done" size={24} color="#388E3C" />
+            </View>
+            <View className="flex-1">
+                <Pressable onPress={onPressBorrower}>
+                    <Text className="text-base font-bold text-blue-700 underline">{item.borrowerName}</Text>
+                </Pressable>
+                <Text className="text-xs text-gray-700 mt-0.5">{item.loanNumber} • {formatDate(new Date(item.payment.paymentDate))}</Text>
+                {item.payment.receiptNumber ? (
+                    <Text className="text-[10px] font-bold text-gray-700 mt-1 uppercase tracking-widest">RCT: {item.payment.receiptNumber}</Text>
+                ) : null}
+            </View>
+            <View className="items-end pl-2">
+                <Text className="text-sm font-extrabold text-[#388E3C]">{formatPHP(item.payment.amount)}</Text>
+                <Pressable
+                    testID={`edit-payment-${item.payment.id}`}
+                    onPress={onEdit}
+                    className="mt-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100"
+                >
+                    <Text className="text-[10px] font-black text-blue-700 uppercase">Edit</Text>
+                </Pressable>
+            </View>
+        </View>
+    </SwipeableItem>
+));
 
 export default function PaymentsListScreen() {
     const router = useRouter();
@@ -74,7 +113,7 @@ export default function PaymentsListScreen() {
         }, [])
     );
 
-    const filteredPayments = payments.filter(p => {
+    const filteredPayments = useMemo(() => payments.filter(p => {
         const query = searchQuery.toLowerCase();
         if (!query) return true;
         
@@ -83,7 +122,7 @@ export default function PaymentsListScreen() {
         const loanMatch = p.loanNumber ? String(p.loanNumber).toLowerCase().includes(query) : false;
         
         return receiptMatch || borrowerMatch || loanMatch;
-    });
+    }), [payments, searchQuery]);
 
     const handleDelete = async () => {
         if (!selectedPayment) return;
@@ -100,43 +139,22 @@ export default function PaymentsListScreen() {
         }
     };
 
-    const renderItem = ({ item }: { item: EnrichedPayment }) => (
-        <SwipeableItem
-            onActionsVisibilityChange={(isVisible) => {
-                setVisibleSwipeActionId((currentId) => isVisible ? item.payment.id : currentId === item.payment.id ? null : currentId);
+    const renderItem = useCallback(({ item }: { item: EnrichedPayment }) => (
+        <MemoizedPaymentItem
+            item={item}
+            onPressBorrower={() => {
+                if (item.borrowerId) router.push(`/(admin)/borrowers/${item.borrowerId}`);
             }}
             onEdit={() => router.push(`/(admin)/payments/new?paymentId=${item.payment.id}`)}
             onDelete={() => {
                 setSelectedPayment(item);
                 setIsConfirmDeleteVisible(true);
             }}
-        >
-            <View className="bg-white p-4 rounded-2xl mb-3 border border-gray-100 shadow-sm flex-row items-center">
-                <View className="w-12 h-12 rounded-full bg-green-50 items-center justify-center mr-4">
-                    <MaterialIcons name="done" size={24} color="#388E3C" />
-                </View>
-                <View className="flex-1">
-                    <Pressable onPress={() => item.borrowerId && router.push(`/(admin)/borrowers/${item.borrowerId}`)}>
-                        <Text className="text-base font-bold text-blue-700 underline">{item.borrowerName}</Text>
-                    </Pressable>
-                    <Text className="text-xs text-gray-700 mt-0.5">{item.loanNumber} • {formatDate(new Date(item.payment.paymentDate))}</Text>
-                    {item.payment.receiptNumber ? (
-                        <Text className="text-[10px] font-bold text-gray-700 mt-1 uppercase tracking-widest">RCT: {item.payment.receiptNumber}</Text>
-                    ) : null}
-                </View>
-                <View className="items-end pl-2">
-                    <Text className="text-sm font-extrabold text-[#388E3C]">{formatPHP(item.payment.amount)}</Text>
-                    <Pressable
-                        testID={`edit-payment-${item.payment.id}`}
-                        onPress={() => router.push(`/(admin)/payments/new?paymentId=${item.payment.id}`)}
-                        className="mt-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100"
-                    >
-                        <Text className="text-[10px] font-black text-blue-700 uppercase">Edit</Text>
-                    </Pressable>
-                </View>
-            </View>
-        </SwipeableItem>
-    );
+            onActionsVisibilityChange={(isVisible) => {
+                setVisibleSwipeActionId((currentId) => isVisible ? item.payment.id : currentId === item.payment.id ? null : currentId);
+            }}
+        />
+    ), [router]);
 
     return (
         <View className="flex-1 bg-gray-50 p-4">

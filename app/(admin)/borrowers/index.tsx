@@ -173,6 +173,57 @@ export default function BorrowersListScreen() {
                 activeLoanBalanceMap[l.borrowerId] = (activeLoanBalanceMap[l.borrowerId] || 0) + bal;
                 
                 const netRel = l.principalAmount - (l.deductedAmount || 0) - (l.serviceChargeAmount || 0);
+                activeLoanNetReleaseMap[l.borrowerId] = (activeLoanNetReleaseMap[l.borrowerId] || 0) + netRel;
+            });
+
+            setBorrowerFrequencies(frequencyMap);
+            setBorrowerBalances(activeLoanBalanceMap);
+            setBorrowerNetReleases(activeLoanNetReleaseMap);
+            setBorrowers(fetchedBorrowers);
+            setCollectors(collectorMap);
+        } catch (error) {
+            console.error('Failed to load borrowers:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            loadData();
+        }, [])
+    );
+
+    const uniqueGroups = Array.from(new Set(borrowers.map(b => b.group).filter(Boolean))).sort();
+
+    const filteredBorrowers = useMemo(() => borrowers.filter(b => {
+        const freq = borrowerFrequencies[b.id] || '';
+        const matchesSearch = b.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (b.decryptedPhone && b.decryptedPhone.includes(searchQuery)) ||
+            (b.decryptedAddress && b.decryptedAddress.toLowerCase().includes(searchQuery.toLowerCase()));
+        
+        const matchesFrequency = frequencyFilter === 'all' || freq.toLowerCase() === frequencyFilter;
+        const matchesGroup = groupFilter === 'all' || b.group === groupFilter;
+
+        let matchesDate = true;
+        if (dateFilter !== 'all') {
+            const createdAtDate = new Date(b.createdAt);
+            if (dateFilter === 'today') {
+                matchesDate = isAfter(createdAtDate, startOfToday());
+            } else if (dateFilter === 'this_week') {
+                matchesDate = isAfter(createdAtDate, startOfWeek(new Date(), { weekStartsOn: 1 })); // Monday
+            } else if (dateFilter === 'this_month') {
+                matchesDate = isAfter(createdAtDate, startOfMonth(new Date()));
+            }
+        }
+
+        return matchesSearch && matchesFrequency && matchesGroup && matchesDate;
+    }), [borrowers, borrowerFrequencies, searchQuery, frequencyFilter, groupFilter, dateFilter]);
+
+    const handleDelete = async () => {
+        if (!selectedBorrower) return;
+        try {
+            await BaseModelService.cascadeDeleteBorrower(selectedBorrower);
             loadData();
             setIsConfirmDeleteVisible(false);
         } catch (error: any) {

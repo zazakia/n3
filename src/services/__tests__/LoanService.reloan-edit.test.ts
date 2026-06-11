@@ -39,7 +39,10 @@ describe('LoanService Reloan Edit Edge Case', () => {
                 totalAmount: 5250,
                 installmentAmount: 1750,
                 firstPaymentDate: new Date(),
-                maturityDate: new Date()
+                maturityDate: new Date(),
+                numPayments: 0,
+                totalInterest: 0,
+                totalFees: 0
             },
             collectorId: 'collector-id',
             encodedBy: 'admin',
@@ -80,7 +83,10 @@ describe('LoanService Reloan Edit Edge Case', () => {
                 totalAmount: 5250,
                 installmentAmount: 1750,
                 firstPaymentDate: new Date(),
-                maturityDate: new Date()
+                maturityDate: new Date(),
+                numPayments: 0,
+                totalInterest: 0,
+                totalFees: 0
             },
             collectorId: 'collector-id',
             encodedBy: 'admin',

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, FlatList, Pressable, ActivityIndicator, ScrollView, Modal } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { database } from '../../../src/database';
@@ -177,6 +177,8 @@ export default function LoansListScreen() {
     }), [loans, searchQuery, filterStatus]);
 
     const handleDelete = async () => {
+        try {
+            await BaseModelService.softDelete(selectedLoan!);
             setIsConfirmDeleteVisible(false);
             loadData();
             if (Platform.OS === 'web') {
@@ -230,87 +232,20 @@ export default function LoansListScreen() {
         }
     };
 
-    const renderItem = ({ item }: { item: Loan & { borrowerName: string, balance: number } }) => (
-        <SwipeableItem
-            onActionsVisibilityChange={(isVisible) => {
-                setVisibleSwipeActionId((currentId) => isVisible ? item.id : currentId === item.id ? null : currentId);
-            }}
+    const renderItem = useCallback(({ item }: { item: Loan & { borrowerName: string, balance: number } }) => (
+        <MemoizedLoanItem
+            item={item}
+            onPress={() => router.push(`/(admin)/loans/${item.id}`)}
+            onPressBorrower={() => router.push(`/(admin)/borrowers/${item.borrowerId}`)}
             onDelete={() => {
                 setSelectedLoan(item);
                 setIsConfirmDeleteVisible(true);
             }}
-        >
-            <Pressable
-                className="bg-white p-4 rounded-2xl mb-3 border border-gray-100 shadow-sm active:opacity-70"
-                onPress={() => router.push(`/(admin)/loans/${item.id}`)}
-            >
-                <View className="flex-row justify-between items-start mb-2">
-                    <View>
-                        <Pressable onPress={() => router.push(`/(admin)/borrowers/${item.borrowerId}`)}>
-                            <Text className="text-base font-bold text-blue-700 underline">{item.borrowerName}</Text>
-                        </Pressable>
-                        <View className="flex-row items-center mt-0.5">
-                            <Text className="text-xs font-bold text-gray-700">{item.loanNumber}</Text>
-                            {item.isReloan && (
-                                <View className="ml-2 px-1.5 py-0.5 bg-blue-100 rounded-md">
-                                    <Text className="text-[8px] font-black uppercase text-blue-700">Renewal</Text>
-                                </View>
-                            )}
-                        </View>
-                        {!!item.releaseDate && (
-                            <View className="flex-row items-center mt-1">
-                                <MaterialIcons name="event" size={12} color="#9CA3AF" />
-                                <Text className="text-[10px] text-gray-600 ml-1 font-medium">
-                                    Released: {format(new Date(item.releaseDate as any), 'MMM dd, yyyy')}
-                                </Text>
-                            </View>
-                        )}
-                    </View>
-                    <View className={`px-2 py-1 rounded ${item.status === 'active' ? 'bg-blue-50' :
-                        item.status === 'paid' ? 'bg-green-50' :
-                            item.status === 'defaulted' ? 'bg-red-50' : 'bg-gray-100'
-                        }`}>
-                        <Text className={`text-[10px] font-black uppercase tracking-wider ${item.status === 'active' ? 'text-blue-800' :
-                            item.status === 'paid' ? 'text-green-800' :
-                                item.status === 'defaulted' ? 'text-red-800' : 'text-gray-800'
-                            }`}>{item.status}</Text>
-                    </View>
-                </View>
-
-                <View className="h-px bg-gray-50 my-2" />
-
-                <View className="flex-row justify-between items-center">
-                    <View className="flex-1">
-                        <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Principal</Text>
-                        <Text className="text-sm font-extrabold text-primary mt-0.5">{formatPHP(item.principalAmount)}</Text>
-                    </View>
-                    <View className="flex-1 items-center">
-                        <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Insurance</Text>
-                        <Text className="text-sm font-bold text-orange-600 mt-0.5">{formatPHP(item.insuranceAmount || 0)}</Text>
-                    </View>
-                    <View className="flex-1 items-end">
-                        <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Net Rel.</Text>
-                        <Text className="text-sm font-extrabold text-green-700 mt-0.5">{formatPHP(item.principalAmount - (item.deductedAmount || 0) - (item.serviceChargeAmount || 0))}</Text>
-                    </View>
-                </View>
-                
-                <View className="flex-row justify-between items-center mt-2">
-                    <View className="flex-1">
-                        <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Total Amnt</Text>
-                        <Text className="text-sm font-extrabold text-gray-900 mt-0.5">{formatPHP(item.totalAmount)}</Text>
-                    </View>
-                    <View className="flex-1 items-center">
-                        <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Interest</Text>
-                        <Text className="text-sm font-extrabold text-blue-700 mt-0.5">{formatPHP(item.interestAmount > 0 ? item.interestAmount : item.principalAmount * (item.interestRate / 100))}</Text>
-                    </View>
-                    <View className="flex-1 items-end">
-                        <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Balance</Text>
-                        <Text className="text-sm font-extrabold text-[#D32F2F] mt-0.5">{formatPHP(item.balance)}</Text>
-                    </View>
-                </View>
-            </Pressable>
-        </SwipeableItem>
-    );
+            onActionsVisibilityChange={(isVisible) => {
+                setVisibleSwipeActionId((currentId) => isVisible ? item.id : currentId === item.id ? null : currentId);
+            }}
+        />
+    ), [router]);
 
     return (
         <View className="flex-1 bg-gray-50 p-4">
