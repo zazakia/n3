@@ -23,6 +23,89 @@ const PAPER_SIZE_OPTIONS: { label: string; value: VoucherPaperSize; description:
     { label: 'Legal', value: 'legal', description: '8.5 x 14 in' },
 ];
 
+const MemoizedLoanItem = React.memo(({ item, onPress, onPressBorrower, onDelete, onActionsVisibilityChange }: { 
+    item: Loan & { borrowerName: string, balance: number }, 
+    onPress: () => void, 
+    onPressBorrower: () => void, 
+    onDelete: () => void, 
+    onActionsVisibilityChange: (isVisible: boolean) => void 
+}) => (
+    <SwipeableItem
+        onActionsVisibilityChange={onActionsVisibilityChange}
+        onDelete={onDelete}
+    >
+        <Pressable
+            className="bg-white p-4 rounded-2xl mb-3 border border-gray-100 shadow-sm active:opacity-70"
+            onPress={onPress}
+        >
+            <View className="flex-row justify-between items-start mb-2">
+                <View>
+                    <Pressable onPress={onPressBorrower}>
+                        <Text className="text-base font-bold text-blue-700 underline">{item.borrowerName}</Text>
+                    </Pressable>
+                    <View className="flex-row items-center mt-0.5">
+                        <Text className="text-xs font-bold text-gray-700">{item.loanNumber}</Text>
+                        {item.isReloan && (
+                            <View className="ml-2 px-1.5 py-0.5 bg-blue-100 rounded-md">
+                                <Text className="text-[8px] font-black uppercase text-blue-700">Renewal</Text>
+                            </View>
+                        )}
+                    </View>
+                    {!!item.releaseDate && (
+                        <View className="flex-row items-center mt-1">
+                            <MaterialIcons name="event" size={12} color="#9CA3AF" />
+                            <Text className="text-[10px] text-gray-600 ml-1 font-medium">
+                                Released: {format(new Date(item.releaseDate as any), 'MMM dd, yyyy')}
+                            </Text>
+                        </View>
+                    )}
+                </View>
+                <View className={`px-2 py-1 rounded ${item.status === 'active' ? 'bg-blue-50' :
+                    item.status === 'paid' ? 'bg-green-50' :
+                        item.status === 'defaulted' ? 'bg-red-50' : 'bg-gray-100'
+                    }`}>
+                    <Text className={`text-[10px] font-black uppercase tracking-wider ${item.status === 'active' ? 'text-blue-800' :
+                        item.status === 'paid' ? 'text-green-800' :
+                            item.status === 'defaulted' ? 'text-red-800' : 'text-gray-800'
+                        }`}>{item.status}</Text>
+                </View>
+            </View>
+
+            <View className="h-px bg-gray-50 my-2" />
+
+            <View className="flex-row justify-between items-center">
+                <View className="flex-1">
+                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Principal</Text>
+                    <Text className="text-sm font-extrabold text-primary mt-0.5">{formatPHP(item.principalAmount)}</Text>
+                </View>
+                <View className="flex-1 items-center">
+                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Insurance</Text>
+                    <Text className="text-sm font-bold text-orange-600 mt-0.5">{formatPHP(item.insuranceAmount || 0)}</Text>
+                </View>
+                <View className="flex-1 items-end">
+                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Net Rel.</Text>
+                    <Text className="text-sm font-extrabold text-green-700 mt-0.5">{formatPHP(item.principalAmount - (item.deductedAmount || 0) - (item.serviceChargeAmount || 0))}</Text>
+                </View>
+            </View>
+            
+            <View className="flex-row justify-between items-center mt-2">
+                <View className="flex-1">
+                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Total Amnt</Text>
+                    <Text className="text-sm font-extrabold text-gray-900 mt-0.5">{formatPHP(item.totalAmount)}</Text>
+                </View>
+                <View className="flex-1 items-center">
+                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Interest</Text>
+                    <Text className="text-sm font-extrabold text-blue-700 mt-0.5">{formatPHP(item.interestAmount > 0 ? item.interestAmount : item.principalAmount * (item.interestRate / 100))}</Text>
+                </View>
+                <View className="flex-1 items-end">
+                    <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Balance</Text>
+                    <Text className="text-sm font-extrabold text-[#D32F2F] mt-0.5">{formatPHP(item.balance)}</Text>
+                </View>
+            </View>
+        </Pressable>
+    </SwipeableItem>
+));
+
 export default function LoansListScreen() {
     const router = useRouter();
     const [loans, setLoans] = useState<(Loan & { borrowerName: string, balance: number })[]>([]);
@@ -86,17 +169,14 @@ export default function LoansListScreen() {
         }, [])
     );
 
-    const filteredLoans = loans.filter(l => {
+    const filteredLoans = useMemo(() => loans.filter(l => {
         const matchesSearch = l.loanNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
             l.borrowerName.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesStatus = filterStatus === 'all' || l.status === filterStatus;
         return matchesSearch && matchesStatus;
-    });
+    }), [loans, searchQuery, filterStatus]);
 
     const handleDelete = async () => {
-        if (!selectedLoan) return;
-        try {
-            await BaseModelService.cascadeDeleteLoan(selectedLoan);
             setIsConfirmDeleteVisible(false);
             loadData();
             if (Platform.OS === 'web') {

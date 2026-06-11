@@ -56,8 +56,8 @@ const REMOTE_TABLE_MAP: Record<string, string> = {
 const MIN_SYNC_INTERVAL = 60000; // 60 seconds cooldown
 const SYNC_SESSION_TIMEOUT_MS = 8000;
 const SERVER_TIME_TIMEOUT_MS = 5000;
-const TABLE_PAGE_TIMEOUT_MS = 10000;
-const UPSERT_TIMEOUT_MS = 10000;
+const TABLE_PAGE_TIMEOUT_MS = 30000;
+const UPSERT_TIMEOUT_MS = 30000;
 
 const withSyncTimeout = async <T,>(
     promise: PromiseLike<T>,
@@ -649,13 +649,17 @@ export class SyncService {
                         .map(record => this.sanitizeRecord(record, localTableName));
 
                     if (toUpsert.length > 0) {
-                        const { error } = await withSyncTimeout(
-                            this.supabase.from(remoteName).upsert(toUpsert),
-                            UPSERT_TIMEOUT_MS,
-                            `Push ${remoteName} upserts`
-                        );
-                        if (error) {
-                            throw new Error(error.message);
+                        const batchSize = 500;
+                        for (let j = 0; j < toUpsert.length; j += batchSize) {
+                            const chunk = toUpsert.slice(j, j + batchSize);
+                            const { error } = await withSyncTimeout(
+                                this.supabase.from(remoteName).upsert(chunk),
+                                UPSERT_TIMEOUT_MS,
+                                `Push ${remoteName} upserts batch ${Math.floor(j / batchSize) + 1}`
+                            );
+                            if (error) {
+                                throw new Error(error.message);
+                            }
                         }
                     }
 
@@ -668,13 +672,17 @@ export class SyncService {
                             deleted_at: serverSafeTime,
                             updated_at: serverSafeTime, // Update updated_at so pull queries see the change
                         }));
-                        const { error } = await withSyncTimeout(
-                            this.supabase.from(remoteName).upsert(deletePayload),
-                            UPSERT_TIMEOUT_MS,
-                            `Push ${remoteName} deletes`
-                        );
-                        if (error) {
-                            throw new Error(error.message);
+                        const batchSize = 500;
+                        for (let j = 0; j < deletePayload.length; j += batchSize) {
+                            const chunk = deletePayload.slice(j, j + batchSize);
+                            const { error } = await withSyncTimeout(
+                                this.supabase.from(remoteName).upsert(chunk),
+                                UPSERT_TIMEOUT_MS,
+                                `Push ${remoteName} deletes batch ${Math.floor(j / batchSize) + 1}`
+                            );
+                            if (error) {
+                                throw new Error(error.message);
+                            }
                         }
                     }
 

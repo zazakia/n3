@@ -83,6 +83,7 @@ describe('Common UI Components', () => {
 
   describe('SearchBar', () => {
     it('renders with placeholder and handles text change', () => {
+      jest.useFakeTimers();
       const onChangeTextMock = jest.fn();
       const { getByPlaceholderText } = render(
         <SearchBar value="" onChangeText={onChangeTextMock} placeholder="Find..." />
@@ -90,7 +91,9 @@ describe('Common UI Components', () => {
       const input = getByPlaceholderText('Find...');
       expect(input).toBeTruthy();
       fireEvent.changeText(input, 'test query');
+      jest.advanceTimersByTime(300);
       expect(onChangeTextMock).toHaveBeenCalledWith('test query');
+      jest.useRealTimers();
     });
   });
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, FlatList, Pressable, ActivityIndicator, ScrollView, Alert, Platform } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { database } from '../../../src/database';
@@ -17,6 +17,90 @@ import ActionSheet from '../../../src/components/ActionSheet';
 import ConfirmDialog from '../../../src/components/ConfirmDialog';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { format, isAfter, startOfToday, startOfWeek, startOfMonth } from 'date-fns';
+
+const MemoizedBorrowerItem = React.memo(({ item, borrowerBalances, borrowerFrequencies, borrowerNetReleases, onPress, onLongPress, onActionsVisibilityChange, onEdit, onDelete }: {
+    item: Borrower,
+    borrowerBalances: Record<string, number>,
+    borrowerFrequencies: Record<string, string>,
+    borrowerNetReleases: Record<string, number>,
+    onPress: () => void,
+    onLongPress: () => void,
+    onActionsVisibilityChange: (isVisible: boolean) => void,
+    onEdit: () => void,
+    onDelete: () => void
+}) => (
+    <SwipeableItem
+        onActionsVisibilityChange={onActionsVisibilityChange}
+        onEdit={onEdit}
+        onDelete={onDelete}
+    >
+        <Pressable
+            testID={`borrower-item-${item.id}`}
+            data-testid={`borrower-item-${item.id}`}
+            className="bg-white p-4 border-b border-gray-100 flex-row items-center active:opacity-70"
+            onPress={onPress}
+            onLongPress={onLongPress}
+        >
+            <View className="w-12 h-12 rounded-full bg-blue-50 items-center justify-center mr-3">
+                <Text className="text-blue-700 font-bold text-lg">{item.fullName.charAt(0).toUpperCase()}</Text>
+            </View>
+            <View className="flex-1" style={{ minWidth: 0 }}>
+                <View className="flex-row items-start" style={{ minWidth: 0 }}>
+                    <Text className="flex-1 text-base font-bold text-gray-900 leading-5" numberOfLines={2} ellipsizeMode="tail">
+                        {item.fullName}
+                    </Text>
+                    {!!borrowerFrequencies[item.id] && (
+                        <View className="bg-purple-50 px-2 py-1 rounded border border-purple-100 ml-2 max-w-[92px]">
+                            <Text className="text-[10px] text-purple-700 font-bold uppercase" numberOfLines={1} ellipsizeMode="tail">
+                                {borrowerFrequencies[item.id].replace('_', '-')}
+                            </Text>
+                        </View>
+                    )}
+                </View>
+                <View className="flex-row items-center mt-0.5">
+                    <MaterialIcons name="calendar-today" size={12} color="#9CA3AF" />
+                    <Text className="text-[10px] text-gray-700 ml-1" numberOfLines={1}>
+                        Added: {format(item.createdAt, 'MMM dd, yyyy')}
+                    </Text>
+                </View>
+
+                {borrowerBalances[item.id] !== undefined && (
+                    <View className="flex-row items-center mt-1">
+                        <MaterialIcons name="account-balance-wallet" size={12} color={borrowerBalances[item.id] > 0 ? "#D32F2F" : "#388E3C"} />
+                        <Text className={`text-xs font-bold ml-1 ${borrowerBalances[item.id] > 0 ? "text-[#D32F2F]" : "text-[#388E3C]"}`}>
+                            Balance: {formatPHP(borrowerBalances[item.id])}
+                        </Text>
+                    </View>
+                )}
+                {borrowerNetReleases[item.id] !== undefined && borrowerNetReleases[item.id] > 0 && (
+                    <View className="flex-row items-center mt-1">
+                        <MaterialIcons name="payments" size={12} color="#047857" />
+                        <Text className="text-xs font-bold ml-1 text-emerald-700">
+                            Net Release: {formatPHP(borrowerNetReleases[item.id])}
+                        </Text>
+                    </View>
+                )}
+                {!!item.decryptedPhone && (
+                    <View className="flex-row items-center mt-1">
+                        <MaterialIcons name="phone" size={12} color="#4B5563" />
+                        <Text className="text-xs text-gray-700 ml-1" numberOfLines={1} ellipsizeMode="tail">
+                            {item.decryptedPhone}
+                        </Text>
+                    </View>
+                )}
+                {!!item.decryptedAddress && (
+                    <View className="flex-row items-center mt-1">
+                        <MaterialIcons name="location-on" size={12} color="#9CA3AF" />
+                        <Text className="flex-1 text-xs text-gray-700 ml-1" numberOfLines={1} ellipsizeMode="tail">
+                            {item.decryptedAddress}
+                        </Text>
+                    </View>
+                )}
+            </View>
+            <MaterialIcons name="chevron-right" size={24} color="#D1D5DB" className="ml-2" />
+        </Pressable>
+    </SwipeableItem>
+));
 
 export default function BorrowersListScreen() {
     const router = useRouter();
@@ -89,57 +173,6 @@ export default function BorrowersListScreen() {
                 activeLoanBalanceMap[l.borrowerId] = (activeLoanBalanceMap[l.borrowerId] || 0) + bal;
                 
                 const netRel = l.principalAmount - (l.deductedAmount || 0) - (l.serviceChargeAmount || 0);
-                activeLoanNetReleaseMap[l.borrowerId] = (activeLoanNetReleaseMap[l.borrowerId] || 0) + netRel;
-            });
-
-            setBorrowerFrequencies(frequencyMap);
-            setBorrowerBalances(activeLoanBalanceMap);
-            setBorrowerNetReleases(activeLoanNetReleaseMap);
-            setBorrowers(fetchedBorrowers);
-            setCollectors(collectorMap);
-        } catch (error) {
-            console.error('Failed to load borrowers:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useFocusEffect(
-        useCallback(() => {
-            loadData();
-        }, [])
-    );
-
-    const uniqueGroups = Array.from(new Set(borrowers.map(b => b.group).filter(Boolean))).sort();
-
-    const filteredBorrowers = borrowers.filter(b => {
-        const freq = borrowerFrequencies[b.id] || '';
-        const matchesSearch = b.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (b.decryptedPhone && b.decryptedPhone.includes(searchQuery)) ||
-            (b.decryptedAddress && b.decryptedAddress.toLowerCase().includes(searchQuery.toLowerCase()));
-        
-        const matchesFrequency = frequencyFilter === 'all' || freq.toLowerCase() === frequencyFilter;
-        const matchesGroup = groupFilter === 'all' || b.group === groupFilter;
-
-        let matchesDate = true;
-        if (dateFilter !== 'all') {
-            const createdAtDate = new Date(b.createdAt);
-            if (dateFilter === 'today') {
-                matchesDate = isAfter(createdAtDate, startOfToday());
-            } else if (dateFilter === 'this_week') {
-                matchesDate = isAfter(createdAtDate, startOfWeek(new Date(), { weekStartsOn: 1 })); // Monday
-            } else if (dateFilter === 'this_month') {
-                matchesDate = isAfter(createdAtDate, startOfMonth(new Date()));
-            }
-        }
-
-        return matchesSearch && matchesFrequency && matchesGroup && matchesDate;
-    });
-
-    const handleDelete = async () => {
-        if (!selectedBorrower) return;
-        try {
-            await BaseModelService.cascadeDeleteBorrower(selectedBorrower);
             loadData();
             setIsConfirmDeleteVisible(false);
         } catch (error: any) {

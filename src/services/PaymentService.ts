@@ -421,7 +421,7 @@ export class PaymentService {
         schedules: PaymentSchedule[],
         options: { paymentId?: string; paymentDate?: number; performedBy?: string; logParams?: LogParams[] }
     ): Promise<void> {
-        const perScheduleDeposit = schedules.length > 0 ? (loan.depositAmount || 0) / schedules.length : 0;
+        const perScheduleDeposit = loan.depositAmount || 0;
         if (perScheduleDeposit <= PESO_TOLERANCE) return;
 
         const paidSchedules = schedules.filter(schedule => schedule.status === 'paid');
