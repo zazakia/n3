@@ -8,6 +8,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AccountingBasisToggle } from '../../../src/components/AccountingBasisToggle';
 import { useAppStore } from '../../../src/store/useAppStore';
+import { PrintButton } from '../../../src/components/PrintButton';
+import { PdfGenerator } from '../../../src/services/PdfGenerator';
 
 export default function IncomeStatementScreen() {
     const [loading, setLoading] = useState(true);
@@ -63,6 +65,19 @@ export default function IncomeStatementScreen() {
             <View className="p-6 pb-3 bg-gray-50 border-b border-gray-100">
                 <View className="flex-row items-center justify-between mb-4">
                     <Text className="text-2xl font-black text-gray-900">Income Statement</Text>
+                    {data && (
+                        <PrintButton
+                            onPrint={async () => {
+                                await PdfGenerator.generateIncomeStatementPdf(
+                                    'Income Statement',
+                                    `${format(startDate, 'MMM d')} — ${format(endDate, 'MMM d, yyyy')}`,
+                                    data,
+                                    isCashBasis
+                                );
+                            }}
+                            compact
+                        />
+                    )}
                 </View>
 
                 {/* Accounting Basis Toggle */}

@@ -5,6 +5,8 @@ import { MfiKpiService } from '../../../src/services/MfiKpiService';
 import { formatPHP } from '../../../src/utils/currency';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { PrintButton } from '../../../src/components/PrintButton';
+import { PdfGenerator } from '../../../src/services/PdfGenerator';
 
 export default function RenewalReportScreen() {
     const [loading, setLoading] = useState(true);
@@ -50,9 +52,35 @@ export default function RenewalReportScreen() {
                             Loan Renewals & Growth Analysis
                         </Text>
                     </View>
-                    <Pressable onPress={onRefresh} className="bg-white p-2 rounded-full shadow-sm border border-gray-100">
-                        <MaterialIcons name="refresh" size={20} color="#4F46E5" />
-                    </Pressable>
+                    <View className="flex-row items-center space-x-2">
+                        {data && (
+                            <PrintButton
+                                onPrint={async () => {
+                                    await PdfGenerator.generateGenericReport({
+                                        title: 'Borrower Retention Report',
+                                        subtitle: 'Loan Renewals & Growth Analysis',
+                                        headers: ['Month', 'New Volume', 'Renewal Volume', 'Total Volume', 'Renewal %'],
+                                        data: data.trend.map((item: any) => [
+                                            item.month,
+                                            formatPHP(item.new),
+                                            formatPHP(item.renewed),
+                                            formatPHP(item.total),
+                                            `${((item.renewed / (item.total || 1)) * 100).toFixed(0)}%`
+                                        ]),
+                                        summaryBoxes: [
+                                            { label: 'Retention Rate', value: `${data.count.rate.toFixed(1)}%` },
+                                            { label: 'New Borrowers', value: data.count.new.toString() },
+                                            { label: 'Renewed', value: data.count.renewed.toString() }
+                                        ]
+                                    });
+                                }}
+                                compact
+                            />
+                        )}
+                        <Pressable onPress={onRefresh} className="bg-white p-2 rounded-full shadow-sm border border-gray-100 ml-2">
+                            <MaterialIcons name="refresh" size={20} color="#4F46E5" />
+                        </Pressable>
+                    </View>
                 </View>
             </View>
 

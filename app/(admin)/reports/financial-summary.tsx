@@ -13,6 +13,9 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { ReportInfoModal, InfoModalContent, InfoIcon } from '../../../src/components/ReportInfoModal';
 import { AccountingBasisToggle } from '../../../src/components/AccountingBasisToggle';
 import { useAppStore } from '../../../src/store/useAppStore';
+import { MfiKpiService } from '../../../src/services/MfiKpiService';
+import { PrintButton } from '../../../src/components/PrintButton';
+import { PdfGenerator } from '../../../src/services/PdfGenerator';
 
 const formatPHP = (amount: number) => {
     return new Intl.NumberFormat('en-PH', {
@@ -32,6 +35,9 @@ export default function FinancialSummaryScreen() {
         inTransit: 0,
         totalRemitted: 0,
         realizedProfit: 0,
+        oss: 0,
+        loanLossProvisions: 0,
+        cycleRecoveryRate: [] as Array<{cycle: string, recoveryRate: number, disbursed: number, collected: number}>
     });
     const [selectedMonth, setSelectedMonth] = useState(new Date());
     const [infoContent, setInfoContent] = useState<InfoModalContent | null>(null);
@@ -76,15 +82,20 @@ export default function FinancialSummaryScreen() {
                 inTransit += await CashService.getCollectorBalance(u.id);
             }
 
+            const incomeStmt = await MfiKpiService.getIncomeStatement(start, end, accountingBasis);
+
             setSummary({
-                totalIncome: grossCollections,
+                totalIncome: incomeStmt ? incomeStmt.totalGrossIncome : grossCollections,
                 totalRemitted,
-                totalExpenses,
+                totalExpenses: incomeStmt ? incomeStmt.operatingExpenses : totalExpenses,
                 inTransit,
-                netProfit: grossCollections - totalExpenses,
+                netProfit: incomeStmt ? incomeStmt.netIncome : grossCollections - totalExpenses,
                 realizedProfit: totalRemitted - totalExpenses,
                 expenseCount: expenses.length,
                 paymentCount: payments.length,
+                oss: incomeStmt ? incomeStmt.oss : 0,
+                loanLossProvisions: incomeStmt ? incomeStmt.loanLossProvisions : 0,
+                cycleRecoveryRate: incomeStmt ? incomeStmt.cycleRecoveryRate : []
             });
         } catch (error) {
             console.error('Failed to load financial summary:', error);
@@ -110,6 +121,29 @@ export default function FinancialSummaryScreen() {
                 title: 'Financial Summary',
                 headerTransparent: true,
                 headerTintColor: '#FFF',
+                headerRight: () => (
+                    <PrintButton
+                        onPrint={async () => {
+                            await PdfGenerator.generateGenericReport({
+                                title: 'Financial Summary',
+                                subtitle: `Reporting Period: ${format(selectedMonth, 'MMMM yyyy')} (${isCashBasis ? 'Cash Basis' : 'Accrual Basis'})`,
+                                headers: ['Metric', 'Value'],
+                                data: [
+                                    ['Total Income', formatPHP(summary.totalIncome)],
+                                    ['Operating Expenses', formatPHP(summary.totalExpenses)],
+                                    ['Loan Loss Provisions', formatPHP(summary.loanLossProvisions)],
+                                    ['Net Monthly Profit', formatPHP(summary.netProfit)],
+                                    ['Realized Profit', formatPHP(summary.realizedProfit)],
+                                    ['In Transit (Collectors)', formatPHP(summary.inTransit)],
+                                    ['Total Remitted', formatPHP(summary.totalRemitted)],
+                                    ['Operational Self-Sufficiency', `${(summary.oss * 100).toFixed(1)}%`]
+                                ],
+                                summaryBoxes: []
+                            });
+                        }}
+                        compact
+                    />
+                )
             }} />
 
             <View className="bg-slate-900 pt-24 pb-12 px-6 rounded-b-[40px] shadow-2xl">
@@ -170,9 +204,29 @@ export default function FinancialSummaryScreen() {
                             </Text>
                         </View>
                     </View>
-                    <Text className={`text-4xl font-black mt-3 ${summary.netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                        {formatPHP(summary.netProfit)}
-                    </Text>
+
+                    
+                    <View className="flex-row items-baseline mt-3 justify-between">
+                        <Text className={`text-4xl font-black ${summary.netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {formatPHP(summary.netProfit)}
+                        </Text>
+                        <View className="items-end bg-slate-800 px-4 py-2 rounded-2xl">
+                            <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">OSS</Text>
+                            <Text className={`text-xl font-black ${summary.oss >= 100 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                {summary.oss.toFixed(1)}%
+                            </Text>
+                        </View>
+                    </View>
+                    
+                    {!isCashBasis && summary.loanLossProvisions > 0 && (
+                        <View className="mt-4 pt-4 border-t border-white/10 flex-row justify-between items-center">
+                            <View className="flex-row items-center">
+                                <MaterialIcons name="security" size={14} color="#94A3B8" style={{ marginRight: 6 }} />
+                                <Text className="text-slate-400 text-xs font-medium">Loan Loss Provision Deduction</Text>
+                            </View>
+                            <Text className="text-rose-400 font-bold text-sm">-{formatPHP(summary.loanLossProvisions)}</Text>
+                        </View>
+                    )}
                 </View>
             </View>
 
@@ -301,6 +355,38 @@ export default function FinancialSummaryScreen() {
                         </View>
                     </View>
                 </View>
+
+                {/* Cycle Recovery Rate Chart */}
+                {summary.cycleRecoveryRate && summary.cycleRecoveryRate.length > 0 && (
+                    <View className="bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 mb-6">
+                        <View className="mb-4">
+                            <Text className="text-slate-900 font-black text-lg">Cycle Recovery Rate</Text>
+                            <Text className="text-slate-500 text-xs">Principal collected vs disbursed by release month</Text>
+                        </View>
+                        <View className="space-y-4">
+                            {summary.cycleRecoveryRate.slice(0, 5).map((cycle) => (
+                                <View key={cycle.cycle} className="mb-2">
+                                    <View className="flex-row justify-between mb-1">
+                                        <Text className="text-slate-700 font-bold">{format(new Date(cycle.cycle + '-01'), 'MMMM yyyy')}</Text>
+                                        <Text className={`font-black ${cycle.recoveryRate >= 100 ? 'text-emerald-600' : 'text-blue-600'}`}>
+                                            {cycle.recoveryRate.toFixed(1)}%
+                                        </Text>
+                                    </View>
+                                    <View className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                                        <View 
+                                            className={`h-full ${cycle.recoveryRate >= 100 ? 'bg-emerald-500' : 'bg-blue-500'}`} 
+                                            style={{ width: `${Math.min(100, cycle.recoveryRate)}%` }} 
+                                        />
+                                    </View>
+                                    <View className="flex-row justify-between mt-1">
+                                        <Text className="text-[10px] text-slate-500">Collected: {formatPHP(cycle.collected)}</Text>
+                                        <Text className="text-[10px] text-slate-500">Disbursed: {formatPHP(cycle.disbursed)}</Text>
+                                    </View>
+                                </View>
+                            ))}
+                        </View>
+                    </View>
+                )}
 
                 {loading && (
                     <View className="flex-row items-center justify-center py-8">

@@ -7,6 +7,8 @@ import { startOfMonth, endOfMonth, addMonths, subMonths, format } from 'date-fns
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SearchBar } from '../../../src/components/SearchBar';
+import { PrintButton } from '../../../src/components/PrintButton';
+import { PdfGenerator } from '../../../src/services/PdfGenerator';
 
 export default function DisbursementsScreen() {
     const [loading, setLoading] = useState(true);
@@ -65,7 +67,32 @@ export default function DisbursementsScreen() {
             stickyHeaderIndices={[0]}
         >
             <View className="bg-gray-50 p-6 pb-2 z-10 border-b border-gray-100">
-                <Text className="text-2xl font-black text-gray-900 mb-4">Disbursements</Text>
+                <View className="flex-row justify-between items-center mb-4">
+                    <Text className="text-2xl font-black text-gray-900">Disbursements</Text>
+                    <PrintButton
+                        onPrint={async () => {
+                            await PdfGenerator.generateGenericReport({
+                                title: 'Disbursements Report',
+                                subtitle: `${format(startDate, 'MMM d, yyyy')} to ${format(endDate, 'MMM d, yyyy')}`,
+                                headers: ['Date', 'Loan No.', 'Client', 'Principal', 'Insurance', 'Net Disbursed'],
+                                data: filteredLoans.map(loan => [
+                                    formatDate(loan.releaseDate),
+                                    loan.loanNumber,
+                                    loan.borrowerName,
+                                    formatPHP(loan.principalAmount),
+                                    formatPHP(loan.insuranceAmount || 0),
+                                    formatPHP(loan.principalAmount - (loan.insuranceAmount || 0))
+                                ]),
+                                summaryBoxes: [
+                                    { label: 'Total Principal', value: formatPHP(totalDisbursed) },
+                                    { label: 'Net Disbursed', value: formatPHP(netDisbursed) },
+                                    { label: 'Total Loans', value: filteredLoans.length.toString() }
+                                ]
+                            });
+                        }}
+                        compact
+                    />
+                </View>
 
                 {/* Month Navigator */}
                 <View className="flex-row items-center justify-between bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 mb-4">

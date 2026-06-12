@@ -4,6 +4,15 @@ import { Platform } from 'react-native';
 import { formatDate } from '../utils/dates';
 import { formatPHP } from '../utils/currency';
 
+export interface GenericReportOptions {
+    title: string;
+    subtitle?: string;
+    headers: string[];
+    data: (string | number | React.ReactNode)[][];
+    summaryBoxes?: { label: string; value: string }[];
+    landscape?: boolean;
+}
+
 interface BorrowerInfo {
     fullName: string;
     address?: string;
@@ -191,6 +200,10 @@ export class PdfGenerator {
     </html>
     `;
 
+        await this.printHtml(html, `Statement of Account — ${borrower.fullName}`);
+    }
+
+    private static async printHtml(html: string, dialogTitle: string = 'Document') {
         if (Platform.OS === 'web') {
             const printWindow = window.open('', '_blank');
             if (printWindow) {
@@ -212,10 +225,11 @@ export class PdfGenerator {
         if (canShare) {
             await Sharing.shareAsync(uri, {
                 mimeType: 'application/pdf',
-                dialogTitle: `Statement of Account — ${borrower.fullName}`,
+                dialogTitle,
             });
         }
     }
+
 
     private static buildVoucherCardHtml(borrower: BorrowerInfo, loan: LoanInfo): string {
         const generatedDate = loan.releaseDate ? formatDate(new Date(loan.releaseDate)) : formatDate(new Date());
@@ -361,31 +375,7 @@ export class PdfGenerator {
         options: VoucherPrintOptions = {}
     ): Promise<void> {
         const html = this.buildVoucherHtml([{ borrower, loan }], options);
-
-        if (Platform.OS === 'web') {
-            const printWindow = window.open('', '_blank');
-            if (printWindow) {
-                printWindow.document.write(html);
-                printWindow.document.close();
-                printWindow.focus();
-                setTimeout(() => {
-                    printWindow.print();
-                    printWindow.close();
-                }, 250);
-            } else {
-                await Print.printAsync({ html });
-            }
-            return;
-        }
-
-        const { uri } = await Print.printToFileAsync({ html });
-        const canShare = await Sharing.isAvailableAsync();
-        if (canShare) {
-            await Sharing.shareAsync(uri, {
-                mimeType: 'application/pdf',
-                dialogTitle: `Voucher — ${borrower.fullName}`,
-            });
-        }
+        await this.printHtml(html, `Voucher — ${borrower.fullName}`);
     }
 
     static async generateVoucherBatch(
@@ -395,30 +385,292 @@ export class PdfGenerator {
         if (vouchers.length === 0) return;
 
         const html = this.buildVoucherHtml(vouchers, options);
+        await this.printHtml(html, `Vouchers — ${vouchers.length} loan${vouchers.length === 1 ? '' : 's'}`);
+    }
 
-        if (Platform.OS === 'web') {
-            const printWindow = window.open('', '_blank');
-            if (printWindow) {
-                printWindow.document.write(html);
-                printWindow.document.close();
-                printWindow.focus();
-                setTimeout(() => {
-                    printWindow.print();
-                    printWindow.close();
-                }, 250);
-            } else {
-                await Print.printAsync({ html });
+    static async generateGenericReport(options: GenericReportOptions): Promise<void> {
+        const { title, subtitle, headers, data, summaryBoxes, landscape } = options;
+        const generatedDate = formatDate(new Date());
+
+        const headersHtml = headers.map(h => `<th>${h}</th>`).join('');
+        const rowsHtml = data.map((row, idx) => `
+            <tr style="background:${idx % 2 === 0 ? '#fff' : '#f9f9f9'}">
+                ${row.map(cell => `<td>${cell !== null && cell !== undefined ? cell : ''}</td>`).join('')}
+            </tr>
+        `).join('');
+
+        const summaryHtml = summaryBoxes ? `
+            <div class="summary-section">
+                ${summaryBoxes.map(box => `
+                    <div class="summary-box">
+                        <div class="label">${box.label}</div>
+                        <div class="value">${box.value}</div>
+                    </div>
+                `).join('')}
+            </div>
+        ` : '';
+
+        const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8"/>
+          <style>
+            @page { size: ${landscape ? 'landscape' : 'portrait'}; margin: 0.5in; }
+            body { font-family: Arial, sans-serif; margin: 32px; color: #222; font-size: 12px; }
+            .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #000; padding-bottom: 16px; margin-bottom: 32px; }
+            .brand { font-size: 24px; font-weight: 900; color: #000; letter-spacing: -1px; margin-bottom: 4px; }
+            .subtitle { font-size: 14px; color: #555; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
+            th { text-align: left; padding: 12px 8px; border-bottom: 2px solid #ddd; color: #555; font-size: 11px; text-transform: uppercase; }
+            td { padding: 12px 8px; border-bottom: 1px solid #eee; }
+            .summary-section { display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; }
+            .summary-box { background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; min-width: 150px; }
+            .summary-box .label { font-size: 11px; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
+            .summary-box .value { font-size: 18px; font-weight: bold; color: #0f172a; }
+            .footer { text-align: center; font-size: 10px; color: #888; border-top: 1px solid #eee; padding-top: 16px; margin-top: 32px; }
+            @media print {
+              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; }
             }
-            return;
-        }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <div class="brand">${title}</div>
+              ${subtitle ? `<div class="subtitle">${subtitle}</div>` : ''}
+            </div>
+          </div>
+          
+          ${summaryHtml}
 
-        const { uri } = await Print.printToFileAsync({ html });
-        const canShare = await Sharing.isAvailableAsync();
-        if (canShare) {
-            await Sharing.shareAsync(uri, {
-                mimeType: 'application/pdf',
-                dialogTitle: `Vouchers — ${vouchers.length} loan${vouchers.length === 1 ? '' : 's'}`,
-            });
-        }
+          <table>
+            <thead><tr>${headersHtml}</tr></thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+
+          <div class="footer">
+            Generated on ${generatedDate} &bull; INFINITY FINANCE Loan Management System
+          </div>
+        </body>
+        </html>
+        `;
+
+        await this.printHtml(html, title);
+    }
+
+    static async generateIncomeStatementPdf(title: string, subtitle: string, data: any, isCashBasis: boolean): Promise<void> {
+        const generatedDate = formatDate(new Date());
+
+        const opExHtml = Object.entries(data.opExBreakdown || {}).map(([cat, amt]: [string, any]) => `
+            <tr>
+                <td style="padding-left: 24px;">${cat}</td>
+                <td style="text-align: right;">${formatPHP(amt)}</td>
+            </tr>
+        `).join('');
+
+        const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8"/>
+          <style>
+            @page { size: portrait; margin: 0.5in; }
+            body { font-family: Arial, sans-serif; margin: 32px; color: #222; font-size: 14px; }
+            .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #000; padding-bottom: 16px; margin-bottom: 32px; }
+            .brand { font-size: 24px; font-weight: 900; color: #000; letter-spacing: -1px; margin-bottom: 4px; }
+            .subtitle { font-size: 14px; color: #555; }
+            .basis-badge { display: inline-block; padding: 4px 8px; background: #eef2ff; color: #3730a3; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 24px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
+            td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; }
+            .section-title { font-weight: bold; font-size: 12px; color: #3b82f6; text-transform: uppercase; padding-top: 16px; border-bottom: none; }
+            .section-total { font-weight: bold; background-color: #f8fafc; }
+            .net-income { background-color: #eff6ff; font-weight: bold; font-size: 18px; }
+            .footer { text-align: center; font-size: 10px; color: #888; border-top: 1px solid #eee; padding-top: 16px; margin-top: 32px; }
+            @media print {
+              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <div class="brand">${title}</div>
+              <div class="subtitle">${subtitle}</div>
+            </div>
+          </div>
+          
+          <div class="basis-badge">
+            ${isCashBasis ? 'CASH BASIS' : 'ACCRUAL BASIS'}
+          </div>
+
+          <table>
+            <tbody>
+                <tr><td colspan="2" class="section-title">Operating Revenue</td></tr>
+                <tr>
+                    <td style="padding-left: 24px;">Earned Interest Income</td>
+                    <td style="text-align: right; font-weight: bold;">${formatPHP(data.earnedInterestIncome || 0)}</td>
+                </tr>
+                <tr>
+                    <td style="padding-left: 24px;">Upfront Fee Income</td>
+                    <td style="text-align: right; font-weight: bold;">${formatPHP(data.upfrontFeeIncome || 0)}</td>
+                </tr>
+                <tr>
+                    <td style="padding-left: 24px;">Penalty Income</td>
+                    <td style="text-align: right; font-weight: bold;">${formatPHP(data.penaltyIncome || 0)}</td>
+                </tr>
+                <tr class="section-total">
+                    <td>Total Gross Income</td>
+                    <td style="text-align: right; color: #2563eb;">${formatPHP(data.totalGrossIncome || data.operatingRevenue)}</td>
+                </tr>
+
+                <tr><td colspan="2" class="section-title" style="color: #ef4444;">Operating Expenses</td></tr>
+                ${opExHtml}
+                <tr class="section-total">
+                    <td>Total Operating Expenses</td>
+                    <td style="text-align: right; color: #dc2626;">(${formatPHP(data.operatingExpenses)})</td>
+                </tr>
+
+                <tr><td colspan="2" class="section-title" style="color: #f97316;">Financial & Provision Costs</td></tr>
+                <tr>
+                    <td style="padding-left: 24px;">Financial Costs</td>
+                    <td style="text-align: right; font-weight: bold;">(${formatPHP(data.financialCosts)})</td>
+                </tr>
+                <tr>
+                    <td style="padding-left: 24px;">Loan Loss Provisions</td>
+                    <td style="text-align: right; font-weight: bold;">(${formatPHP(data.loanLossProvisions)})</td>
+                </tr>
+
+                <tr class="net-income">
+                    <td style="padding: 16px 8px; color: #1e3a8a;">NET INCOME</td>
+                    <td style="text-align: right; padding: 16px 8px; color: ${data.netIncome >= 0 ? '#16a34a' : '#dc2626'};">${formatPHP(data.netIncome)}</td>
+                </tr>
+            </tbody>
+          </table>
+
+          <div style="display: flex; justify-content: space-between; margin-top: 32px;">
+            <div style="flex: 1; background: #f8fafc; padding: 16px; border-radius: 8px; margin-right: 16px;">
+                <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Operational Self-Sufficiency (OSS)</div>
+                <div style="font-size: 18px; font-weight: bold; color: ${data.oss >= 1 ? '#16a34a' : '#dc2626'}; margin-top: 4px;">${(data.oss * 100).toFixed(1)}%</div>
+            </div>
+            <div style="flex: 1; background: #f8fafc; padding: 16px; border-radius: 8px;">
+                <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">Financial Self-Sufficiency (FSS)</div>
+                <div style="font-size: 18px; font-weight: bold; color: ${data.fss >= 1 ? '#16a34a' : '#dc2626'}; margin-top: 4px;">${(data.fss * 100).toFixed(1)}%</div>
+            </div>
+          </div>
+
+          <div class="footer">
+            Generated on ${generatedDate} &bull; INFINITY FINANCE Loan Management System
+          </div>
+        </body>
+        </html>
+        `;
+
+        await this.printHtml(html, title);
+    }
+
+    static async generateBalanceSheetPdf(title: string, subtitle: string, data: any): Promise<void> {
+        const generatedDate = formatDate(new Date());
+
+        const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8"/>
+          <style>
+            @page { size: portrait; margin: 0.5in; }
+            body { font-family: Arial, sans-serif; margin: 32px; color: #222; font-size: 14px; }
+            .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #000; padding-bottom: 16px; margin-bottom: 32px; }
+            .brand { font-size: 24px; font-weight: 900; color: #000; letter-spacing: -1px; margin-bottom: 4px; }
+            .subtitle { font-size: 14px; color: #555; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
+            td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; }
+            .section-title { font-weight: bold; font-size: 14px; text-transform: uppercase; padding-top: 24px; border-bottom: 2px solid #e2e8f0; }
+            .item-title { padding-left: 24px; color: #475569; }
+            .item-value { text-align: right; font-weight: bold; color: #0f172a; }
+            .section-total { font-weight: bold; background-color: #f8fafc; font-size: 15px; }
+            .section-total td { padding: 16px 8px; }
+            .footer { text-align: center; font-size: 10px; color: #888; border-top: 1px solid #eee; padding-top: 16px; margin-top: 32px; }
+            @media print {
+              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <div class="brand">${title}</div>
+              <div class="subtitle">${subtitle}</div>
+            </div>
+          </div>
+          
+          <table>
+            <tbody>
+                <tr><td colspan="2" class="section-title" style="color: #059669;">Assets</td></tr>
+                <tr>
+                    <td class="item-title">Net Loan Portfolio</td>
+                    <td class="item-value">${formatPHP(data.assets.loanPortfolio)}</td>
+                </tr>
+                <tr>
+                    <td class="item-title">Cash on Hand (Admin)</td>
+                    <td class="item-value">${formatPHP(data.assets.cashOnHand)}</td>
+                </tr>
+                <tr>
+                    <td class="item-title">Cash in Transit (Collectors)</td>
+                    <td class="item-value">${formatPHP(data.assets.cashInTransit)}</td>
+                </tr>
+                ${data.assets.otherAssets > 0 ? `
+                <tr>
+                    <td class="item-title">Other Assets</td>
+                    <td class="item-value">${formatPHP(data.assets.otherAssets)}</td>
+                </tr>` : ''}
+                <tr class="section-total">
+                    <td style="color: #047857;">Total Assets</td>
+                    <td style="text-align: right; color: #047857;">${formatPHP(data.assets.totalAssets)}</td>
+                </tr>
+
+                <tr><td colspan="2" class="section-title" style="color: #dc2626;">Liabilities</td></tr>
+                <tr>
+                    <td class="item-title">Borrowings / Payables</td>
+                    <td class="item-value">${formatPHP(data.liabilities.borrowings)}</td>
+                </tr>
+                <tr>
+                    <td class="item-title">Borrower Savings Deposits</td>
+                    <td class="item-value">${formatPHP(data.liabilities.savingsDeposits)}</td>
+                </tr>
+                <tr class="section-total">
+                    <td style="color: #b91c1c;">Total Liabilities</td>
+                    <td style="text-align: right; color: #b91c1c;">${formatPHP(data.liabilities.totalLiabilities)}</td>
+                </tr>
+
+                <tr><td colspan="2" class="section-title" style="color: #4338ca;">Equity</td></tr>
+                <tr>
+                    <td class="item-title">Paid-in Capital / Reserves</td>
+                    <td class="item-value">${formatPHP(data.equity.paidInCapital)}</td>
+                </tr>
+                <tr>
+                    <td class="item-title">Total Equity</td>
+                    <td class="item-value">${formatPHP(data.equity.totalEquity)}</td>
+                </tr>
+                <tr class="section-total">
+                    <td style="color: #3730a3;">Total Equity</td>
+                    <td style="text-align: right; color: #3730a3;">${formatPHP(data.equity.totalEquity)}</td>
+                </tr>
+                
+                <tr class="section-total" style="background-color: #eef2ff;">
+                    <td style="color: #312e81; padding-top: 24px;">Total Liabilities & Equity</td>
+                    <td style="text-align: right; color: #312e81; padding-top: 24px;">${formatPHP(data.liabilities.totalLiabilities + data.equity.totalEquity)}</td>
+                </tr>
+            </tbody>
+          </table>
+
+          <div class="footer">
+            Generated on ${generatedDate} &bull; INFINITY FINANCE Loan Management System
+          </div>
+        </body>
+        </html>
+        `;
+
+        await this.printHtml(html, title);
     }
 }

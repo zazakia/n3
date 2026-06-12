@@ -7,6 +7,8 @@ import { formatPHP } from '../../../src/utils/currency';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { ReportInfoModal, InfoModalContent, InfoIcon } from '../../../src/components/ReportInfoModal';
+import { PrintButton } from '../../../src/components/PrintButton';
+import { PdfGenerator } from '../../../src/services/PdfGenerator';
 
 export default function CollectorEfficiencyScreen() {
     const [loading, setLoading] = useState(true);
@@ -45,18 +47,43 @@ export default function CollectorEfficiencyScreen() {
     return (
         <View className="flex-1 bg-gray-50">
             <View className="p-6 pb-2 bg-gray-50 border-b border-gray-100">
-                <View className="flex-row items-center mb-2">
-                    <Text className="text-2xl font-black text-gray-900">Collector Ranking</Text>
-                    <InfoIcon onPress={() => setInfoContent({
-                        title: 'Collector Efficiency Ranking',
-                        question: 'How well are our collectors performing against their expected collections?',
-                        formula: 'Total Collected Amount / Total Assigned Target Collections',
-                        explanation: 'This metric compares each collector\'s actual cash collected against the scheduled payments they were assigned to collect that month.'
-                    })} />
+                <View className="flex-row justify-between items-start mb-2">
+                    <View className="flex-1 pr-3">
+                        <View className="flex-row items-center mb-1">
+                            <Text className="text-2xl font-black text-gray-900 mr-2">Collector Ranking</Text>
+                            <InfoIcon onPress={() => setInfoContent({
+                                title: 'Collector Efficiency Ranking',
+                                question: 'How well are our collectors performing against their expected collections?',
+                                formula: 'Total Collected Amount / Total Assigned Target Collections',
+                                explanation: 'This metric compares each collector\'s actual cash collected against the scheduled payments they were assigned to collect that month.'
+                            })} />
+                        </View>
+                        <Text className="text-gray-700 font-bold uppercase tracking-widest text-[10px]">
+                            Monthly Efficiency (Collected vs Target)
+                        </Text>
+                    </View>
+                    <View className="pt-1">
+                        <PrintButton
+                            onPrint={async () => {
+                                await PdfGenerator.generateGenericReport({
+                                    title: 'Collector Efficiency Ranking',
+                                    subtitle: 'Monthly Efficiency (Collected vs Target)',
+                                    headers: ['Rank', 'Collector', 'Efficiency', 'Collected', 'Cash Held', 'Target'],
+                                    data: collectors.map((c, idx) => [
+                                        (idx + 1).toString(),
+                                        c.name,
+                                        `${c.efficiency.toFixed(1)}%`,
+                                        formatPHP(c.collected),
+                                        formatPHP(c.cashHeld),
+                                        formatPHP(c.target)
+                                    ]),
+                                    summaryBoxes: []
+                                });
+                            }}
+                            compact
+                        />
+                    </View>
                 </View>
-                <Text className="text-gray-700 font-bold uppercase tracking-widest text-[10px]">
-                    Monthly Efficiency (Collected vs Target)
-                </Text>
             </View>
 
             <ScrollView 

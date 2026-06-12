@@ -111,8 +111,9 @@ export class MfiKpiService {
 
             const operatingExpenses = expenses.reduce((s, e) => s + e.amount, 0);
 
-            const oss = KpiCalculator.computeOSS(operatingRevenue, operatingExpenses, 0, 0);
-            const fss = KpiCalculator.computeFSS(operatingRevenue, operatingExpenses, 0, 0, 0, 0);
+            const llp = KpiCalculator.computeLLP(loans, schedules, payments, penalties);
+            const oss = KpiCalculator.computeOSS(operatingRevenue, operatingExpenses, 0, llp);
+            const fss = KpiCalculator.computeFSS(operatingRevenue, operatingExpenses, 0, llp, 0, 0);
             const oer = KpiCalculator.computeOER(operatingExpenses, glp);
 
             const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime();
@@ -421,13 +422,29 @@ export class MfiKpiService {
             
             const baseFinancialCosts = snapshots.reduce((s, snap) => s + snap.financialCosts, 0);
             const financialCosts = baseFinancialCosts + savingsInterestExpense;
-            const loanLossProvisions = snapshots.reduce((s, snap) => s + snap.loanLossReserve, 0);
-
-            const netIncome = totalGrossIncome - totalOperatingExpenses - financialCosts - loanLossProvisions;
-
+            
             // Portfolio Health Metrics
             const activeLoans = loans.filter(l => l.status === 'active' || l.status === 'defaulted');
             const glp = activeLoans.reduce((s, l) => s + (l.principalAmount || 0), 0);
+
+            // Fetch comprehensive data for active loans to calculate dynamic LLP and cycle recovery.
+            // If closed financial snapshots already carry a loan-loss reserve, keep that
+            // accounting value as the income-statement provision. Dynamic LLP is the
+            // fallback for periods without snapshot reserve data.
+            const activeLoanIds = activeLoans.map(l => l.id);
+            const paymentsForActiveLoans = activeLoanIds.length > 0 ? await this.db.collections.get<Payment>('payments')
+                .query(Q.where('deleted_at', null), Q.where('loan_id', Q.oneOf(activeLoanIds))).fetch() : [];
+            const penaltiesForActiveLoans = activeLoanIds.length > 0 ? await this.db.collections.get<LoanPenalty>('loan_penalties')
+                .query(Q.where('deleted_at', null), Q.where('loan_id', Q.oneOf(activeLoanIds))).fetch() : [];
+            const schedulesForActiveLoans = activeLoanIds.length > 0 ? await this.db.collections.get<PaymentSchedule>('payment_schedules')
+                .query(Q.where('deleted_at', null), Q.where('loan_id', Q.oneOf(activeLoanIds))).fetch() : [];
+
+            const snapshotLoanLossProvisions = snapshots.reduce((s, snap) => s + (snap.loanLossReserve || 0), 0);
+            const dynamicLoanLossProvisions = KpiCalculator.computeLLP(activeLoans, schedulesForActiveLoans, paymentsForActiveLoans, penaltiesForActiveLoans);
+            const loanLossProvisions = snapshotLoanLossProvisions > 0 ? snapshotLoanLossProvisions : dynamicLoanLossProvisions;
+
+
+            const netIncome = totalGrossIncome - totalOperatingExpenses - financialCosts - loanLossProvisions;
 
             let totalExpectedInterest = 0;
             activeLoans.forEach(loan => {
@@ -441,13 +458,13 @@ export class MfiKpiService {
                 totalExpectedInterest += explicitInterest > 0 ? explicitInterest : derivedInterest;
             });
 
-            const paymentsForActiveLoans = await this.db.collections.get<Payment>('payments')
-                .query(Q.where('deleted_at', null), 
-                    Q.where('loan_id', Q.oneOf(activeLoans.map(l => l.id)))
-                ).fetch();
-            
             const earnedInterestOnActive = KpiCalculator.computeInterestIncome(paymentsForActiveLoans, activeLoans);
             const unearnedInterestPipeline = Math.max(0, totalExpectedInterest - earnedInterestOnActive);
+
+            const oss = KpiCalculator.computeOSS(totalGrossIncome, totalOperatingExpenses, financialCosts, loanLossProvisions);
+            const fss = KpiCalculator.computeFSS(totalGrossIncome, totalOperatingExpenses, financialCosts, loanLossProvisions, 0, 0);
+            const cycleRecoveryRate = KpiCalculator.computeCycleRecoveryRate(activeLoans, paymentsForActiveLoans);
+
 
             return {
                 operatingRevenue: totalGrossIncome, // Kept for backwards compatibility
@@ -467,6 +484,9 @@ export class MfiKpiService {
                 // Under cash basis we report null so the UI can hide this section.
                 unearnedInterestPipeline: basis === 'cash' ? null : unearnedInterestPipeline,
                 accountingBasis: basis,
+                oss,
+                fss,
+                cycleRecoveryRate,
             };
         } catch (e) {
             console.error('[MfiKpiService] Error generating income statement:', e);

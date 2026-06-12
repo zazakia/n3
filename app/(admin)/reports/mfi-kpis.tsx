@@ -5,6 +5,8 @@ import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { ReminderService } from '../../../src/services/ReminderService';
 import { Linking, Pressable } from 'react-native';
 import { ReportInfoModal, InfoModalContent, InfoIcon } from '../../../src/components/ReportInfoModal';
+import { PrintButton } from '../../../src/components/PrintButton';
+import { PdfGenerator } from '../../../src/services/PdfGenerator';
 
 export default function MfiKpisScreen() {
     const [kpis, setKpis] = useState<MfiKpiData | null>(null);
@@ -29,8 +31,37 @@ export default function MfiKpisScreen() {
         <View className="flex-1 bg-gray-50">
             {/* ── Top controls (Static) ── */}
             <View className="p-6 pb-2 bg-gray-50 border-b border-gray-100">
-                <Text className="text-2xl font-black text-gray-900">MFI Efficiency KPIs</Text>
-                <Text className="text-gray-700 font-medium tracking-wide text-xs">Industry Standard Microfinance Indicators</Text>
+                <View className="flex-row justify-between items-start mb-2">
+                    <View className="flex-1 pr-3">
+                        <Text className="text-2xl font-black text-gray-900">MFI Efficiency KPIs</Text>
+                        <Text className="text-gray-700 font-medium tracking-wide text-xs">Industry Standard Microfinance Indicators</Text>
+                    </View>
+                    <View className="pt-1">
+                        <PrintButton
+                            onPrint={async () => {
+                                await PdfGenerator.generateGenericReport({
+                                    title: 'MFI Efficiency KPIs',
+                                    subtitle: 'Industry Standard Microfinance Indicators',
+                                    headers: ['Category', 'Indicator', 'Value', 'Standard / Note'],
+                                    data: [
+                                        ['Portfolio Quality', 'Portfolio At Risk (PAR > 30)', `${(kpis.portfolioAtRisk * 100).toFixed(2)}%`, '< 5%'],
+                                        ['Financial Sustainability', 'Operational Self-Sufficiency (OSS)', `${(kpis.oss * 100).toFixed(1)}%`, '> 100%'],
+                                        ['Financial Sustainability', 'Financial Self-Sufficiency (FSS)', `${(kpis.fss * 100).toFixed(1)}%`, 'Inflation adjusted'],
+                                        ['Operating Efficiency', 'Collection Efficiency', `${(kpis.collectionEfficiency * 100).toFixed(1)}%`, '> 90%'],
+                                        ['Operating Efficiency', 'Operating Expense Ratio (OER)', `${(kpis.oer * 100).toFixed(1)}%`, '10-15%'],
+                                        ['Profitability', 'Return on Assets (ROA)', `${(advancedKpis.roa * 100).toFixed(1)}%`, '3-5%'],
+                                        ['Profitability', 'Return on Equity (ROE)', `${(advancedKpis.roe * 100).toFixed(1)}%`, '10-15%'],
+                                        ['Profitability', 'Portfolio Yield', `${(advancedKpis.portfolioYield * 100).toFixed(1)}%`, 'Effective interest'],
+                                        ['Growth', 'Borrower Retention Rate', `${(advancedKpis.retentionRate * 100).toFixed(1)}%`, 'Repeat clients'],
+                                    ],
+                                    summaryBoxes: [],
+                                    landscape: true
+                                });
+                            }}
+                            compact
+                        />
+                    </View>
+                </View>
             </View>
 
             <ScrollView className="flex-1" contentContainerStyle={{ padding: 16 }}>

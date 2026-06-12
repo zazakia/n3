@@ -7,6 +7,8 @@ import { format } from 'date-fns';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AccountingBasisToggle } from '../../../src/components/AccountingBasisToggle';
+import { PrintButton } from '../../../src/components/PrintButton';
+import { PdfGenerator } from '../../../src/services/PdfGenerator';
 
 export default function BalanceSheetScreen() {
     const [loading, setLoading] = useState(true);
@@ -46,9 +48,23 @@ export default function BalanceSheetScreen() {
             <View className="p-6 pb-2 bg-gray-50 border-b border-gray-100">
                 <View className="flex-row justify-between items-center mb-2">
                     <Text className="text-2xl font-black text-gray-900">Balance Sheet</Text>
-                    <Pressable className="bg-blue-100 p-2 rounded-full" onPress={loadData}>
-                        <MaterialIcons name="refresh" size={20} color="#2563EB" />
-                    </Pressable>
+                    <View className="flex-row items-center space-x-2">
+                        {data && (
+                            <PrintButton
+                                onPrint={async () => {
+                                    await PdfGenerator.generateBalanceSheetPdf(
+                                        'Balance Sheet',
+                                        `As of ${format(data.asOf || new Date(), 'MMM d, yyyy')}`,
+                                        data
+                                    );
+                                }}
+                                compact
+                            />
+                        )}
+                        <Pressable className="bg-blue-100 p-2 rounded-full ml-2" onPress={loadData}>
+                            <MaterialIcons name="refresh" size={20} color="#2563EB" />
+                        </Pressable>
+                    </View>
                 </View>
                 <Text className="text-gray-700 font-bold uppercase tracking-widest text-[10px] mb-3">
                     As of {data ? format(data.asOf, 'MMM d, yyyy') : 'Now'}

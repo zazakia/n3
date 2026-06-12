@@ -6,6 +6,8 @@ import { formatPHP } from '../../../src/utils/currency';
 import { format } from 'date-fns';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
+import { PrintButton } from '../../../src/components/PrintButton';
+import { PdfGenerator } from '../../../src/services/PdfGenerator';
 
 export default function SavingsReportScreen() {
     const [loading, setLoading] = useState(true);
@@ -51,9 +53,34 @@ export default function SavingsReportScreen() {
                             Borrower Capital Tracking
                         </Text>
                     </View>
-                    <Pressable onPress={onRefresh} className="bg-white p-2 rounded-full shadow-sm border border-gray-100">
-                        <MaterialIcons name="refresh" size={20} color="#1A237E" />
-                    </Pressable>
+                    <View className="flex-row items-center space-x-2">
+                        {data && (
+                            <PrintButton
+                                onPrint={async () => {
+                                    await PdfGenerator.generateGenericReport({
+                                        title: 'Savings Report',
+                                        subtitle: 'Borrower Capital Tracking',
+                                        headers: ['Date', 'Client', 'Type', 'Amount'],
+                                        data: data.activity.map((tx: any) => [
+                                            format(tx.date, 'MMM d, yyyy h:mm a'),
+                                            tx.borrowerName,
+                                            tx.type.replace('_', ' ').toUpperCase(),
+                                            formatPHP(tx.amount)
+                                        ]),
+                                        summaryBoxes: [
+                                            { label: 'Current Balance', value: formatPHP(data.summary.currentBalance) },
+                                            { label: 'Total Deposits', value: formatPHP(data.summary.totalDeposits) },
+                                            { label: 'Total Withdrawals', value: formatPHP(data.summary.totalWithdrawals) }
+                                        ]
+                                    });
+                                }}
+                                compact
+                            />
+                        )}
+                        <Pressable onPress={onRefresh} className="bg-white p-2 rounded-full shadow-sm border border-gray-100 ml-2">
+                            <MaterialIcons name="refresh" size={20} color="#1A237E" />
+                        </Pressable>
+                    </View>
                 </View>
             </View>
 

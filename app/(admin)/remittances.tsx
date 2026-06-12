@@ -10,8 +10,9 @@ import { Q } from '@nozbe/watermelondb';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { safeBack } from '../../src/utils/navigation';
-
 import { CashService } from '../../src/services/CashService';
+import { PrintButton } from '../../src/components/PrintButton';
+import { PdfGenerator } from '../../src/services/PdfGenerator';
 
 export default function AdminRemittanceReviewScreen() {
     const { user } = useAuth();
@@ -105,12 +106,33 @@ export default function AdminRemittanceReviewScreen() {
                     colors={['#1E293B', '#0F172A']}
                     className="pt-12 pb-20 px-6 rounded-b-[40px] shadow-lg"
                 >
-                    <Pressable 
-                        onPress={() => safeBack(router, '/(admin)')} 
-                        className="bg-white/10 w-10 h-10 rounded-2xl items-center justify-center mb-6"
-                    >
-                        <MaterialIcons name="arrow-back" size={24} color="#FFF" />
-                    </Pressable>
+                    <View className="flex-row items-center justify-between mb-6">
+                        <Pressable 
+                            onPress={() => safeBack(router, '/(admin)')} 
+                            className="bg-white/10 w-10 h-10 rounded-2xl items-center justify-center"
+                        >
+                            <MaterialIcons name="arrow-back" size={24} color="#FFF" />
+                        </Pressable>
+                        <PrintButton
+                            onPrint={async () => {
+                                await PdfGenerator.generateGenericReport({
+                                    title: 'Pending Remittances Report',
+                                    subtitle: 'Review cash handovers from collectors',
+                                    headers: ['Date', 'Collector', 'Reference', 'Amount'],
+                                    data: pendingRemittances.map(r => [
+                                        new Date(r.remittanceDate).toLocaleDateString(),
+                                        r.collector?.name || 'Unknown',
+                                        r.referenceNumber || 'N/A',
+                                        formatPHP(r.amount)
+                                    ]),
+                                    summaryBoxes: [
+                                        { label: 'Pending Total', value: formatPHP(pendingRemittances.reduce((s, remit) => s + (remit.amount || 0), 0)) }
+                                    ]
+                                });
+                            }}
+                            compact
+                        />
+                    </View>
                     <Text className="text-slate-700 text-xs font-bold uppercase tracking-[3px]">Financial Audit</Text>
                     <Text className="text-white text-3xl font-black mt-1">Pending Remittances</Text>
                 </LinearGradient>

@@ -9,6 +9,8 @@ import Loan from '../../../src/database/models/Loan';
 import Payment from '../../../src/database/models/Payment';
 import { AnimatedPressable } from '../../../src/components/AnimatedPressable';
 import { format } from 'date-fns';
+import { PrintButton } from '../../../src/components/PrintButton';
+import { PdfGenerator } from '../../../src/services/PdfGenerator';
 
 export default function SystemAuditScreen() {
     const router = useRouter();
@@ -210,7 +212,33 @@ export default function SystemAuditScreen() {
                             <MaterialIcons name="arrow-back" size={20} color="#FFF" />
                         </Pressable>
                         <Text className="text-white text-xl font-black">System Audit</Text>
-                        <View className="w-10" />
+                        <View className="flex-row items-center space-x-2">
+                            {report && (
+                                <PrintButton
+                                    onPrint={async () => {
+                                        await PdfGenerator.generateGenericReport({
+                                            title: 'System Audit Report',
+                                            subtitle: `Run Date: ${format(report.timestamp, 'MMM d, yyyy h:mm a')}`,
+                                            headers: ['Category', 'Type', 'Target', 'Message', 'Suggestion'],
+                                            data: report.issues.map(i => [
+                                                i.category,
+                                                i.entityType,
+                                                i.entityName || i.entityId,
+                                                i.message,
+                                                i.suggestedFix || 'None'
+                                            ]),
+                                            summaryBoxes: [
+                                                { label: 'Critical', value: criticalIssues.length.toString() },
+                                                { label: 'Warnings', value: warningIssues.length.toString() },
+                                                { label: 'Informational', value: infoIssues.length.toString() }
+                                            ],
+                                            landscape: true
+                                        });
+                                    }}
+                                    compact
+                                />
+                            )}
+                        </View>
                     </View>
 
                     <View className="flex-row justify-between items-center bg-white/10 p-5 rounded-[32px] border border-white/5">

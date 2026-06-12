@@ -180,4 +180,103 @@ export class KpiCalculator {
             return sum + Math.max(0, interestShare);
         }, 0);
     }
+
+    /**
+     * Dynamically calculates Loan Loss Provision (LLP) based on PAR aging.
+     * Standard MFI formula: PAR>30 * 50% + PAR>90 * 100%
+     */
+    static computeLLP(
+        loans: Loan[],
+        schedules: PaymentSchedule[],
+        payments: Payment[],
+        penalties: LoanPenalty[],
+        now: Date = new Date()
+    ): number {
+        const activeLoans = loans.filter(l => l.status === 'active' || l.status === 'defaulted');
+        
+        let totalProvision = 0;
+
+        for (const loan of activeLoans) {
+            const loanSchedules = schedules.filter(s => s.loanId === loan.id);
+            const loanPayments = payments.filter(p => p.loanId === loan.id);
+            const loanPenalties = penalties.filter(p => p.loanId === loan.id);
+
+            // Calculate current outstanding balance
+            const paid = loanPayments.reduce((s, p) => s + p.amount, 0);
+            const penaltyTotal = loanPenalties.reduce((s, p) => s + p.amount, 0);
+            const totalReceivable = (loan.totalAmount || loan.principalAmount || 0);
+            const outstanding = Math.max(0, totalReceivable + penaltyTotal - paid);
+
+            if (outstanding <= 0) continue;
+
+            // Find maximum days overdue across all pending schedules for this loan
+            let maxOverdueDays = 0;
+            for (const sched of loanSchedules) {
+                if (sched.status === 'pending' || sched.status === 'partial' || sched.status === 'late') {
+                    const overdueDays = differenceInDays(now, new Date(sched.dueDate));
+                    if (overdueDays > maxOverdueDays) {
+                        maxOverdueDays = overdueDays;
+                    }
+                }
+            }
+
+            // Apply provisioning buckets
+            if (maxOverdueDays > 90) {
+                totalProvision += outstanding * 1.0; // 100% provision
+            } else if (maxOverdueDays > 30) {
+                totalProvision += outstanding * 0.5; // 50% provision
+            }
+        }
+
+        return totalProvision;
+    }
+
+    /**
+     * Calculates Capital Recovery Rate by cycle (release month)
+     * Groups loans by release month and calculates (Total Principal Collected / Total Principal Released)
+     */
+    static computeCycleRecoveryRate(loans: Loan[], payments: Payment[]): Array<{ cycle: string, recoveryRate: number, disbursed: number, collected: number }> {
+        const loansByMonth = new Map<string, Loan[]>();
+        
+        for (const loan of loans) {
+            if (loan.status === 'pending' || loan.status === 'cancelled' || loan.status === 'declined') continue;
+            if (!loan.releaseDate) continue;
+            
+            const date = new Date(loan.releaseDate);
+            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            if (!loansByMonth.has(monthKey)) {
+                loansByMonth.set(monthKey, []);
+            }
+            loansByMonth.get(monthKey)!.push(loan);
+        }
+
+        const paymentsByLoanId = new Map<string, number>();
+        for (const payment of payments) {
+            paymentsByLoanId.set(payment.loanId, (paymentsByLoanId.get(payment.loanId) || 0) + payment.amount);
+        }
+
+        const results = [];
+        for (const [cycle, cycleLoans] of loansByMonth.entries()) {
+            let totalDisbursed = 0;
+            let totalPrincipalCollected = 0;
+
+            for (const loan of cycleLoans) {
+                totalDisbursed += (loan.principalAmount || 0);
+                
+                const totalPaid = paymentsByLoanId.get(loan.id) || 0;
+                // Cap principal collected at the disbursed amount for recovery rate logic
+                const principalCollected = Math.min((loan.principalAmount || 0), totalPaid);
+                totalPrincipalCollected += principalCollected;
+            }
+
+            results.push({
+                cycle,
+                disbursed: totalDisbursed,
+                collected: totalPrincipalCollected,
+                recoveryRate: totalDisbursed > 0 ? (totalPrincipalCollected / totalDisbursed) * 100 : 0
+            });
+        }
+
+        return results.sort((a, b) => b.cycle.localeCompare(a.cycle));
+    }
 }

@@ -6,6 +6,8 @@ import Expense from '../../../src/database/models/Expense';
 import { MaterialIcons } from '@expo/vector-icons';
 import { formatPHP } from '../../../src/utils/currency';
 import { PieChart } from 'react-native-chart-kit';
+import { PrintButton } from '../../../src/components/PrintButton';
+import { PdfGenerator } from '../../../src/services/PdfGenerator';
 
 const CATEGORY_COLORS: Record<string, string> = {
     'Transportation': '#3B82F6',
@@ -73,10 +75,34 @@ export default function ExpenseReportScreen() {
     return (
         <View className="flex-1 bg-gray-50">
             <View className="p-6 pb-2 bg-gray-50 border-b border-gray-100">
-                <Text className="text-2xl font-black text-gray-900 mb-2">Expense Breakdown</Text>
-                <Text className="text-gray-700 font-bold uppercase tracking-widest text-[10px]">
-                    Lifetime Business Expenses
-                </Text>
+                <View className="flex-row justify-between items-start mb-2">
+                    <View className="flex-1 pr-3">
+                        <Text className="text-2xl font-black text-gray-900 mb-2">Expense Breakdown</Text>
+                        <Text className="text-gray-700 font-bold uppercase tracking-widest text-[10px]">
+                            Lifetime Business Expenses
+                        </Text>
+                    </View>
+                    <View className="pt-1">
+                        <PrintButton
+                            onPrint={async () => {
+                                await PdfGenerator.generateGenericReport({
+                                    title: 'Expense Breakdown Report',
+                                    subtitle: 'Lifetime Business Expenses',
+                                    headers: ['Category', 'Amount', '% of Total'],
+                                    data: stats.map(s => [
+                                        s.name,
+                                        formatPHP(s.amount),
+                                        `${((s.amount / totalExpense) * 100).toFixed(1)}%`
+                                    ]),
+                                    summaryBoxes: [
+                                        { label: 'Total Expenses', value: formatPHP(totalExpense) }
+                                    ]
+                                });
+                            }}
+                            compact
+                        />
+                    </View>
+                </View>
             </View>
 
             <ScrollView 

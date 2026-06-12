@@ -6,6 +6,8 @@ import { formatPHP } from '../../../src/utils/currency';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { MaterialIcons } from '@expo/vector-icons';
 import { MetricBreakdownDialog, BreakdownItem } from '../../../src/components/MetricBreakdownDialog';
+import { PrintButton } from '../../../src/components/PrintButton';
+import { PdfGenerator } from '../../../src/services/PdfGenerator';
 
 export default function PortfolioAgingScreen() {
     const [loading, setLoading] = useState(true);
@@ -75,10 +77,34 @@ export default function PortfolioAgingScreen() {
         <View className="flex-1 bg-gray-50">
             {/* ── Top controls (Static) ── */}
             <View className="p-6 pb-2 bg-gray-50 border-b border-gray-100">
-                <Text className="text-2xl font-black text-gray-900 mb-2">Portfolio Aging</Text>
-                <Text className="text-gray-700 font-bold uppercase tracking-widest text-[10px] mb-6">
-                    PAR Buckets Breakdown (Principal At Risk)
-                </Text>
+                <View className="flex-row justify-between items-start mb-2">
+                    <View className="flex-1 pr-3">
+                        <Text className="text-2xl font-black text-gray-900">Portfolio Aging</Text>
+                        <Text className="text-gray-700 font-bold uppercase tracking-widest text-[10px]">
+                            PAR Buckets Breakdown (Principal At Risk)
+                        </Text>
+                    </View>
+                    <View className="pt-1">
+                        <PrintButton
+                            onPrint={async () => {
+                                await PdfGenerator.generateGenericReport({
+                                    title: 'Portfolio Aging Report',
+                                    subtitle: 'PAR Buckets Breakdown (Principal At Risk)',
+                                    headers: ['Bucket', 'Count', 'Amount'],
+                                    data: agingBuckets.map(b => [
+                                        b.label,
+                                        b.count.toString(),
+                                        formatPHP(b.amount)
+                                    ]),
+                                    summaryBoxes: [
+                                        { label: 'Total Principal At Risk', value: formatPHP(totalOverdue) }
+                                    ]
+                                });
+                            }}
+                            compact
+                        />
+                    </View>
+                </View>
 
                 {/* Summary Chart-like Bar */}
                 <View className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm">

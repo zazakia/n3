@@ -11,6 +11,8 @@ import * as FileSystem from 'expo-file-system';
 import { Platform } from 'react-native';
 import * as Sharing from 'expo-sharing';
 import { SearchBar } from '../../../src/components/SearchBar';
+import { PrintButton } from '../../../src/components/PrintButton';
+import { PdfGenerator } from '../../../src/services/PdfGenerator';
 
 export default function ActiveLoansReportScreen() {
     const router = useRouter();
@@ -229,14 +231,40 @@ export default function ActiveLoansReportScreen() {
                             Portfolio Collection Overview
                         </Text>
                     </View>
-                    <Pressable
-                        onPress={handleExport}
-                        testID="export-excel"
-                        className="bg-green-600 flex-row items-center px-4 py-2 rounded-xl active:bg-green-700 shadow-sm"
-                    >
-                        <MaterialIcons name="file-download" size={18} color="#fff" className="mr-2" />
-                        <Text className="text-white font-bold text-xs uppercase tracking-wider">Export Excel</Text>
-                    </Pressable>
+                    <View className="flex-row items-center space-x-2">
+                        <PrintButton
+                            onPrint={async () => {
+                                await PdfGenerator.generateGenericReport({
+                                    title: 'Active Loans Collection',
+                                    subtitle: 'Portfolio Collection Overview',
+                                    headers: ['Loan No.', 'Client', 'Collector', 'Loan Amt', 'Balance', 'Total Collected'],
+                                    data: filteredData.map(r => [
+                                        r.loanNumber,
+                                        r.clientName,
+                                        r.collectorName,
+                                        formatPHP(r.loanAmount),
+                                        formatPHP(r.loanBalance),
+                                        formatPHP(r.totalCollected)
+                                    ]),
+                                    summaryBoxes: [
+                                        { label: 'Total Loan Amount', value: formatPHP(totals.loanAmount) },
+                                        { label: 'Total Balance', value: formatPHP(totals.loanBalance) },
+                                        { label: 'Total Collected', value: formatPHP(totals.totalCollected) }
+                                    ],
+                                    landscape: true
+                                });
+                            }}
+                            compact
+                        />
+                        <Pressable
+                            onPress={handleExport}
+                            testID="export-excel"
+                            className="bg-green-600 flex-row items-center px-4 py-2 rounded-xl active:bg-green-700 shadow-sm ml-2"
+                        >
+                            <MaterialIcons name="file-download" size={18} color="#fff" style={{ marginRight: 8 }} />
+                            <Text className="text-white font-bold text-xs uppercase tracking-wider">Export Excel</Text>
+                        </Pressable>
+                    </View>
                 </View>
 
                 {/* Collector filter pills */}

@@ -13,6 +13,8 @@ import { DatePicker } from '../../../src/components/DatePicker';
 import { formatPHP } from '../../../src/utils/currency';
 import { formatDate } from '../../../src/utils/dates';
 import { SearchBar } from '../../../src/components/SearchBar';
+import { PrintButton } from '../../../src/components/PrintButton';
+import { PdfGenerator } from '../../../src/services/PdfGenerator';
 
 type PresetKey = 'today' | 'wtd' | 'mtd' | 'ytd' | 'custom';
 
@@ -237,6 +239,30 @@ export default function CollectionReportScreen() {
                             Actual payments received from {formatDate(parseISO(startDate))} — {formatDate(parseISO(endDate))}
                         </Text>
                         <Text className="text-xs text-gray-700 mt-2">{collectorLabel}</Text>
+                    </View>
+                    <View className="pt-1">
+                        <PrintButton
+                            onPrint={async () => {
+                                await PdfGenerator.generateGenericReport({
+                                    title: 'Collection Report',
+                                    subtitle: `${formatDate(parseISO(startDate))} to ${formatDate(parseISO(endDate))} • ${collectorLabel}`,
+                                    headers: ['Date', 'Client', 'Collector', 'Receipt No.', 'Amount'],
+                                    data: filteredRows.map(r => [
+                                        formatDate(r.paymentDate),
+                                        r.borrowerName,
+                                        r.collectorName,
+                                        r.receiptNumber,
+                                        formatPHP(r.amount)
+                                    ]),
+                                    summaryBoxes: [
+                                        { label: 'Total Collected', value: formatPHP(totalCollected) },
+                                        { label: 'Transactions', value: filteredRows.length.toString() },
+                                        { label: 'Unique Clients', value: uniqueBorrowers.toString() }
+                                    ]
+                                });
+                            }}
+                            compact
+                        />
                     </View>
                 </View>
 

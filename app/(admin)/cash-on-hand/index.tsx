@@ -8,6 +8,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { formatPHP } from '../../../src/utils/currency';
 import { formatDate } from '../../../src/utils/dates';
 import { CashService } from '../../../src/services/CashService';
+import { PrintButton } from '../../../src/components/PrintButton';
+import { PdfGenerator } from '../../../src/services/PdfGenerator';
 
 export default function CashOnHandScreen() {
     const router = useRouter();
@@ -69,6 +71,25 @@ export default function CashOnHandScreen() {
             <View className="flex-1 px-4">
                 <View className="flex-row justify-between items-center mb-4 px-2">
                     <Text className="text-lg font-extrabold text-gray-900">Manual Adjustments</Text>
+                    <PrintButton
+                        onPrint={async () => {
+                            await PdfGenerator.generateGenericReport({
+                                title: 'Cash on Hand Report',
+                                subtitle: 'Manual Cash Adjustments',
+                                headers: ['Date', 'Type', 'Particulars', 'Amount'],
+                                data: txns.map((t) => [
+                                    formatDate(new Date(t.transactionDate)),
+                                    t.type.replace('_', ' ').toUpperCase(),
+                                    t.particulars,
+                                    (t.type === 'in' || t.type === 'starting_balance' ? '+' : '-') + formatPHP(t.amount)
+                                ]),
+                                summaryBoxes: [
+                                    { label: 'Current Balance', value: formatPHP(balance) }
+                                ]
+                            });
+                        }}
+                        compact
+                    />
                 </View>
 
                 {loading ? (
