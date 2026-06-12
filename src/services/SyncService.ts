@@ -171,7 +171,6 @@ export class SyncService {
             return;
         }
         await this.sync(options.force);
-        await this.updatePendingCount();
     }
 
     /**

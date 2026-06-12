@@ -101,11 +101,10 @@ describe('LoadingScreen', () => {
         expect(mockReplace).toHaveBeenCalledWith('/login');
     });
 
-    it('clears the sync timeout on unmount after sync completes', async () => {
+    it('does not force a full sync before redirecting authenticated users', async () => {
         const { useSyncStore } = require('../../src/stores/syncStore');
         const { useAuth } = require('../../src/store/AuthContext');
         const { SyncService } = require('../../src/services/SyncService');
-        const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
 
         useSyncStore.mockReturnValue({
             status: 'idle',
@@ -121,16 +120,15 @@ describe('LoadingScreen', () => {
             initializationError: null,
         });
 
-        SyncService.checkAndSync.mockResolvedValue(undefined);
+        render(<LoadingScreen />);
 
-        const { unmount } = render(<LoadingScreen />);
+        await act(async () => {
+            jest.advanceTimersByTime(1000);
+            await Promise.resolve();
+        });
 
-        await Promise.resolve();
-        await Promise.resolve();
-        unmount();
-
-        expect(clearTimeoutSpy).toHaveBeenCalled();
-        clearTimeoutSpy.mockRestore();
+        expect(SyncService.checkAndSync).not.toHaveBeenCalled();
+        expect(mockReplace).toHaveBeenCalledWith('/(admin)');
     });
 
     it('restores the last authorized route instead of always returning to the role dashboard', async () => {

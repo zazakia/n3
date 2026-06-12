@@ -481,12 +481,12 @@ describe('SyncService', () => {
         expect(upsert).not.toHaveBeenCalled();
     });
 
-    it('checkAndSync calls sync and updatePendingCount', async () => {
+    it('checkAndSync delegates pending-count refresh to sync', async () => {
         const syncSpy = jest.spyOn(service, 'sync').mockResolvedValue();
         const pendingSpy = jest.spyOn(service, 'updatePendingCount').mockResolvedValue(0);
         await service.checkAndSync();
         expect(syncSpy).toHaveBeenCalled();
-        expect(pendingSpy).toHaveBeenCalled();
+        expect(pendingSpy).not.toHaveBeenCalled();
     });
 
     it('checkAndSync skips if already syncing', async () => {

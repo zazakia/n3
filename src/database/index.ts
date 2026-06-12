@@ -97,7 +97,7 @@ try {
             adapter = new SQLiteAdapter({
                 schema: mySchema,
                 migrations: myMigrations,
-                jsi: false,
+                jsi: true,
                 onSetUpError: (error) => {
                     console.error('[Database] WatermelonDB setup error:', error);
                 },

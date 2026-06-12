@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, Pressable, RefreshControl, ActivityIndicator, SafeAreaView, StatusBar, Alert, TextInput } from 'react-native';
+import { View, Text, ScrollView, Pressable, RefreshControl, ActivityIndicator, SafeAreaView, StatusBar, Alert, TextInput, FlatList } from 'react-native';
 import { database } from '../../src/database';
 import Borrower from '../../src/database/models/Borrower';
 import Loan from '../../src/database/models/Loan';
@@ -306,110 +306,117 @@ export default function CollectionSheetScreen() {
                 </LinearGradient>
             )}
 
-            <ScrollView
+            <FlatList
                 className="flex-1 -mt-6"
+                data={isSearching ? [] : items}
+                keyExtractor={(item) => item.schedule.id}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={sunlightMode ? "#000" : "#0D9488"} />}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100, paddingTop: 10 }}
-            >
-                {isSearching ? (
-                    <Animated.View entering={FadeInDown} className="bg-white p-12 rounded-[40px] items-center border border-teal-50 shadow-sm mt-4 justify-center">
-                        <ActivityIndicator size="large" color="#0D9488" />
-                        <Text className="text-gray-900 font-bold mt-4">Filtering list...</Text>
-                    </Animated.View>
-                ) : items.length === 0 ? (
-                    <Animated.View entering={FadeInDown} className="bg-white p-12 rounded-[40px] items-center border border-gray-100 shadow-sm mt-4">
-                        <View className="w-20 h-20 bg-teal-50 rounded-full items-center justify-center mb-6">
-                            <MaterialIcons name={searchQuery ? "search-off" : "check-circle"} size={48} color="#0D9488" />
-                        </View>
-                        <Text className="text-gray-900 font-black text-xl text-center">
-                            {searchQuery ? "No matches found" : "All collections done!"}
-                        </Text>
-                        <Text className="text-gray-700 text-sm text-center mt-2 px-6">
-                            {searchQuery 
-                                ? `Couldn't find any pending collections for "${searchQuery}"` 
-                                : "You've processed all scheduled collections for today. Great job!"}
-                        </Text>
-                    </Animated.View>
-                ) : (
-                    <View>
-                        {items.map((item, idx) => {
-                            const isOverdue = isPast(new Date(item.schedule.dueDate)) && !isToday(new Date(item.schedule.dueDate));
-                            const isProcessing = processingId === item.schedule.id;
+                initialNumToRender={8}
+                maxToRenderPerBatch={8}
+                updateCellsBatchingPeriod={32}
+                windowSize={5}
+                removeClippedSubviews
+                ListEmptyComponent={
+                    isSearching ? (
+                        <Animated.View entering={FadeInDown} className="bg-white p-12 rounded-[40px] items-center border border-teal-50 shadow-sm mt-4 justify-center">
+                            <ActivityIndicator size="large" color="#0D9488" />
+                            <Text className="text-gray-900 font-bold mt-4">Filtering list...</Text>
+                        </Animated.View>
+                    ) : (
+                        <Animated.View entering={FadeInDown} className="bg-white p-12 rounded-[40px] items-center border border-gray-100 shadow-sm mt-4">
+                            <View className="w-20 h-20 bg-teal-50 rounded-full items-center justify-center mb-6">
+                                <MaterialIcons name={searchQuery ? "search-off" : "check-circle"} size={48} color="#0D9488" />
+                            </View>
+                            <Text className="text-gray-900 font-black text-xl text-center">
+                                {searchQuery ? "No matches found" : "All collections done!"}
+                            </Text>
+                            <Text className="text-gray-700 text-sm text-center mt-2 px-6">
+                                {searchQuery
+                                    ? `Couldn't find any pending collections for "${searchQuery}"`
+                                    : "You've processed all scheduled collections for today. Great job!"}
+                            </Text>
+                        </Animated.View>
+                    )
+                }
+                renderItem={({ item, index }) => {
+                    const isOverdue = isPast(new Date(item.schedule.dueDate)) && !isToday(new Date(item.schedule.dueDate));
+                    const isProcessing = processingId === item.schedule.id;
+                    const entering = index < 8 ? FadeInDown.delay(index * 30).springify().damping(15) : undefined;
 
-                            return (
-                                <Animated.View 
-                                    key={item.schedule.id}
-                                    entering={FadeInDown.delay(idx * 50).springify().damping(15)}
-                                    layout={Layout.springify()}
-                                    className={`bg-white p-5 rounded-[32px] mb-4 border ${sunlightMode ? 'border-4 border-black' : isOverdue ? 'border-red-100 bg-red-50/30 shadow-sm' : 'border-gray-50 shadow-sm'}`}
+                    return (
+                        <Animated.View
+                            entering={entering}
+                            layout={Layout.springify()}
+                            className={`bg-white p-5 rounded-[32px] mb-4 border ${sunlightMode ? 'border-4 border-black' : isOverdue ? 'border-red-100 bg-red-50/30 shadow-sm' : 'border-gray-50 shadow-sm'}`}
+                        >
+                            <View className="flex-row items-center mb-5">
+                                <View className={`w-14 h-14 rounded-2xl items-center justify-center mr-4 border ${sunlightMode ? 'bg-black border-black' : isOverdue ? 'bg-red-500 border-red-500' : 'bg-teal-500 border-teal-500'}`}>
+                                    <Text className="text-white font-black text-xl">
+                                        {item.borrower.fullName.charAt(0)}
+                                    </Text>
+                                </View>
+                                <View className="flex-1">
+                                    <Text className={`${sunlightMode ? 'text-black' : 'text-gray-900'} font-black text-lg leading-tight`} numberOfLines={1}>
+                                        {item.borrower.fullName}
+                                    </Text>
+                                    <View className="flex-row items-center mt-1">
+                                        <View className={`px-2 py-0.5 rounded-full mr-2 ${sunlightMode ? 'bg-black' : isOverdue ? 'bg-red-100' : 'bg-gray-100'}`}>
+                                            <Text className={`text-[9px] font-black uppercase tracking-tighter ${sunlightMode ? 'text-white' : isOverdue ? 'text-red-600' : 'text-gray-700'}`}>
+                                                {isOverdue ? 'Overdue' : 'Due Today'}
+                                            </Text>
+                                        </View>
+                                        <View className="flex-row items-center">
+                                            <Ionicons name="navigate-circle" size={14} color={sunlightMode ? "#000" : "#9CA3AF"} />
+                                            <Text className={`${sunlightMode ? 'text-black' : 'text-gray-700'} text-[10px] font-bold uppercase ml-1`} numberOfLines={1}>
+                                                {item.borrower.area || 'Field'}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                </View>
+                                <View className="items-end">
+                                    <Text className={`${sunlightMode ? 'text-black' : 'text-gray-900'} font-black text-xl tracking-tighter`}>
+                                        {formatPHP(item.schedule.scheduledAmount)}
+                                    </Text>
+                                    <View className="flex-row items-center">
+                                        <Text className={`${sunlightMode ? 'text-black' : 'text-gray-700'} text-[9px] font-bold mr-1`}>Loan #:</Text>
+                                        <Text className={`${sunlightMode ? 'text-black' : 'text-teal-600'} text-[10px] font-black`}>
+                                            {item.loan.loanNumber}
+                                        </Text>
+                                    </View>
+                                </View>
+                            </View>
+
+                            <View className="flex-row gap-3">
+                                <AnimatedPressable
+                                    onPress={() => router.push(`/(collector)/borrowers/${item.borrower.id}`)}
+                                    haptic={false}
+                                    className={`${sunlightMode ? 'bg-white border-4 border-black' : 'bg-gray-100 border-gray-200'} h-14 w-14 rounded-2xl items-center justify-center border`}
                                 >
-                                    <View className="flex-row items-center mb-5">
-                                        <View className={`w-14 h-14 rounded-2xl items-center justify-center mr-4 border ${sunlightMode ? 'bg-black border-black' : isOverdue ? 'bg-red-500 border-red-500' : 'bg-teal-500 border-teal-500'}`}>
-                                            <Text className="text-white font-black text-xl">
-                                                {item.borrower.fullName.charAt(0)}
-                                            </Text>
-                                        </View>
-                                        <View className="flex-1">
-                                            <Text className={`${sunlightMode ? 'text-black' : 'text-gray-900'} font-black text-lg leading-tight`} numberOfLines={1}>
-                                                {item.borrower.fullName}
-                                            </Text>
-                                            <View className="flex-row items-center mt-1">
-                                                <View className={`px-2 py-0.5 rounded-full mr-2 ${sunlightMode ? 'bg-black' : isOverdue ? 'bg-red-100' : 'bg-gray-100'}`}>
-                                                    <Text className={`text-[9px] font-black uppercase tracking-tighter ${sunlightMode ? 'text-white' : isOverdue ? 'text-red-600' : 'text-gray-700'}`}>
-                                                        {isOverdue ? 'Overdue' : 'Due Today'}
-                                                    </Text>
-                                                </View>
-                                                <View className="flex-row items-center">
-                                                    <Ionicons name="navigate-circle" size={14} color={sunlightMode ? "#000" : "#9CA3AF"} />
-                                                    <Text className={`${sunlightMode ? 'text-black' : 'text-gray-700'} text-[10px] font-bold uppercase ml-1`} numberOfLines={1}>
-                                                        {item.borrower.area || 'Field'}
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                        <View className="items-end">
-                                            <Text className={`${sunlightMode ? 'text-black' : 'text-gray-900'} font-black text-xl tracking-tighter`}>
-                                                {formatPHP(item.schedule.scheduledAmount)}
-                                            </Text>
-                                            <View className="flex-row items-center">
-                                                <Text className={`${sunlightMode ? 'text-black' : 'text-gray-700'} text-[9px] font-bold mr-1`}>Loan #:</Text>
-                                                <Text className={`${sunlightMode ? 'text-black' : 'text-teal-600'} text-[10px] font-black`}>
-                                                    {item.loan.loanNumber}
-                                                </Text>
-                                            </View>
-                                        </View>
-                                    </View>
+                                    <Ionicons name="person" size={22} color={sunlightMode ? "#000" : "#4B5563"} />
+                                </AnimatedPressable>
 
-                                    <View className="flex-row gap-3">
-                                        <AnimatedPressable
-                                            onPress={() => router.push(`/(collector)/borrowers/${item.borrower.id}`)}
-                                            className={`${sunlightMode ? 'bg-white border-4 border-black' : 'bg-gray-100 border-gray-200'} h-14 w-14 rounded-2xl items-center justify-center border`}
-                                        >
-                                            <Ionicons name="person" size={22} color={sunlightMode ? "#000" : "#4B5563"} />
-                                        </AnimatedPressable>
-                                        
-                                        <AnimatedPressable
-                                            onPress={() => handleQuickCollect(item)}
-                                            disabled={isProcessing}
-                                            className={`flex-1 h-14 flex-row items-center justify-center rounded-2xl ${sunlightMode ? 'bg-black border-4 border-black' : isOverdue ? 'bg-red-600' : 'bg-teal-600 shadow-sm'}`}
-                                        >
-                                            {isProcessing ? (
-                                                <ActivityIndicator size="small" color="#FFF" />
-                                            ) : (
-                                                <>
-                                                    <Ionicons name="flash" size={18} color="#FFF" />
-                                                    <Text className="text-white font-black uppercase tracking-[2px] text-xs ml-2">Quick Collect</Text>
-                                                </>
-                                            )}
-                                        </AnimatedPressable>
-                                    </View>
-                                </Animated.View>
-                            );
-                        })}
-                    </View>
-                )}
-            </ScrollView>
+                                <AnimatedPressable
+                                    onPress={() => handleQuickCollect(item)}
+                                    disabled={isProcessing}
+                                    haptic={false}
+                                    className={`flex-1 h-14 flex-row items-center justify-center rounded-2xl ${sunlightMode ? 'bg-black border-4 border-black' : isOverdue ? 'bg-red-600' : 'bg-teal-600 shadow-sm'}`}
+                                >
+                                    {isProcessing ? (
+                                        <ActivityIndicator size="small" color="#FFF" />
+                                    ) : (
+                                        <>
+                                            <Ionicons name="flash" size={18} color="#FFF" />
+                                            <Text className="text-white font-black uppercase tracking-[2px] text-xs ml-2">Quick Collect</Text>
+                                        </>
+                                    )}
+                                </AnimatedPressable>
+                            </View>
+                        </Animated.View>
+                    );
+                }}
+            />
         </SafeAreaView>
     );
 }

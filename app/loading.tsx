@@ -3,7 +3,6 @@ import {
     View, Text, StyleSheet, Animated, Dimensions, Easing, Platform
 } from 'react-native';
 import { router } from 'expo-router';
-import { SyncService } from '../src/services/SyncService';
 import { useSyncStore } from '../src/stores/syncStore';
 import { useAuth } from '../src/store/AuthContext';
 import { ROLE_HOME_ROUTES, UserRole } from '../src/constants/roles';
@@ -12,21 +11,15 @@ import { isRouteAllowedForRole, LAST_AUTHORIZED_ROUTE_KEY } from '../src/utils/a
 
 const { width } = Dimensions.get('window');
 
-const SYNC_TIMEOUT_MS = 30000; // 30 second timeout for sync operation
 const AUTO_REDIRECT_DELAY_MS = 1000; // Delay before redirecting to allow UI to settle
 const NO_SESSION_GRACE_MS = 3000; // Allow auth event/session storage to settle after login handoff
 
 export default function LoadingScreen() {
-    console.log('[LoadingScreen] Rendering LoadingScreen');
     const rotation = useRef(new Animated.Value(0)).current;
     const glow = useRef(new Animated.Value(0.3)).current;
     const { status, currentModel, progress } = useSyncStore();
     const { user, role, roleResolved, initialized, initializationError } = useAuth();
-    const [syncAttempted, setSyncAttempted] = useState(false);
-    const [syncTimedOut, setSyncTimedOut] = useState(false);
     const [noSessionGraceElapsed, setNoSessionGraceElapsed] = useState(false);
-
-    console.log('[LoadingScreen] State:', { status, initialized, user: !!user, role, roleResolved });
 
     useEffect(() => {
         Animated.loop(
@@ -60,72 +53,6 @@ export default function LoadingScreen() {
     }, [initialized, user]);
 
     useEffect(() => {
-        if (!initialized || syncAttempted) return;
-
-        let timeoutId: ReturnType<typeof setTimeout> | null = null;
-        let active = true;
-
-        if (initializationError) {
-            console.log('[Loading] Auth initialization failed, skipping sync');
-            setSyncAttempted(true);
-            setSyncTimedOut(true);
-            return;
-        }
-
-        if (!user && !noSessionGraceElapsed) {
-            console.log('[Loading] Waiting briefly for auth session handoff');
-            return;
-        }
-
-        if (!user) {
-            console.log('[Loading] No authenticated user, skipping sync');
-            setSyncAttempted(true);
-            return;
-        }
-
-        if (!roleResolved) {
-            console.log('[Loading] Waiting for role resolution before sync');
-            return;
-        }
-
-        if (!role) {
-            console.log('[Loading] Authenticated user has no role, skipping sync');
-            setSyncAttempted(true);
-            return;
-        }
-
-        console.log('[Loading] Auth initialized with user, starting sync with timeout...');
-        setSyncAttempted(true);
-
-        const syncPromise = SyncService.checkAndSync({ force: true });
-        const timeoutPromise = new Promise<void>((_, reject) => {
-            timeoutId = setTimeout(
-                () => reject(new Error(`Sync operation timed out after ${SYNC_TIMEOUT_MS}ms`)),
-                SYNC_TIMEOUT_MS
-            );
-        });
-
-        Promise.race([syncPromise, timeoutPromise])
-            .catch((err) => {
-                if (!active) return;
-                console.error('[Loading] Sync failed:', err?.message);
-                setSyncTimedOut(true);
-            })
-            .finally(() => {
-                if (timeoutId) {
-                    clearTimeout(timeoutId);
-                }
-            });
-
-        return () => {
-            active = false;
-            if (timeoutId) {
-                clearTimeout(timeoutId);
-            }
-        };
-    }, [initialized, user, role, roleResolved, syncAttempted, initializationError, noSessionGraceElapsed]);
-
-    useEffect(() => {
         if (!initialized) return;
 
         if (!user && !noSessionGraceElapsed) {
@@ -141,14 +68,10 @@ export default function LoadingScreen() {
 
         // Wait until role resolution settles before deciding where to go.
         if (user && !roleResolved) {
-            console.log('[LoadingScreen] Waiting for role resolution before redirect');
             return;
         }
 
-        const shouldRedirect =
-            status === 'completed' ||
-            status === 'error' ||
-            syncTimedOut;
+        const shouldRedirect = !!initializationError || !user || roleResolved;
 
         if (!shouldRedirect) return;
 
@@ -170,7 +93,7 @@ export default function LoadingScreen() {
         }, AUTO_REDIRECT_DELAY_MS);
 
         return () => clearTimeout(timeout);
-    }, [status, initialized, user, role, roleResolved, syncTimedOut, noSessionGraceElapsed]);
+    }, [initialized, user, role, roleResolved, initializationError, noSessionGraceElapsed]);
 
     const getStatusMessage = () => {
         if (!initialized) return 'Initializing...';
@@ -178,7 +101,6 @@ export default function LoadingScreen() {
         if (!user) return 'No session found';
         if (user && !roleResolved) return 'Resolving access...';
         if (initializationError) return 'Auth setup incomplete';
-        if (syncTimedOut) return 'Loading app data... (offline mode)';
         if (status === 'error') return 'Sync Error. Retrying...';
         if (status === 'completed') return 'Ready';
         if (status === 'syncing') return `Syncing ${currentModel}...`;
