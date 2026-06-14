@@ -2,6 +2,115 @@ import type { AppUpdateEntry } from './appUpdates';
 
 export const GENERATED_APP_UPDATES: AppUpdateEntry[] = [
     {
+        "id": "38b3d01843a5ece5053fca6de681eb99b635af80",
+        "version": "38b3d01",
+        "versionLabel": "Commit",
+        "date": "2026-06-13",
+        "title": "Checkpoint workspace state before Bitbucket migration",
+        "category": "technical",
+        "icon": "code",
+        "summary": "The projects under D:\\\\GitHub are being prepared for remote backup to Bitbucket, so this records each repository's current local state before remote creation and push.",
+        "changes": [
+            "Checkpoint workspace state before Bitbucket migration",
+            "The projects under D:\\\\GitHub are being prepared for remote backup to Bitbucket, so this records each repository's current local state before remote creation and push."
+        ],
+        "codeChanges": [
+            "Updated app/(collector)/collection-sheet.tsx",
+            "Updated app/__tests__/loading.test.tsx",
+            "Updated app/loading.tsx"
+        ]
+    },
+    {
+        "id": "416720f5d209ac757ccf683f14d45951bdf6ccd1",
+        "version": "416720f",
+        "versionLabel": "Commit",
+        "date": "2026-06-12",
+        "title": "Implement admin reporting dashboard with PDF export and financial KPI services",
+        "category": "feature",
+        "icon": "new-releases",
+        "summary": "Implement admin reporting dashboard with PDF export and financial KPI services",
+        "changes": [
+            "Implement admin reporting dashboard with PDF export and financial KPI services"
+        ],
+        "codeChanges": [
+            "Updated .agents/skills/deploy-infinity/SKILL.md",
+            "Updated app/(admin)/cash-on-hand/index.tsx",
+            "Updated app/(admin)/remittances.tsx"
+        ]
+    },
+    {
+        "id": "299eca7f65089af03cb127e8d08f5d21f3da468a",
+        "version": "299eca7",
+        "versionLabel": "Commit",
+        "date": "2026-06-11",
+        "title": "Bump version to 1.0.27",
+        "category": "technical",
+        "icon": "code",
+        "summary": "Bump version to 1.0.27",
+        "changes": [
+            "Bump version to 1.0.27"
+        ],
+        "codeChanges": [
+            "Updated app/(admin)/borrowers/index.tsx",
+            "Updated app/(admin)/loans/index.tsx",
+            "Updated app/(admin)/payments/index.tsx"
+        ]
+    },
+    {
+        "id": "79f1deabbd22fd7c0336196739ae7f70fccdf3e7",
+        "version": "79f1dea",
+        "versionLabel": "Commit",
+        "date": "2026-06-11",
+        "title": "Final polish for SearchBar debounce, PaymentService allocation, and SyncService batching limit",
+        "category": "technical",
+        "icon": "code",
+        "summary": "Final polish for SearchBar debounce, PaymentService allocation, and SyncService batching limit",
+        "changes": [
+            "Final polish for SearchBar debounce, PaymentService allocation, and SyncService batching limit"
+        ],
+        "codeChanges": [
+            "Updated app/(admin)/borrowers/index.tsx",
+            "Updated app/(admin)/loans/index.tsx",
+            "Updated src/components/SearchBar.tsx"
+        ]
+    },
+    {
+        "id": "248696beeea2e91e0681b296712619e5b918eab5",
+        "version": "248696b",
+        "versionLabel": "Commit",
+        "date": "2026-06-11",
+        "title": "Add safety check to LoanService to prevent editing loans without existingLoan instance and include audit verification files",
+        "category": "data",
+        "icon": "fact-check",
+        "summary": "Add safety check to LoanService to prevent editing loans without existingLoan instance and include audit verification files",
+        "changes": [
+            "Add safety check to LoanService to prevent editing loans without existingLoan instance and include audit verification files"
+        ],
+        "codeChanges": [
+            "Updated .agents/sentinel/BRIEFING.md",
+            "Updated .agents/victory_auditor/handoff.md",
+            "Updated .agents/victory_auditor_2/BRIEFING.md"
+        ]
+    },
+    {
+        "id": "5c580645d9b1e8464b039ac9338817053ae7afb0",
+        "version": "5c58064",
+        "versionLabel": "Commit",
+        "date": "2026-06-10",
+        "title": "Implement weekly collector assignment system, database testing utilities, and project deployment documentation",
+        "category": "feature",
+        "icon": "new-releases",
+        "summary": "Implement weekly collector assignment system, database testing utilities, and project deployment documentation",
+        "changes": [
+            "Implement weekly collector assignment system, database testing utilities, and project deployment documentation"
+        ],
+        "codeChanges": [
+            "Updated .agents/skills/pre-deploy-test/SKILL.md",
+            "Updated .agents/workflows/deploy.md",
+            "Updated app/(admin)/reports/weekly-dcs.tsx"
+        ]
+    },
+    {
         "id": "af3dc327edf72f8c1c67a74bcfdc2cd33b1f5fee",
         "version": "af3dc32",
         "versionLabel": "Commit",

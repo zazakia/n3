@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, FlatList, Pressable, ActivityIndicator, ScrollView, Modal } from 'react-native';
+import { View, Text, FlatList, Pressable, ActivityIndicator, ScrollView, Modal, Alert, Platform } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { database } from '../../../src/database';
 import { Q } from '@nozbe/watermelondb';
@@ -13,9 +13,11 @@ import { formatPHP } from '../../../src/utils/currency';
 import SwipeableItem from '../../../src/components/SwipeableItem';
 import ConfirmDialog from '../../../src/components/ConfirmDialog';
 import BaseModelService from '../../../src/services/BaseModelService';
-import { Alert, Platform } from 'react-native';
 import { format } from 'date-fns';
 import { PdfGenerator, VoucherPaperSize } from '../../../src/services/PdfGenerator';
+import { DataTable, ColumnDef } from '../../../src/components/DataTable';
+import { PaginationControls } from '../../../src/components/PaginationControls';
+import { ViewToggle, ViewMode } from '../../../src/components/ViewToggle';
 
 const PAPER_SIZE_OPTIONS: { label: string; value: VoucherPaperSize; description: string }[] = [
     { label: 'Letter', value: 'letter', description: '8.5 x 11 in' },
@@ -23,17 +25,16 @@ const PAPER_SIZE_OPTIONS: { label: string; value: VoucherPaperSize; description:
     { label: 'Legal', value: 'legal', description: '8.5 x 14 in' },
 ];
 
+export type EnrichedLoan = Loan & { borrowerName: string, balance: number };
+
 const MemoizedLoanItem = React.memo(({ item, onPress, onPressBorrower, onDelete, onActionsVisibilityChange }: { 
-    item: Loan & { borrowerName: string, balance: number }, 
+    item: EnrichedLoan, 
     onPress: () => void, 
     onPressBorrower: () => void, 
     onDelete: () => void, 
     onActionsVisibilityChange: (isVisible: boolean) => void 
 }) => (
-    <SwipeableItem
-        onActionsVisibilityChange={onActionsVisibilityChange}
-        onDelete={onDelete}
-    >
+    <SwipeableItem onActionsVisibilityChange={onActionsVisibilityChange} onDelete={onDelete}>
         <Pressable
             className="bg-white p-4 rounded-2xl mb-3 border border-gray-100 shadow-sm active:opacity-70"
             onPress={onPress}
@@ -76,7 +77,7 @@ const MemoizedLoanItem = React.memo(({ item, onPress, onPressBorrower, onDelete,
             <View className="flex-row justify-between items-center">
                 <View className="flex-1">
                     <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Principal</Text>
-                    <Text className="text-sm font-extrabold text-primary mt-0.5">{formatPHP(item.principalAmount)}</Text>
+                    <Text className="text-sm font-extrabold text-emerald-700 mt-0.5">{formatPHP(item.principalAmount)}</Text>
                 </View>
                 <View className="flex-1 items-center">
                     <Text className="text-[10px] font-bold text-gray-700 uppercase tracking-widest">Insurance</Text>
@@ -108,7 +109,7 @@ const MemoizedLoanItem = React.memo(({ item, onPress, onPressBorrower, onDelete,
 
 export default function LoansListScreen() {
     const router = useRouter();
-    const [loans, setLoans] = useState<(Loan & { borrowerName: string, balance: number })[]>([]);
+    const [loans, setLoans] = useState<EnrichedLoan[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [loading, setLoading] = useState(true);
@@ -119,43 +120,92 @@ export default function LoansListScreen() {
     const [printing, setPrinting] = useState(false);
     const [visibleSwipeActionId, setVisibleSwipeActionId] = useState<string | null>(null);
 
+    // Pagination & View Mode
+    const [viewMode, setViewMode] = useState<ViewMode>('table');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(25);
+    const [totalRecords, setTotalRecords] = useState(0);
+
     const loadData = async () => {
+        setLoading(true);
         try {
-            const fetchedLoans = await database.collections.get<Loan>('loans')
-                .query(
-                    Q.where('deleted_at', Q.eq(null)),
-                    Q.sortBy('created_at', Q.desc)
-                ).fetch();
-            const fetchedBorrowers = await database.collections.get<Borrower>('borrowers').query(Q.where('deleted_at', Q.eq(null))).fetch();
-            const fetchedPayments = await database.collections.get<Payment>('payments').query(Q.where('deleted_at', Q.eq(null))).fetch();
-            const fetchedPenalties = await database.collections.get<LoanPenalty>('loan_penalties').query(Q.where('deleted_at', Q.eq(null))).fetch();
+            const conditions: Q.Clause[] = [Q.where('deleted_at', Q.eq(null))];
+            
+            if (filterStatus !== 'all') {
+                conditions.push(Q.where('status', filterStatus));
+            }
 
-            const borrowerMap: Record<string, string> = {};
-            fetchedBorrowers.forEach(b => borrowerMap[b.id] = b.fullName);
-
-            const paymentMap: Record<string, number> = {};
-            fetchedPayments.forEach(p => {
-                paymentMap[p.loanId] = (paymentMap[p.loanId] || 0) + (p.amount || 0);
-            });
-
-            const penaltyMap: Record<string, number> = {};
-            fetchedPenalties.forEach(p => {
-                penaltyMap[p.loanId] = (penaltyMap[p.loanId] || 0) + (p.amount || 0);
-            });
-
-            const enrichedLoans = fetchedLoans.map(l => {
-                const loanAny = l as any;
-                loanAny.borrowerName = l.borrowerId ? (borrowerMap[l.borrowerId] ?? 'Unknown') : 'Unknown';
+            if (searchQuery.trim()) {
+                const safeSearch = Q.sanitizeLikeString(searchQuery);
+                // Pre-fetch matching borrowers to work around Q.or not supporting Q.on
+                const matchingBorrowers = await database.get<Borrower>('borrowers')
+                    .query(Q.where('full_name', Q.like(`%${safeSearch}%`))).fetch();
                 
-                const totalPaid = paymentMap[l.id] || 0;
-                const penaltyTotal = penaltyMap[l.id] || 0;
-                const totalExpected = (l.totalAmount || 0) + penaltyTotal;
-                loanAny.balance = Math.max(0, totalExpected - totalPaid);
+                const borrowerIds = matchingBorrowers.map(b => b.id);
                 
-                return loanAny;
-            });
+                conditions.push(
+                    Q.or(
+                        Q.where('loan_number', Q.like(`%${safeSearch}%`)),
+                        Q.where('borrower_id', Q.oneOf(borrowerIds))
+                    )
+                );
+            }
 
-            setLoans(enrichedLoans);
+            const baseQuery = database.collections.get<Loan>('loans').query(...conditions);
+
+            const count = await baseQuery.fetchCount();
+            setTotalRecords(count);
+
+            const maxPage = Math.max(1, Math.ceil(count / itemsPerPage));
+            if (currentPage > maxPage) {
+                setCurrentPage(maxPage);
+                return;
+            }
+
+            const offset = (currentPage - 1) * itemsPerPage;
+            const fetchedLoans = await baseQuery.extend(
+                Q.sortBy('created_at', Q.desc),
+                Q.skip(offset),
+                Q.take(itemsPerPage)
+            ).fetch();
+
+            if (fetchedLoans.length > 0) {
+                const borrowerIds = fetchedLoans.map(l => l.borrowerId).filter(Boolean);
+                const fetchedBorrowers = await database.collections.get<Borrower>('borrowers')
+                    .query(Q.where('id', Q.oneOf(borrowerIds))).fetch();
+                
+                const loanIds = fetchedLoans.map(l => l.id);
+                const fetchedPayments = await database.collections.get<Payment>('payments')
+                    .query(Q.where('loan_id', Q.oneOf(loanIds)), Q.where('deleted_at', Q.eq(null))).fetch();
+                const fetchedPenalties = await database.collections.get<LoanPenalty>('loan_penalties')
+                    .query(Q.where('loan_id', Q.oneOf(loanIds)), Q.where('deleted_at', Q.eq(null))).fetch();
+
+                const borrowerMap: Record<string, string> = {};
+                fetchedBorrowers.forEach(b => borrowerMap[b.id] = b.fullName);
+
+                const paymentMap: Record<string, number> = {};
+                fetchedPayments.forEach(p => { paymentMap[p.loanId] = (paymentMap[p.loanId] || 0) + (p.amount || 0); });
+
+                const penaltyMap: Record<string, number> = {};
+                fetchedPenalties.forEach(p => { penaltyMap[p.loanId] = (penaltyMap[p.loanId] || 0) + (p.amount || 0); });
+
+                const enrichedLoans = fetchedLoans.map(l => {
+                    const loanAny = l as any;
+                    loanAny.borrowerName = l.borrowerId ? (borrowerMap[l.borrowerId] ?? 'Unknown') : 'Unknown';
+                    
+                    const totalPaid = paymentMap[l.id] || 0;
+                    const penaltyTotal = penaltyMap[l.id] || 0;
+                    const totalExpected = (l.totalAmount || 0) + penaltyTotal;
+                    loanAny.balance = Math.max(0, totalExpected - totalPaid);
+                    
+                    return loanAny as EnrichedLoan;
+                });
+
+                setLoans(enrichedLoans);
+            } else {
+                setLoans([]);
+            }
+
         } catch (error) {
             console.error('Failed to load loans:', error);
         } finally {
@@ -166,15 +216,8 @@ export default function LoansListScreen() {
     useFocusEffect(
         useCallback(() => {
             loadData();
-        }, [])
+        }, [currentPage, itemsPerPage, searchQuery, filterStatus])
     );
-
-    const filteredLoans = useMemo(() => loans.filter(l => {
-        const matchesSearch = l.loanNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            l.borrowerName.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus = filterStatus === 'all' || l.status === filterStatus;
-        return matchesSearch && matchesStatus;
-    }), [loans, searchQuery, filterStatus]);
 
     const handleDelete = async () => {
         try {
@@ -192,12 +235,12 @@ export default function LoansListScreen() {
     };
 
     const handleBatchPrint = async () => {
-        if (filteredLoans.length === 0) return;
+        if (loans.length === 0) return;
 
         setPrinting(true);
         try {
             await PdfGenerator.generateVoucherBatch(
-                filteredLoans.map((loan) => ({
+                loans.map((loan) => ({
                     borrower: { fullName: loan.borrowerName },
                     loan: {
                         loanNumber: loan.loanNumber,
@@ -232,34 +275,79 @@ export default function LoansListScreen() {
         }
     };
 
-    const renderItem = useCallback(({ item }: { item: Loan & { borrowerName: string, balance: number } }) => (
-        <MemoizedLoanItem
-            item={item}
-            onPress={() => router.push(`/(admin)/loans/${item.id}`)}
-            onPressBorrower={() => router.push(`/(admin)/borrowers/${item.borrowerId}`)}
-            onDelete={() => {
-                setSelectedLoan(item);
-                setIsConfirmDeleteVisible(true);
-            }}
-            onActionsVisibilityChange={(isVisible) => {
-                setVisibleSwipeActionId((currentId) => isVisible ? item.id : currentId === item.id ? null : currentId);
-            }}
-        />
-    ), [router]);
+    const columns: ColumnDef<EnrichedLoan>[] = [
+        {
+            key: 'loanNumber',
+            label: 'Loan #',
+            width: 100,
+            render: (l) => (
+                <View>
+                    <Text className="font-bold text-gray-900">{l.loanNumber}</Text>
+                    {l.isReloan && <Text className="text-[8px] font-black uppercase text-blue-700 mt-0.5 bg-blue-100 self-start px-1 rounded">Renewal</Text>}
+                </View>
+            )
+        },
+        {
+            key: 'borrowerName',
+            label: 'Borrower Name',
+            flex: 2,
+            render: (l) => (
+                <Pressable onPress={() => router.push(`/(admin)/borrowers/${l.borrowerId}`)}>
+                    <Text className="text-sm text-blue-700 underline font-bold" numberOfLines={1}>{l.borrowerName}</Text>
+                </Pressable>
+            )
+        },
+        {
+            key: 'status',
+            label: 'Status',
+            width: 80,
+            align: 'center',
+            render: (l) => (
+                <View className={`px-2 py-1 rounded ${l.status === 'active' ? 'bg-blue-50' : l.status === 'paid' ? 'bg-green-50' : l.status === 'defaulted' ? 'bg-red-50' : 'bg-gray-100'}`}>
+                    <Text className={`text-[9px] font-black uppercase tracking-wider ${l.status === 'active' ? 'text-blue-800' : l.status === 'paid' ? 'text-green-800' : l.status === 'defaulted' ? 'text-red-800' : 'text-gray-800'}`}>
+                        {l.status}
+                    </Text>
+                </View>
+            )
+        },
+        {
+            key: 'principalAmount',
+            label: 'Principal',
+            flex: 1,
+            align: 'right',
+            render: (l) => <Text className="font-bold text-emerald-700">{formatPHP(l.principalAmount)}</Text>
+        },
+        {
+            key: 'balance',
+            label: 'Balance',
+            flex: 1,
+            align: 'right',
+            render: (l) => <Text className="font-bold text-[#D32F2F]">{formatPHP(l.balance)}</Text>
+        },
+        {
+            key: 'releaseDate',
+            label: 'Released',
+            width: 100,
+            align: 'right',
+            render: (l) => <Text className="text-xs text-gray-600">{l.releaseDate ? format(new Date(l.releaseDate as any), 'MMM dd, yyyy') : '-'}</Text>
+        }
+    ];
+
+    const totalPages = Math.max(1, Math.ceil(totalRecords / itemsPerPage));
 
     return (
         <View className="flex-1 bg-gray-50 p-4">
             <View className="mb-2">
-                <SearchBar
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    placeholder="Search by loan # or name..."
-                />
-                {searchQuery.trim().length > 0 && (
-                    <Text className="text-xs text-gray-500 mt-1 ml-2 font-medium">
-                        Showing {filteredLoans.length} result(s)
-                    </Text>
-                )}
+                <View className="flex-row items-center justify-between mb-2">
+                    <View className="flex-1 mr-3">
+                        <SearchBar
+                            value={searchQuery}
+                            onChangeText={(t) => { setSearchQuery(t); setCurrentPage(1); }}
+                            placeholder="Search by loan # or borrower name..."
+                        />
+                    </View>
+                    <ViewToggle mode={viewMode} onToggle={setViewMode} />
+                </View>
             </View>
 
             <View className="mb-4 flex-row items-center">
@@ -267,8 +355,8 @@ export default function LoansListScreen() {
                     {['all', 'pending', 'active', 'paid', 'defaulted'].map(status => (
                         <Pressable
                             key={status}
-                            onPress={() => setFilterStatus(status)}
-                            className={`px-4 py-2 rounded-full border mr-2 ${filterStatus === status ? 'bg-primary border-primary' : 'bg-white border-gray-200'}`}
+                            onPress={() => { setFilterStatus(status); setCurrentPage(1); }}
+                            className={`px-4 py-2 rounded-full border mr-2 ${filterStatus === status ? 'bg-emerald-600 border-emerald-600' : 'bg-white border-gray-200'}`}
                         >
                             <Text className={`text-xs font-bold uppercase tracking-wider ${filterStatus === status ? 'text-white' : 'text-gray-700'}`}>
                                 {status}
@@ -277,33 +365,75 @@ export default function LoansListScreen() {
                     ))}
                 </ScrollView>
                 <Pressable
-                    className={`ml-3 px-5 py-2.5 rounded-full flex-row items-center border ${filteredLoans.length === 0 ? 'bg-gray-100 border-gray-200' : 'bg-purple-700 border-purple-700'}`}
+                    className={`ml-3 px-5 py-2.5 rounded-full flex-row items-center border ${loans.length === 0 ? 'bg-gray-100 border-gray-200' : 'bg-purple-700 border-purple-700'}`}
                     onPress={() => setIsPrintOptionsVisible(true)}
-                    disabled={filteredLoans.length === 0}
+                    disabled={loans.length === 0}
                 >
-                    <MaterialIcons name="print" size={16} color={filteredLoans.length === 0 ? '#9CA3AF' : '#FFFFFF'} className="mr-2" />
-                    <Text className={`text-xs font-black uppercase tracking-wider ${filteredLoans.length === 0 ? 'text-gray-400' : 'text-white'}`}>
+                    <MaterialIcons name="print" size={16} color={loans.length === 0 ? '#9CA3AF' : '#FFFFFF'} className="mr-2" />
+                    <Text className={`text-xs font-black uppercase tracking-wider ${loans.length === 0 ? 'text-gray-400' : 'text-white'}`}>
                         Batch Print
                     </Text>
                 </Pressable>
             </View>
 
-            {loading ? (
+            {loading && loans.length === 0 ? (
                 <ActivityIndicator size="large" color="#D32F2F" className="mt-10" />
             ) : (
-                <FlatList
-                    data={filteredLoans}
-                    keyExtractor={(item) => item.id}
-                    renderItem={renderItem}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 100 }}
-                    ListEmptyComponent={
-                        <View className="items-center justify-center py-20">
-                            <MaterialIcons name="money-off" size={64} color="#E5E7EB" />
-                            <Text className="text-gray-700 font-medium mt-4 text-base">No loans found</Text>
-                        </View>
-                    }
-                />
+                <>
+                    <View className="flex-1">
+                        {viewMode === 'table' ? (
+                            <DataTable 
+                                columns={columns} 
+                                data={loans} 
+                                keyExtractor={(l) => l.id} 
+                                onRowPress={(l) => router.push(`/(admin)/loans/${l.id}`)}
+                                minWidth={700}
+                            />
+                        ) : (
+                            <FlatList
+                                data={loans}
+                                keyExtractor={(item) => item.id}
+                                removeClippedSubviews={true}
+                                windowSize={5}
+                                maxToRenderPerBatch={10}
+                                initialNumToRender={10}
+                                renderItem={({ item }) => (
+                                    <MemoizedLoanItem
+                                        item={item}
+                                        onPress={() => router.push(`/(admin)/loans/${item.id}`)}
+                                        onPressBorrower={() => router.push(`/(admin)/borrowers/${item.borrowerId}`)}
+                                        onDelete={() => {
+                                            setSelectedLoan(item);
+                                            setIsConfirmDeleteVisible(true);
+                                        }}
+                                        onActionsVisibilityChange={(isVisible) => {
+                                            setVisibleSwipeActionId((currentId) => isVisible ? item.id : currentId === item.id ? null : currentId);
+                                        }}
+                                    />
+                                )}
+                                showsVerticalScrollIndicator={false}
+                                contentContainerStyle={{ paddingBottom: 20 }}
+                                ListEmptyComponent={
+                                    <View className="items-center justify-center py-20">
+                                        <MaterialIcons name="money-off" size={64} color="#E5E7EB" />
+                                        <Text className="text-gray-700 font-medium mt-4 text-base">No loans found</Text>
+                                    </View>
+                                }
+                            />
+                        )}
+                    </View>
+                    <PaginationControls 
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalRecords={totalRecords}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={setCurrentPage}
+                        onItemsPerPageChange={(limit) => {
+                            setItemsPerPage(limit);
+                            setCurrentPage(1);
+                        }}
+                    />
+                </>
             )}
 
             <ConfirmDialog
@@ -316,19 +446,14 @@ export default function LoansListScreen() {
                 isDestructive={true}
             />
 
-            <Modal
-                visible={isPrintOptionsVisible}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setIsPrintOptionsVisible(false)}
-            >
+            <Modal visible={isPrintOptionsVisible} transparent animationType="fade" onRequestClose={() => setIsPrintOptionsVisible(false)}>
                 <View className="flex-1 bg-black/40 justify-center px-6">
                     <View className="bg-white rounded-2xl p-5 border border-gray-100">
                         <View className="flex-row justify-between items-center mb-4">
                             <View>
                                 <Text className="text-lg font-black text-gray-900">Batch Print Vouchers</Text>
                                 <Text className="text-xs font-bold text-gray-500 mt-1">
-                                    8 vouchers per page · {filteredLoans.length} selected
+                                    8 vouchers per page · {loans.length} selected (this page)
                                 </Text>
                             </View>
                             <Pressable className="p-2 bg-gray-100 rounded-full" onPress={() => setIsPrintOptionsVisible(false)}>
@@ -374,7 +499,7 @@ export default function LoansListScreen() {
             {/* FAB */}
             {!visibleSwipeActionId && (
                 <Pressable
-                    className={`${Platform.OS === 'web' ? 'absolute bottom-6 left-6' : 'absolute bottom-6 right-6'} w-14 h-14 bg-[#D32F2F] rounded-full items-center justify-center shadow-lg active:bg-red-800`}
+                    className={`${Platform.OS === 'web' ? 'absolute bottom-20 left-6' : 'absolute bottom-20 right-6'} w-14 h-14 bg-[#D32F2F] rounded-full items-center justify-center shadow-lg active:bg-red-800 z-50`}
                     onPress={() => router.push('/(admin)/loans/new')}
                 >
                     <MaterialIcons name="add" size={28} color="#FFFFFF" />

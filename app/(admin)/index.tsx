@@ -464,7 +464,7 @@ export default function AdminDashboardScreen() {
         }
     };
 
-    useFocusEffect(useCallback(() => { loadData(); }, [status]));
+    useFocusEffect(useCallback(() => { loadData(); }, []));
 
     const onRefresh = async () => {
         setRefreshing(true);

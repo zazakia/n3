@@ -78,8 +78,9 @@ export default function ClientPassbookScreen() {
                 const activeLoan = orderedLoans.find(loan => loan.status === 'active') || orderedLoans[0];
                 setSelectedLoanId(activeLoan.id);
             }
-        } catch (error) {
-            console.error('Passbook load error:', error);
+        } catch (error: any) {
+            const isNotFound = error?.message?.includes('not found') || error?.type === 'RecordNotFound';
+            if (!isNotFound) console.error('Passbook load error:', error);
             safeBack(router, '/(admin)');
         } finally {
             setLoading(false);

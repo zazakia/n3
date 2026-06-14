@@ -98,6 +98,10 @@ export default function CashOnHandScreen() {
                     <FlatList
                         data={txns}
                         keyExtractor={(item) => item.id}
+                        removeClippedSubviews={true}
+                        windowSize={5}
+                        maxToRenderPerBatch={10}
+                        initialNumToRender={10}
                         renderItem={renderItem}
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={{ paddingBottom: 100 }}

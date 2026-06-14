@@ -4,6 +4,7 @@ import { useFocusEffect } from 'expo-router';
 import { MfiKpiService } from '../../../src/services/MfiKpiService';
 import { formatPHP } from '../../../src/utils/currency';
 import { startOfMonth, endOfMonth, addMonths, subMonths, format } from 'date-fns';
+import { formatDate } from '../../../src/utils/dates';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SearchBar } from '../../../src/components/SearchBar';

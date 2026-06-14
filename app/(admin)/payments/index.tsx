@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, FlatList, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, Pressable, ActivityIndicator, Alert, Platform } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { database } from '../../../src/database';
 import { Q } from '@nozbe/watermelondb';
@@ -13,7 +13,10 @@ import { formatDate } from '../../../src/utils/dates';
 import SwipeableItem from '../../../src/components/SwipeableItem';
 import ConfirmDialog from '../../../src/components/ConfirmDialog';
 import BaseModelService from '../../../src/services/BaseModelService';
-import { Alert, Platform } from 'react-native';
+import { DataTable, ColumnDef } from '../../../src/components/DataTable';
+import { PaginationControls } from '../../../src/components/PaginationControls';
+import { ViewToggle, ViewMode } from '../../../src/components/ViewToggle';
+import { format } from 'date-fns';
 
 type EnrichedPayment = {
     payment: Payment;
@@ -29,11 +32,7 @@ const MemoizedPaymentItem = React.memo(({ item, onPressBorrower, onEdit, onDelet
     onDelete: () => void,
     onActionsVisibilityChange: (isVisible: boolean) => void
 }) => (
-    <SwipeableItem
-        onActionsVisibilityChange={onActionsVisibilityChange}
-        onEdit={onEdit}
-        onDelete={onDelete}
-    >
+    <SwipeableItem onActionsVisibilityChange={onActionsVisibilityChange} onEdit={onEdit} onDelete={onDelete}>
         <View className="bg-white p-4 rounded-2xl mb-3 border border-gray-100 shadow-sm flex-row items-center">
             <View className="w-12 h-12 rounded-full bg-green-50 items-center justify-center mr-4">
                 <MaterialIcons name="done" size={24} color="#388E3C" />
@@ -70,36 +69,92 @@ export default function PaymentsListScreen() {
     const [isConfirmDeleteVisible, setIsConfirmDeleteVisible] = useState(false);
     const [visibleSwipeActionId, setVisibleSwipeActionId] = useState<string | null>(null);
 
+    // Pagination & View Mode
+    const [viewMode, setViewMode] = useState<ViewMode>('table');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(25);
+    const [totalRecords, setTotalRecords] = useState(0);
+
     const loadData = async () => {
+        setLoading(true);
         try {
-            const fetchedPayments = await database.collections.get<Payment>('payments')
-                .query(
-                    Q.where('deleted_at', Q.eq(null))
-                ).fetch();
-            const fetchedLoans = await database.collections.get<Loan>('loans').query(Q.where('deleted_at', Q.eq(null))).fetch();
-            const fetchedBorrowers = await database.collections.get<Borrower>('borrowers').query(Q.where('deleted_at', Q.eq(null))).fetch();
+            const conditions: Q.Clause[] = [Q.where('deleted_at', Q.eq(null))];
 
-            const loanMap = new Map<string, Loan>();
-            fetchedLoans.forEach(l => loanMap.set(l.id, l));
+            if (searchQuery.trim()) {
+                const safeSearch = Q.sanitizeLikeString(searchQuery);
+                
+                // Fetch matching loans
+                const matchingLoans = await database.get<Loan>('loans').query(Q.where('loan_number', Q.like(`%${safeSearch}%`))).fetch();
+                const loanIdsFromLoanNumber = matchingLoans.map(l => l.id);
+                
+                // Fetch matching borrowers
+                const matchingBorrowers = await database.get<Borrower>('borrowers').query(Q.where('full_name', Q.like(`%${safeSearch}%`))).fetch();
+                const borrowerIds = matchingBorrowers.map(b => b.id);
+                
+                let loanIdsFromBorrowers: string[] = [];
+                if (borrowerIds.length > 0) {
+                    const loansFromBorrowers = await database.get<Loan>('loans').query(Q.where('borrower_id', Q.oneOf(borrowerIds))).fetch();
+                    loanIdsFromBorrowers = loansFromBorrowers.map(l => l.id);
+                }
+                
+                const allMatchingLoanIds = Array.from(new Set([...loanIdsFromLoanNumber, ...loanIdsFromBorrowers]));
+                
+                // If it looks like a number, maybe it's a receipt search, else maybe just name
+                conditions.push(
+                    Q.or(
+                        Q.where('receipt_number', Q.like(`%${safeSearch}%`)),
+                        Q.where('loan_id', Q.oneOf(allMatchingLoanIds))
+                    )
+                );
+            }
 
-            const borrowerMap = new Map<string, string>();
-            fetchedBorrowers.forEach(b => borrowerMap.set(b.id, b.fullName));
+            const baseQuery = database.collections.get<Payment>('payments').query(...conditions);
 
-            const enriched: EnrichedPayment[] = fetchedPayments.map(p => {
-                const loan = loanMap.get(p.loanId);
-                const borrowerName = loan && loan.borrowerId ? (borrowerMap.get(loan.borrowerId) ?? 'Unknown') : 'Unknown';
-                return {
-                    payment: p,
-                    borrowerName,
-                    loanNumber: loan?.loanNumber ?? 'Unknown',
-                    borrowerId: loan?.borrowerId
-                };
-            });
+            const count = await baseQuery.fetchCount();
+            setTotalRecords(count);
 
-            // Sort payments by payment_date desc safely in memory
-            enriched.sort((a, b) => (b.payment.paymentDate || 0) - (a.payment.paymentDate || 0));
+            const maxPage = Math.max(1, Math.ceil(count / itemsPerPage));
+            if (currentPage > maxPage) {
+                setCurrentPage(maxPage);
+                return;
+            }
 
-            setPayments(enriched);
+            const offset = (currentPage - 1) * itemsPerPage;
+            const fetchedPayments = await baseQuery.extend(
+                Q.sortBy('payment_date', Q.desc),
+                Q.skip(offset),
+                Q.take(itemsPerPage)
+            ).fetch();
+
+            if (fetchedPayments.length > 0) {
+                const loanIds = Array.from(new Set(fetchedPayments.map(p => p.loanId)));
+                const fetchedLoans = await database.collections.get<Loan>('loans').query(Q.where('id', Q.oneOf(loanIds))).fetch();
+                
+                const borrowerIds = Array.from(new Set(fetchedLoans.map(l => l.borrowerId).filter(Boolean)));
+                const fetchedBorrowers = await database.collections.get<Borrower>('borrowers').query(Q.where('id', Q.oneOf(borrowerIds))).fetch();
+
+                const loanMap = new Map<string, Loan>();
+                fetchedLoans.forEach(l => loanMap.set(l.id, l));
+
+                const borrowerMap = new Map<string, string>();
+                fetchedBorrowers.forEach(b => borrowerMap.set(b.id, b.fullName));
+
+                const enriched: EnrichedPayment[] = fetchedPayments.map(p => {
+                    const loan = loanMap.get(p.loanId);
+                    const borrowerName = loan && loan.borrowerId ? (borrowerMap.get(loan.borrowerId) ?? 'Unknown') : 'Unknown';
+                    return {
+                        payment: p,
+                        borrowerName,
+                        loanNumber: loan?.loanNumber ?? 'Unknown',
+                        borrowerId: loan?.borrowerId
+                    };
+                });
+
+                setPayments(enriched);
+            } else {
+                setPayments([]);
+            }
+
         } catch (error) {
             console.error('Failed to load payments:', error);
         } finally {
@@ -110,19 +165,8 @@ export default function PaymentsListScreen() {
     useFocusEffect(
         useCallback(() => {
             loadData();
-        }, [])
+        }, [currentPage, itemsPerPage, searchQuery])
     );
-
-    const filteredPayments = useMemo(() => payments.filter(p => {
-        const query = searchQuery.toLowerCase();
-        if (!query) return true;
-        
-        const receiptMatch = p.payment.receiptNumber ? String(p.payment.receiptNumber).toLowerCase().includes(query) : false;
-        const borrowerMatch = p.borrowerName ? String(p.borrowerName).toLowerCase().includes(query) : false;
-        const loanMatch = p.loanNumber ? String(p.loanNumber).toLowerCase().includes(query) : false;
-        
-        return receiptMatch || borrowerMatch || loanMatch;
-    }), [payments, searchQuery]);
 
     const handleDelete = async () => {
         if (!selectedPayment) return;
@@ -139,54 +183,132 @@ export default function PaymentsListScreen() {
         }
     };
 
-    const renderItem = useCallback(({ item }: { item: EnrichedPayment }) => (
-        <MemoizedPaymentItem
-            item={item}
-            onPressBorrower={() => {
-                if (item.borrowerId) router.push(`/(admin)/borrowers/${item.borrowerId}`);
-            }}
-            onEdit={() => router.push(`/(admin)/payments/new?paymentId=${item.payment.id}`)}
-            onDelete={() => {
-                setSelectedPayment(item);
-                setIsConfirmDeleteVisible(true);
-            }}
-            onActionsVisibilityChange={(isVisible) => {
-                setVisibleSwipeActionId((currentId) => isVisible ? item.payment.id : currentId === item.payment.id ? null : currentId);
-            }}
-        />
-    ), [router]);
+    const columns: ColumnDef<EnrichedPayment>[] = [
+        {
+            key: 'paymentDate',
+            label: 'Date',
+            width: 100,
+            render: (p) => <Text className="font-bold text-gray-900">{formatDate(new Date(p.payment.paymentDate))}</Text>
+        },
+        {
+            key: 'receiptNumber',
+            label: 'Receipt #',
+            width: 90,
+            render: (p) => <Text className="text-gray-700">{p.payment.receiptNumber || '-'}</Text>
+        },
+        {
+            key: 'borrowerName',
+            label: 'Borrower Name',
+            flex: 2,
+            render: (p) => (
+                <Pressable onPress={() => { if(p.borrowerId) router.push(`/(admin)/borrowers/${p.borrowerId}`) }}>
+                    <Text className="text-sm text-blue-700 underline font-bold" numberOfLines={1}>{p.borrowerName}</Text>
+                </Pressable>
+            )
+        },
+        {
+            key: 'loanNumber',
+            label: 'Loan #',
+            width: 100,
+            render: (p) => <Text className="text-gray-700">{p.loanNumber}</Text>
+        },
+        {
+            key: 'amount',
+            label: 'Amount',
+            width: 100,
+            align: 'right',
+            render: (p) => <Text className="font-extrabold text-[#388E3C]">{formatPHP(p.payment.amount)}</Text>
+        },
+        {
+            key: 'actions',
+            label: '',
+            width: 60,
+            align: 'center',
+            render: (p) => (
+                <Pressable
+                    className="p-1.5 active:bg-blue-100 rounded-full bg-blue-50"
+                    onPress={() => router.push(`/(admin)/payments/new?paymentId=${p.payment.id}`)}
+                >
+                    <Text className="text-[10px] font-black text-blue-700 uppercase">Edit</Text>
+                </Pressable>
+            )
+        }
+    ];
+
+    const totalPages = Math.max(1, Math.ceil(totalRecords / itemsPerPage));
 
     return (
         <View className="flex-1 bg-gray-50 p-4">
-            <View className="mb-4">
-                <SearchBar
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    placeholder="Search name, loan #, receipt..."
-                />
-                {searchQuery.trim().length > 0 && (
-                    <Text className="text-xs text-gray-500 mt-1 ml-2 font-medium">
-                        Showing {filteredPayments.length} result(s)
-                    </Text>
-                )}
+            <View className="mb-4 flex-row items-center justify-between">
+                <View className="flex-1 mr-3">
+                    <SearchBar
+                        value={searchQuery}
+                        onChangeText={(t) => { setSearchQuery(t); setCurrentPage(1); }}
+                        placeholder="Search name, loan #, receipt..."
+                    />
+                </View>
+                <ViewToggle mode={viewMode} onToggle={setViewMode} />
             </View>
 
-            {loading ? (
+            {loading && payments.length === 0 ? (
                 <ActivityIndicator size="large" color="#D32F2F" className="mt-10" />
             ) : (
-                <FlatList
-                    data={filteredPayments}
-                    keyExtractor={(item) => item.payment.id}
-                    renderItem={renderItem}
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 100 }}
-                    ListEmptyComponent={
-                        <View className="items-center justify-center py-20">
-                            <MaterialIcons name="receipt-long" size={64} color="#E5E7EB" />
-                            <Text className="text-gray-700 font-medium mt-4 text-base">No payments found</Text>
-                        </View>
-                    }
-                />
+                <>
+                    <View className="flex-1">
+                        {viewMode === 'table' ? (
+                            <DataTable 
+                                columns={columns} 
+                                data={payments} 
+                                keyExtractor={(p) => p.payment.id} 
+                                minWidth={600}
+                            />
+                        ) : (
+                            <FlatList
+                                data={payments}
+                                keyExtractor={(item) => item.payment.id}
+                                removeClippedSubviews={true}
+                                windowSize={5}
+                                maxToRenderPerBatch={10}
+                                initialNumToRender={10}
+                                renderItem={({ item }) => (
+                                    <MemoizedPaymentItem
+                                        item={item}
+                                        onPressBorrower={() => {
+                                            if (item.borrowerId) router.push(`/(admin)/borrowers/${item.borrowerId}`);
+                                        }}
+                                        onEdit={() => router.push(`/(admin)/payments/new?paymentId=${item.payment.id}`)}
+                                        onDelete={() => {
+                                            setSelectedPayment(item);
+                                            setIsConfirmDeleteVisible(true);
+                                        }}
+                                        onActionsVisibilityChange={(isVisible) => {
+                                            setVisibleSwipeActionId((currentId) => isVisible ? item.payment.id : currentId === item.payment.id ? null : currentId);
+                                        }}
+                                    />
+                                )}
+                                showsVerticalScrollIndicator={false}
+                                contentContainerStyle={{ paddingBottom: 20 }}
+                                ListEmptyComponent={
+                                    <View className="items-center justify-center py-20">
+                                        <MaterialIcons name="receipt-long" size={64} color="#E5E7EB" />
+                                        <Text className="text-gray-700 font-medium mt-4 text-base">No payments found</Text>
+                                    </View>
+                                }
+                            />
+                        )}
+                    </View>
+                    <PaginationControls 
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalRecords={totalRecords}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={setCurrentPage}
+                        onItemsPerPageChange={(limit) => {
+                            setItemsPerPage(limit);
+                            setCurrentPage(1);
+                        }}
+                    />
+                </>
             )}
 
             <ConfirmDialog
@@ -202,7 +324,7 @@ export default function PaymentsListScreen() {
             {/* FAB */}
             {!visibleSwipeActionId && (
                 <Pressable
-                    className={`${Platform.OS === 'web' ? 'absolute bottom-6 left-6' : 'absolute bottom-6 right-6'} flex-row items-center bg-[#D32F2F] px-6 py-4 rounded-full shadow-xl active:bg-red-800`}
+                    className={`${Platform.OS === 'web' ? 'absolute bottom-20 left-6' : 'absolute bottom-20 right-6'} flex-row items-center bg-[#D32F2F] px-6 py-4 rounded-full shadow-xl active:bg-red-800 z-50`}
                     onPress={() => router.push('/(admin)/payments/new')}
                 >
                     <MaterialIcons name="add" size={24} color="#FFFFFF" className="mr-2" />

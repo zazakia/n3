@@ -359,6 +359,10 @@ export default function CollectionReportScreen() {
                     className="flex-1 bg-white px-4"
                     data={filteredRows}
                     keyExtractor={(item) => item.id}
+                    removeClippedSubviews={true}
+                    windowSize={5}
+                    maxToRenderPerBatch={10}
+                    initialNumToRender={10}
                     renderItem={({ item }) => (
                         <View className="flex-row items-center py-3 border-b border-gray-50">
                             <View className="flex-1 pr-2">

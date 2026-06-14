@@ -100,6 +100,10 @@ export default function BorrowerTransactionsScreen() {
             <FlatList
                 data={payments}
                 keyExtractor={(item) => item.id}
+                removeClippedSubviews={true}
+                windowSize={5}
+                maxToRenderPerBatch={10}
+                initialNumToRender={10}
                 renderItem={renderItem}
                 ListHeaderComponent={() => (
                     <Animated.View entering={FadeInUp.duration(400)} className="mb-6">

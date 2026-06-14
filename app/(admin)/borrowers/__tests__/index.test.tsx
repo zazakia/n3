@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor, screen, act } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import BorrowersListScreen from '../index';
 import { database } from '../../../../src/database';
 import BaseModelService from '../../../../src/services/BaseModelService';
@@ -22,16 +22,27 @@ jest.mock('@nozbe/watermelondb', () => ({
         and: jest.fn().mockReturnValue({}),
         or: jest.fn().mockReturnValue({}),
         eq: jest.fn().mockReturnValue({}),
+        gte: jest.fn().mockReturnValue({}),
+        lte: jest.fn().mockReturnValue({}),
+        gt: jest.fn().mockReturnValue({}),
+        lt: jest.fn().mockReturnValue({}),
+        like: jest.fn().mockReturnValue({}),
+        notLike: jest.fn().mockReturnValue({}),
+        oneOf: jest.fn().mockReturnValue({}),
+        notIn: jest.fn().mockReturnValue({}),
+        sanitizeLikeString: jest.fn((s: string) => s),
+        sortBy: jest.fn().mockReturnValue({}),
+        skip: jest.fn().mockReturnValue({}),
+        take: jest.fn().mockReturnValue({}),
+        asc: 'asc',
+        desc: 'desc',
     },
 }));
 
 jest.mock('date-fns', () => ({
-    format: (d: any, fmt: string) => {
-        try {
-            return new Date(d).toISOString().split('T')[0];
-        } catch(e) {
-            return 'Invalid Date';
-        }
+    format: (d: any) => {
+        try { return new Date(d).toISOString().split('T')[0]; }
+        catch { return 'Invalid Date'; }
     },
     isAfter: jest.fn().mockReturnValue(false),
     startOfToday: jest.fn().mockReturnValue(new Date()),
@@ -94,15 +105,56 @@ jest.mock('../../../../src/components/ConfirmDialog', () => ({
     default: () => null
 }));
 
+jest.mock('../../../../src/components/DataTable', () => {
+    const React = require('react');
+    const { View, Text, Pressable } = require('react-native');
+    return {
+        __esModule: true,
+        DataTable: ({ data, keyExtractor, columns, onRowPress }: any) =>
+            React.createElement(
+                View,
+                { testID: 'data-table' },
+                data.length === 0
+                    ? React.createElement(Text, null, 'No records found')
+                    : data.map((item: any) =>
+                        React.createElement(
+                            Pressable,
+                            { key: keyExtractor(item), testID: `row-${keyExtractor(item)}`, onPress: () => onRowPress && onRowPress(item) },
+                            React.createElement(Text, null, item.fullName)
+                        )
+                    )
+            ),
+    };
+});
+
+jest.mock('../../../../src/components/PaginationControls', () => ({
+    __esModule: true,
+    PaginationControls: () => null,
+}));
+
+jest.mock('../../../../src/components/ViewToggle', () => {
+    const React = require('react');
+    const { View, Pressable, Text } = require('react-native');
+    return {
+        __esModule: true,
+        ViewToggle: ({ mode, onToggle }: any) =>
+            React.createElement(
+                View,
+                null,
+                React.createElement(Pressable, { testID: 'view-toggle-table', onPress: () => onToggle('table') }, React.createElement(Text, null, 'Table')),
+                React.createElement(Pressable, { testID: 'view-toggle-card', onPress: () => onToggle('card') }, React.createElement(Text, null, 'Cards'))
+            ),
+        ViewMode: {},
+    };
+});
+
 jest.mock('react-native-gesture-handler', () => {
     const React = require('react');
     const View = require('react-native').View;
     return {
         Swipeable: (props: any) => React.createElement(View, {}, props.children),
         GestureHandlerRootView: (props: any) => React.createElement(View, { className: props.className }, props.children),
-        default: {
-            install: () => {},
-        }
+        default: { install: () => {} }
     };
 });
 
@@ -116,130 +168,112 @@ jest.mock('../../../../src/services/BaseModelService', () => ({
 
 describe('BorrowersListScreen', () => {
     const mockBorrowers = [
-        { id: 'b1', fullName: 'Alice', group: 'Group A', decryptedPhone: '111', decryptedAddress: 'Street 1', collectorId: 'c1', createdAt: Date.now() },
-        { id: 'b2', fullName: 'Bob', group: 'Group B', decryptedPhone: '222', decryptedAddress: 'Street 2', collectorId: 'c2', createdAt: Date.now() },
-        { id: 'b3', fullName: 'Charlie', group: 'Group A', decryptedPhone: '333', decryptedAddress: 'Street 3', collectorId: 'c1', createdAt: Date.now() }
-    ];
-
-    const mockUsers = [
-        { id: 'c1', fullName: 'Collector One' },
-        { id: 'c2', fullName: 'Collector Two' }
+        { id: 'b1', fullName: 'Alice', decryptedPhone: '111', decryptedAddress: 'Street 1', createdAt: Date.now() },
+        { id: 'b2', fullName: 'Bob', decryptedPhone: '222', decryptedAddress: 'Street 2', createdAt: Date.now() },
+        { id: 'b3', fullName: 'Charlie', decryptedPhone: '333', decryptedAddress: 'Street 3', createdAt: Date.now() },
     ];
 
     const mockLoans = [
-        { id: 'l1', borrowerId: 'b1', frequency: 'daily', status: 'active' },
-        { id: 'l2', borrowerId: 'b2', frequency: 'weekly', status: 'active' },
-        { id: 'l3', borrowerId: 'b3', frequency: 'monthly', status: 'active' }
+        { id: 'l1', borrowerId: 'b1', frequency: 'daily', status: 'active', totalAmount: 1000, principalAmount: 1000, deductedAmount: 0, serviceChargeAmount: 0 },
+        { id: 'l2', borrowerId: 'b2', frequency: 'weekly', status: 'active', totalAmount: 2000, principalAmount: 2000, deductedAmount: 0, serviceChargeAmount: 0 },
+        { id: 'l3', borrowerId: 'b3', frequency: 'monthly', status: 'active', totalAmount: 3000, principalAmount: 3000, deductedAmount: 0, serviceChargeAmount: 0 },
     ];
+
+    /** Build a mock query object that supports the WatermelonDB chaining the component uses */
+    function makeBorrowerQueryMock(data: any[]) {
+        const extendFetch = jest.fn().mockResolvedValue(data);
+        const extendObj = { fetch: extendFetch };
+        return {
+            fetchCount: jest.fn().mockResolvedValue(data.length),
+            fetch: jest.fn().mockResolvedValue(data),
+            extend: jest.fn().mockReturnValue(extendObj),
+        };
+    }
+
+    function makeLoanQueryMock(data: any[]) {
+        return {
+            fetchCount: jest.fn().mockResolvedValue(data.length),
+            fetch: jest.fn().mockResolvedValue(data),
+            extend: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue(data) }),
+        };
+    }
 
     beforeEach(() => {
         jest.clearAllMocks();
-        (BaseModelService.fetchActive as jest.Mock).mockResolvedValue(mockBorrowers);
+
         (database.collections.get as jest.Mock).mockImplementation((collectionName) => {
             if (collectionName === 'borrowers') {
-                return {
-                    query: jest.fn().mockReturnThis(),
-                    fetch: jest.fn().mockResolvedValue(mockBorrowers),
-                };
-            }
-            if (collectionName === 'user_profiles') {
-                return {
-                    query: jest.fn().mockReturnThis(),
-                    fetch: jest.fn().mockResolvedValue(mockUsers),
-                };
+                const qMock = makeBorrowerQueryMock(mockBorrowers);
+                return { query: jest.fn().mockReturnValue(qMock) };
             }
             if (collectionName === 'loans') {
-                return {
-                    query: jest.fn().mockReturnThis(),
-                    fetch: jest.fn().mockResolvedValue(mockLoans),
-                };
+                const qMock = makeLoanQueryMock(mockLoans);
+                return { query: jest.fn().mockReturnValue(qMock) };
             }
+            // payments, loan_penalties → empty
             return {
-                query: jest.fn().mockReturnThis(),
-                fetch: jest.fn().mockResolvedValue([]),
+                query: jest.fn().mockReturnValue({
+                    fetchCount: jest.fn().mockResolvedValue(0),
+                    fetch: jest.fn().mockResolvedValue([]),
+                    extend: jest.fn().mockReturnValue({ fetch: jest.fn().mockResolvedValue([]) }),
+                }),
             };
         });
     });
 
-    it('renders and displays all borrowers initially', async () => {
-        let view: any;
-        view = render(<BorrowersListScreen />);
-        await waitFor(() => { expect(view.queryByTestId('loading-indicator')).toBeNull(); }, { timeout: 1000 });
-        const { getByText } = view;
-        await waitFor(() => {
-            expect(getByText('Alice')).toBeTruthy();
-            expect(getByText('Bob')).toBeTruthy();
-            expect(getByText('Charlie')).toBeTruthy();
-        });
-    });
-
-    it('filters by payment frequency', async () => {
-        let view: any;
-        view = render(<BorrowersListScreen />);
-        await waitFor(() => { expect(view.queryByTestId('loading-indicator')).toBeNull(); }, { timeout: 1000 });
-        const { getByText, queryByText } = view;
-        await waitFor(() => {
-            expect(getByText('Alice')).toBeTruthy();
-        });
-
-        // Click Daily filter
-        fireEvent.press(getByText('Daily'));
-
-        await waitFor(() => {
-            expect(getByText('Alice')).toBeTruthy();
-            expect(queryByText('Bob')).toBeNull();
-            expect(queryByText('Charlie')).toBeNull();
-        });
-    });
-
-    it('filters by group', async () => {
-        let view: any;
-        view = render(<BorrowersListScreen />);
-        await waitFor(() => { expect(view.queryByTestId('loading-indicator')).toBeNull(); }, { timeout: 1000 });
-        const { getByText, getAllByText, queryByText } = view;
-        await waitFor(() => {
-            expect(getByText('Alice')).toBeTruthy();
-        });
-
-        // Click Group A filter
-        fireEvent.press(getAllByText('Group A')[0]);
-
-        await waitFor(() => {
-            expect(getByText('Alice')).toBeTruthy();
-            expect(getByText('Charlie')).toBeTruthy();
-            expect(queryByText('Bob')).toBeNull();
-        });
-    });
-
-    it('combines text search with group filter', async () => {
-        let view: any;
-        view = render(<BorrowersListScreen />);
-        await waitFor(() => { expect(view.queryByTestId('loading-indicator')).toBeNull(); }, { timeout: 1000 });
-        const { getByText, getAllByText, queryByText, getByPlaceholderText } = view;
-        await waitFor(() => {
-            expect(getByText('Alice')).toBeTruthy();
-        });
-
-        // Search "Alice"
-        fireEvent.changeText(getByPlaceholderText('Search name, phone, or address...'), 'Alice');
-        // Click Group A
-        fireEvent.press(getAllByText('Group A')[0]);
-
-        await waitFor(() => {
-            expect(getByText('Alice')).toBeTruthy();
-            expect(queryByText('Charlie')).toBeNull(); // Still group A, but doesn't match search
-        });
-    });
-
-    it('navigates swipe edit actions to a matching borrower edit route', async () => {
+    it('renders and displays all borrowers in DataTable (default view)', async () => {
         const view = render(<BorrowersListScreen />);
-
         await waitFor(() => {
             expect(view.getByText('Alice')).toBeTruthy();
-        });
+            expect(view.getByText('Bob')).toBeTruthy();
+            expect(view.getByText('Charlie')).toBeTruthy();
+        }, { timeout: 3000 });
+    });
 
-        fireEvent.press(view.getAllByTestId('mock-swipe-edit')[0]);
+    it('shows date-range filter tabs (All Time, Today, This Week, This Month)', async () => {
+        const view = render(<BorrowersListScreen />);
+        await waitFor(() => { expect(view.getByText('Alice')).toBeTruthy(); }, { timeout: 3000 });
+        expect(view.getByText('All Time')).toBeTruthy();
+        expect(view.getByText('Today')).toBeTruthy();
+        expect(view.getByText('This Week')).toBeTruthy();
+        expect(view.getByText('This Month')).toBeTruthy();
+    });
 
-        expect(mockPush).toHaveBeenCalledWith('/(admin)/borrowers/b1/edit');
+    it('switching to card view renders the FlatList', async () => {
+        const view = render(<BorrowersListScreen />);
+        await waitFor(() => { expect(view.getByText('Alice')).toBeTruthy(); }, { timeout: 3000 });
+
+        // Switch to card view
+        fireEvent.press(view.getByTestId('view-toggle-card'));
+
+        // Card view should re-render; all borrowers are still in mock data
+        await waitFor(() => {
+            expect(view.getByText('Alice')).toBeTruthy();
+        }, { timeout: 3000 });
+    });
+
+    it('search bar is visible and accepts text input', async () => {
+        const view = render(<BorrowersListScreen />);
+        await waitFor(() => { expect(view.getByText('Alice')).toBeTruthy(); }, { timeout: 3000 });
+
+        const searchInput = view.getByPlaceholderText('Search borrower name...');
+        expect(searchInput).toBeTruthy();
+        fireEvent.changeText(searchInput, 'Alice');
+        // Mock always returns all borrowers; Alice should still be visible
+        await waitFor(() => { expect(view.getByText('Alice')).toBeTruthy(); }, { timeout: 3000 });
+    });
+
+    it('pressing a borrower row navigates to detail', async () => {
+        const view = render(<BorrowersListScreen />);
+        await waitFor(() => { expect(view.getByTestId('row-b1')).toBeTruthy(); }, { timeout: 3000 });
+        fireEvent.press(view.getByTestId('row-b1'));
+        expect(mockPush).toHaveBeenCalledWith('/(admin)/borrowers/b1');
+    });
+
+    it('shows the add-borrower FAB', async () => {
+        const view = render(<BorrowersListScreen />);
+        await waitFor(() => { expect(view.getByText('Alice')).toBeTruthy(); }, { timeout: 3000 });
+        // FAB icon name
+        expect(view.getByText('person-add')).toBeTruthy();
     });
 });

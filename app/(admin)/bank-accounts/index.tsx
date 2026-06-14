@@ -61,6 +61,10 @@ export default function BankAccountsScreen() {
                 <FlatList
                     data={accounts}
                     keyExtractor={(item) => item.id}
+                    removeClippedSubviews={true}
+                    windowSize={5}
+                    maxToRenderPerBatch={10}
+                    initialNumToRender={10}
                     renderItem={renderItem}
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ paddingBottom: 100 }}

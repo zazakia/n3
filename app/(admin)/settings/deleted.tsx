@@ -298,6 +298,10 @@ export default function DeletedItemsScreen() {
                     <FlatList
                         data={items}
                         keyExtractor={(item) => item.id}
+                        removeClippedSubviews={true}
+                        windowSize={5}
+                        maxToRenderPerBatch={10}
+                        initialNumToRender={10}
                         renderItem={renderItem}
                         showsVerticalScrollIndicator={false}
                         ListEmptyComponent={

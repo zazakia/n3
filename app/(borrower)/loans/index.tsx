@@ -134,6 +134,10 @@ export default function LoansHistoryScreen() {
             <FlatList
                 data={loans}
                 keyExtractor={(item) => item.id}
+                removeClippedSubviews={true}
+                windowSize={5}
+                maxToRenderPerBatch={10}
+                initialNumToRender={10}
                 renderItem={renderLoanItem}
                 ListHeaderComponent={() => (
                     <View className="mb-6">
